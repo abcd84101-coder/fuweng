@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#e85d4c">
+<meta name="description" content="晴空城連線大富翁，和朋友一起搶地收租">
+<title>富翁大亂鬥</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --ink:#3b2a1a;--paper:#fff3dc;--card:#fffaf0;--coral:#e85d4c;--coral-d:#c44738;
+  --teal:#2a9d8f;--teal-d:#1d7469;--gold:#e8b02a;--gold-d:#c48a14;--muted:#8a7360;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#1e140c;color:var(--ink);
+  font-family:"PingFang TC","Noto Sans CJK TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  user-select:none;-webkit-user-select:none}
+#app{max-width:480px;margin:0 auto;height:100%;height:100dvh;background:var(--paper);position:relative;overflow:hidden;
+  box-shadow:0 0 40px #0008}
+.view{position:absolute;inset:0;display:none;flex-direction:column;padding:calc(12px + var(--safe-t)) 14px calc(12px + var(--safe-b));
+  overflow:auto;-webkit-overflow-scrolling:touch}
+.view.on{display:flex}
+h1{font-size:28px;letter-spacing:2px;text-align:center;color:#9a3b2a;text-shadow:0 2px 0 #ffd9a3}
+.sub{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 14px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:13px 16px;font-size:16px;font-weight:800;letter-spacing:1px;
+  color:#fff;background:linear-gradient(#ff7a68,#e85d4c);box-shadow:0 5px 0 var(--coral-d),0 8px 16px #e85d4c44;
+  margin:8px 0;cursor:pointer;transform:translateZ(0)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--coral-d)}
+.btn.teal{background:linear-gradient(#3cbcaf,#2a9d8f);box-shadow:0 5px 0 var(--teal-d),0 8px 16px #2a9d8f44}
+.btn.gold{background:linear-gradient(#ffd057,#e8b02a);color:#5a3a00;box-shadow:0 5px 0 var(--gold-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 #e0d0b4}
+.btn.sm{display:inline-block;width:auto;padding:8px 12px;font-size:13px;margin:4px;border-radius:10px}
+.btn:disabled{opacity:.45;transform:none;cursor:default}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row .btn{flex:1}
+input,select,textarea{width:100%;padding:10px 12px;border:2px solid #ead9bc;border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:56px;resize:vertical}
+label.f{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px;font-weight:700}
+.card{background:var(--card);border-radius:16px;padding:14px;margin:8px 0;
+  box-shadow:inset 0 1px 0 #fff,0 6px 0 #e8d5b0,0 10px 18px #0001}
+.muted{color:var(--muted);font-size:12px;line-height:1.6}
+.err{color:#c44738;font-size:13px;min-height:1.2em;text-align:center}
+/* lobby parade */
+.parade{display:flex;justify-content:center;gap:2px;margin:8px 0 16px;flex-wrap:nowrap}
+.parade .av{width:48px;height:48px;flex:0 0 48px;animation:bob 2.4s ease-in-out infinite;filter:drop-shadow(2px 4px 0 #0002)}
+.parade .av:nth-child(2){animation-delay:.2s}
+.parade .av:nth-child(3){animation-delay:.4s}
+.parade .av:nth-child(4){animation-delay:.15s}
+.parade .av:nth-child(5){animation-delay:.35s}
+.parade .av:nth-child(6){animation-delay:.55s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+/* character pick */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ch{background:#fff;border:3px solid transparent;border-radius:14px;padding:8px 4px;text-align:center;cursor:pointer;
+  box-shadow:0 4px 0 #e8d5b0}
+.ch.on{border-color:var(--coral);box-shadow:0 4px 0 var(--coral-d)}
+.ch .av{width:64px;height:64px;margin:0 auto}
+.ch b{display:block;font-size:12px;margin-top:4px}
+.ch small{color:var(--muted);font-size:10px}
+/* game layout */
+#view-game{padding:0;background:linear-gradient(#f6d9a8,#fff3dc 40%,#efe0c0);overflow:hidden}
+#ghead{display:flex;align-items:center;gap:6px;padding:calc(6px + var(--safe-t)) 8px 4px;min-height:42px;z-index:5}
+#ghead .ttl{font-weight:800;font-size:14px;color:#9a3b2a;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ghead .chip{background:#fff8;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;backdrop-filter:blur(6px)}
+.ico{width:34px;height:34px;border:0;border-radius:50%;background:#fff;box-shadow:0 3px 0 #e0d0b4;font-size:16px;cursor:pointer}
+.board-wrap{flex:0 0 auto;padding:0 6px;touch-action:none}
+#board{position:relative;width:100%;aspect-ratio:1;max-height:54dvh;margin:0 auto;transform:translateZ(0);
+  background:
+    radial-gradient(circle at 50% 45%,#3aa38a 0%,#1f7a6a 70%,#165c50 100%);
+  border-radius:18px;box-shadow:0 10px 0 #c9a36a,0 16px 24px #0003,inset 0 0 0 6px #e8c987,inset 0 0 0 10px #b8874a;
+  overflow:hidden}
+#board .felt{position:absolute;inset:16%;border-radius:12px;background:radial-gradient(circle at 50% 30%,#4bb89e,#1e7d6c);
+  box-shadow:inset 0 8px 16px #0003,inset 0 1px 0 #fff2;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;text-align:center;padding:6px;z-index:2;pointer-events:none}
+#board .felt .who{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+#board .felt .nm{font-weight:800;font-size:13px;text-shadow:0 2px 0 #0004}
+#bubble{position:relative;background:#fff;color:var(--ink);border-radius:12px;padding:6px 8px;font-size:11px;line-height:1.35;
+  max-width:86%;min-height:1.3em;box-shadow:0 4px 0 #0002;margin:4px 0;pointer-events:none}
+#bubble:after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+#dicebox{display:flex;gap:6px;margin-top:4px;min-height:36px;align-items:center;justify-content:center}
+.die{width:32px;height:32px;border-radius:7px;background:linear-gradient(#fff,#f0e6d0);box-shadow:2px 3px 0 #0003,inset 0 1px 0 #fff;
+  display:grid;place-items:center;font-weight:900;font-size:16px;color:#9a3b2a}
+.die.shake{animation:dshake .5s linear}
+@keyframes dshake{0%,100%{transform:translate(0) rotate(0)}25%{transform:translate(-3px,2px) rotate(-12deg)}75%{transform:translate(3px,-2px) rotate(10deg)}}
+.tile{position:absolute;overflow:hidden;background:linear-gradient(165deg,#fffdf6 0%,#f3e3c4 100%);
+  box-shadow:inset 1px 1px 0 #fff,inset -1px -2px 0 #0001,1px 2px 2px #0002;z-index:1}
+.tile.corner{z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2px}
+.tile .bar{position:absolute;left:0;right:0;top:0;height:22%;box-shadow:inset 0 1px 0 #fff6,0 1px 0 #0002}
+.tile.left .bar,.tile.right .bar{top:0;bottom:0;width:22%;height:auto;right:auto}
+.tile.right .bar{left:auto;right:0}
+.tile .tn{position:absolute;left:2px;right:2px;bottom:10px;font-size:8px;font-weight:800;line-height:1.05;text-align:center;letter-spacing:-.2px}
+.tile.left .bar{left:auto;right:0;width:18%;height:auto;top:0;bottom:0}
+.tile.right .bar{left:0;right:auto;width:18%;height:auto;top:0;bottom:0}
+.tile.left .tn,.tile.right .tn{writing-mode:horizontal-tb;left:2px;right:2px;top:auto;bottom:11px;width:auto;font-size:7px}
+.tile.left .tn{right:18%}
+.tile.right .tn{left:18%}
+.tile .pr{position:absolute;left:0;right:0;bottom:1px;font-size:7px;color:#6a5340;text-align:center}
+.tile.left .pr{writing-mode:horizontal-tb;left:0;right:16%;top:auto;bottom:1px;width:auto}
+.tile.right .pr{writing-mode:horizontal-tb;right:0;left:16%;width:auto}
+.tile .lv{position:absolute;top:24%;left:1px;right:1px;text-align:center;font-size:8px;pointer-events:none}
+.tile.special{background:linear-gradient(165deg,#fff5d6,#f0d49a)}
+.tile.start{background:linear-gradient(165deg,#ffd9a0,#f0a04a)}
+.tile.hospital{background:linear-gradient(165deg,#d6f0ff,#8ec8ef)}
+.tile.overtime{background:linear-gradient(165deg,#ffd0c8,#e88980)}
+.tile.plaza{background:linear-gradient(165deg,#dff8d0,#8fce6a)}
+.tile.shop{background:linear-gradient(165deg,#ffe3f0,#f5a0c8)}
+.tile.stockt{background:linear-gradient(165deg,#e0e8ff,#8aa0e8)}
+.tile.on{outline:2px solid #fff;outline-offset:-2px;filter:brightness(1.08);z-index:3}
+.tok{position:absolute;width:18px;height:18px;border-radius:50%;z-index:4;pointer-events:none;
+  box-shadow:0 6px 0 -3px #0004;transition:left .12s linear,top .12s linear;overflow:hidden;border:1.5px solid #fff;
+  will-change:left,top,transform}
+.tok.hop{animation:hop .18s ease}
+@keyframes hop{0%{transform:translateY(0)}40%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+.tok img,.tok svg,.tok .ph{width:100%;height:100%;object-fit:cover;display:block}
+.godchip{position:absolute;z-index:5;font-size:11px;pointer-events:none;filter:drop-shadow(0 2px 1px #0006);animation:bob 1.8s ease-in-out infinite}
+.haz{position:absolute;z-index:5;font-size:11px;pointer-events:none}
+/* bottom dock */
+#dock{flex:1;display:flex;flex-direction:column;min-height:0;padding:6px 8px calc(8px + var(--safe-b));gap:4px}
+#plist{display:flex;gap:4px;overflow-x:auto;padding:2px 0;flex:0 0 auto}
+.pchip{flex:1;min-width:72px;background:#fff;border-radius:10px;padding:4px 6px;display:flex;align-items:center;gap:4px;
+  box-shadow:0 3px 0 #e8d5b0;font-size:10px;line-height:1.2}
+.pchip.turn{box-shadow:0 3px 0 var(--coral-d);border:2px solid var(--coral)}
+.pchip.out{opacity:.45}
+.pchip .av{width:28px;height:28px;flex-shrink:0}
+.pchip b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+#actbar{display:flex;flex-wrap:wrap;gap:6px}
+#actbar .btn{width:auto;flex:1 1 30%;margin:0;padding:11px 8px;font-size:14px}
+#items{display:flex;gap:4px;overflow-x:auto;min-height:36px;padding:2px 0}
+.item{flex:0 0 auto;background:#fff;border-radius:8px;padding:4px 7px;font-size:11px;font-weight:700;
+  box-shadow:0 2px 0 #e0d0b4;cursor:pointer;white-space:nowrap}
+.item:active{transform:translateY(2px)}
+#log{height:34px;overflow:hidden;font-size:11px;color:#6a5340;line-height:1.15}
+#log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* modal */
+#mask{position:absolute;inset:0;background:#0006;display:none;z-index:20;align-items:flex-end;justify-content:center}
+#mask.on{display:flex}
+#modal{background:var(--card);width:100%;max-height:78%;overflow:auto;border-radius:20px 20px 0 0;padding:14px 14px calc(16px + var(--safe-b));
+  box-shadow:0 -8px 30px #0004;-webkit-overflow-scrolling:touch}
+#modal h3{margin-bottom:8px;font-size:16px}
+.listbtn{display:block;width:100%;text-align:left;padding:10px 12px;margin:5px 0;border:0;border-radius:10px;background:#fff;
+  box-shadow:0 3px 0 #e8d5b0;font:inherit;font-weight:700;cursor:pointer}
+.listbtn:active{transform:translateY(2px)}
+/* overlays on custom portraits */
+.avwrap{position:relative;display:inline-block}
+.avwrap .fx{position:absolute;right:-4px;top:-6px;font-size:14px;animation:pop .35s ease;z-index:2;pointer-events:none}
+.avwrap.shake{animation:pshake .45s linear}
+.avwrap.fall{animation:fall .7s ease forwards}
+.avwrap.bounce{animation:bounce .5s ease}
+@keyframes pshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px) rotate(-4deg)}75%{transform:translateX(4px) rotate(4deg)}}
+@keyframes fall{to{transform:rotate(70deg) translateY(10px);opacity:.5}}
+@keyframes bounce{0%,100%{transform:scale(1)}40%{transform:scale(1.15) translateY(-4px)}}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.prev{width:120px;height:120px;border-radius:50%;margin:8px auto;overflow:hidden;border:4px solid #fff;
+  box-shadow:0 8px 0 #e8d5b0,0 12px 20px #0002;background:#f4e6c8}
+.prev img{width:100%;height:100%;object-fit:cover}
+.help ol{padding-left:1.2em;font-size:13px;line-height:1.7}
+.badge{display:inline-block;background:#fff3;border-radius:6px;padding:0 5px;font-size:10px}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="view-lobby" class="view on">
+    <h1>富翁大亂鬥</h1>
+    <div class="sub">晴空城爭霸 · 原創連線大富翁</div>
+    <div class="parade" id="parade"></div>
+    <button class="btn" id="btn-ai">單機對戰（打電腦）</button>
+    <button class="btn teal" id="btn-host">建立房間</button>
+    <button class="btn gold" id="btn-join">加入房間</button>
+    <button class="btn ghost" id="btn-create">自創角色</button>
+    <button class="btn ghost" id="btn-help">怎麼玩</button>
+    <p class="muted" style="text-align:center;margin-top:8px">2～4 人 · 手機直式也能玩 · 可加到主畫面</p>
+    <p class="err" id="lobby-msg"></p>
+  </section>
+
+  <section id="view-setup" class="view">
+    <h1 style="font-size:22px">準備出發</h1>
+    <div class="sub" id="setup-sub">選一個角色，輸入暱稱</div>
+    <label class="f">你的暱稱</label>
+    <input id="nick" maxlength="10" placeholder="怎麼稱呼你">
+    <div id="join-box" style="display:none">
+      <label class="f">房號（6 碼）</label>
+      <input id="join-code" maxlength="6" placeholder="例如 AB3K7P" style="text-transform:uppercase;letter-spacing:3px;font-size:20px;text-align:center">
+    </div>
+    <label class="f">選擇角色</label>
+    <div class="grid" id="char-grid"></div>
+    <div id="host-opts" class="card" style="display:none">
+      <label class="f">人數（空位由電腦補上）</label>
+      <select id="seatN"><option>2</option><option selected>3</option><option>4</option></select>
+      <label class="f">勝利條件</label>
+      <select id="winMode">
+        <option value="last">最後一人沒破產</option>
+        <option value="rounds" selected>固定回合後比身家</option>
+      </select>
+      <label class="f">回合數（固定回合時）</label>
+      <select id="roundN"><option>12</option><option selected>16</option><option>20</option><option>24</option></select>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost" id="setup-back">返回</button>
+      <button class="btn" id="setup-go">確定</button>
+    </div>
+    <p class="err" id="setup-msg"></p>
+    <div id="room-wait" style="display:none" class="card">
+      <b>房號</b> <span id="room-code" style="font-size:28px;letter-spacing:4px;color:#c44738"></span>
+      <div class="muted">把房號傳給朋友，他們在「加入房間」輸入即可。你是主機，請保持這個畫面開著。</div>
+      <div id="wait-list"></div>
+      <button class="btn" id="btn-start" style="display:none">開始遊戲</button>
+    </div>
+  </section>
+
+  <section id="view-creator" class="view">
+    <h1 style="font-size:22px">自創角色</h1>
+    <div class="sub">上傳照片、寫台詞，下次還可以再改</div>
+    <div class="prev" id="cr-prev"></div>
+    <div class="row">
+      <button class="btn sm teal" id="cr-pick">從相簿／相機選圖</button>
+    </div>
+    <input type="file" id="cr-file" accept="image/*" hidden>
+    <label class="f">角色名稱</label>
+    <input id="cr-name" maxlength="8" placeholder="幫角色取名">
+    <label class="f">主題顏色</label>
+    <input id="cr-color" type="color" value="#e85d4c" style="height:40px;padding:4px">
+    <label class="f">個性預設（影響電腦風格與預設台詞）</label>
+    <select id="cr-pers"></select>
+    <label class="f">買到地時</label><input id="cr-buy" maxlength="36" placeholder="買地台詞">
+    <label class="f">付過路費時</label><input id="cr-pay" maxlength="36">
+    <label class="f">收到過路費時</label><input id="cr-recv" maxlength="36">
+    <label class="f">破產時</label><input id="cr-br" maxlength="36">
+    <label class="f">抽到好卡時</label><input id="cr-good" maxlength="36">
+    <label class="f">抽到壞卡時</label><input id="cr-bad" maxlength="36">
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost" id="cr-back">返回</button>
+      <button class="btn" id="cr-save">儲存角色</button>
+    </div>
+    <p class="err" id="cr-msg"></p>
+    <div id="cr-list"></div>
+  </section>
+
+  <section id="view-help" class="view">
+    <h1 style="font-size:22px">怎麼玩</h1>
+    <div class="card help">
+      <ol>
+        <li>擲骰沿著晴空城走路，經過發薪日可領薪水與卡牌點。</li>
+        <li>停在沒主的地可以買，再花錢蓋樓，別人停下來就要付過路費。</li>
+        <li>命運／機會會抽到好笑事件。道具舖能用「卡牌點」買道具。</li>
+        <li>道具效果很多：指定步數、路障、地雷、均分現金、強制買地、加蓋或拆樓、轉向停留、請靈送靈……</li>
+        <li>路上會出現靈體，停在上面就會附身幾回合，有的幫你發財，有的專門讓你破財。</li>
+        <li>輪到你時可進銀行存貸款、或到股市買賣。股票每天都會波動。</li>
+        <li>現金不夠就得賣股、拆屋或賣地；都還不上就破產。最後活著或回合結束時身家最高的人獲勝。</li>
+        <li>連線時建立房間的人是主機，請不要關畫面。朋友掉線會暫時由電腦代打。</li>
+      </ol>
+    </div>
+    <button class="btn" id="help-back">我懂了</button>
+  </section>
+
+  <section id="view-game" class="view">
+    <div id="ghead">
+      <div class="ttl">富翁大亂鬥</div>
+      <span class="chip" id="g-round">第 1 回合</span>
+      <span class="chip" id="g-code"></span>
+      <button class="ico" id="btn-mute" title="靜音">🔊</button>
+    </div>
+    <div class="board-wrap"><div id="board"></div></div>
+    <div id="dock">
+      <div id="plist"></div>
+      <div id="log"></div>
+      <div id="items"></div>
+      <div id="actbar"></div>
+    </div>
+  </section>
+
+  <section id="view-result" class="view">
+    <h1 style="font-size:24px" id="res-title">遊戲結束</h1>
+    <div class="sub" id="res-sub"></div>
+    <div id="res-list"></div>
+    <button class="btn" id="res-again">再玩一局</button>
+    <button class="btn ghost" id="res-home">回到首頁</button>
+  </section>
+
+  <div id="mask"><div id="modal"></div></div>
+</div>
+<script>
+(()=>{
+"use strict";
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=>String(s??'').replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+const rnd = (n)=>Math.floor(Math.random()*n);
+const pick = (a)=>a[rnd(a.length)];
+const uid = ()=>Math.random().toString(36).slice(2,10);
+const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
+const fmt = (n)=>'$'+Math.round(n).toLocaleString('zh-Hant');
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+const deep = (o)=>JSON.parse(JSON.stringify(o));
+
+let FAST = false, muted = localStorage.getItem('fuweng-mute')==='1';
+let AC=null;
+function sfx(type){
+  if(muted) return;
+  try{
+    AC = AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    const now=AC.currentTime;
+    const map={click:[520,.06,'square'],dice:[180,.12,'triangle'],coin:[880,.16,'sine'],
+      good:[660,.2,'sine'],bad:[140,.25,'sawtooth'],walk:[320,.05,'square'],
+      boom:[80,.3,'sawtooth'],win:[523,.4,'sine']};
+    const [f,d,w]=map[type]||map.click;
+    o.type=w; o.frequency.setValueAtTime(f,now);
+    if(type==='good'||type==='win') o.frequency.exponentialRampToValueAtTime(f*1.5,now+d);
+    if(type==='bad'||type==='boom') o.frequency.exponentialRampToValueAtTime(60,now+d);
+    g.gain.setValueAtTime(.08,now); g.gain.exponentialRampToValueAtTime(.001,now+d);
+    o.start(now); o.stop(now+d+.02);
+  }catch(e){}
+}
+
+const GROUPS={
+  a:{color:'#8d6e63',name:'甜蜜區'},b:{color:'#42a5f5',name:'熱鬧區'},
+  c:{color:'#66bb6a',name:'文青區'},d:{color:'#ab47bc',name:'雅緻區'},
+  e:{color:'#ffa726',name:'商圈'},f:{color:'#ef5350',name:'都會區'},
+  g:{color:'#26c6da',name:'海濱區'},h:{color:'#5c6bc0',name:'巔峰區'},
+  tr:{color:'#607d8b',name:'交通'},ut:{color:'#ffca28',name:'公共'}
+};
+const TILES=[
+  {id:0,t:'start',name:'發薪日',sub:'領薪水與卡牌點'},
+  {id:1,t:'land',name:'棉花糖巷',price:800,group:'a'},
+  {id:2,t:'fate',name:'命運'},
+  {id:3,t:'land',name:'彈珠巷',price:1000,group:'a'},
+  {id:4,t:'tax',name:'市政稅',fee:500},
+  {id:5,t:'trans',name:'公交總站',price:2000,group:'tr'},
+  {id:6,t:'land',name:'夜市口',price:1400,group:'b'},
+  {id:7,t:'chance',name:'機會'},
+  {id:8,t:'land',name:'漫畫街',price:1600,group:'b'},
+  {id:9,t:'land',name:'體育館路',price:1800,group:'b'},
+  {id:10,t:'hospital',name:'醫院',sub:'住院休息'},
+  {id:11,t:'land',name:'圖書館大道',price:2200,group:'c'},
+  {id:12,t:'util',name:'風力發電廠',price:1800,group:'ut'},
+  {id:13,t:'land',name:'公園路',price:2400,group:'c'},
+  {id:14,t:'land',name:'咖啡巷',price:2600,group:'c'},
+  {id:15,t:'trans',name:'渡輪碼頭',price:2000,group:'tr'},
+  {id:16,t:'land',name:'古董街',price:3000,group:'d'},
+  {id:17,t:'shop',name:'道具舖',sub:'用卡牌點買道具'},
+  {id:18,t:'land',name:'花市',price:3200,group:'d'},
+  {id:19,t:'land',name:'音樂廳路',price:3400,group:'d'},
+  {id:20,t:'plaza',name:'市集廣場',sub:'領取獎池'},
+  {id:21,t:'land',name:'購物廣場',price:4000,group:'e'},
+  {id:22,t:'chance',name:'機會'},
+  {id:23,t:'land',name:'美食街',price:4200,group:'e'},
+  {id:24,t:'land',name:'百貨大樓',price:4400,group:'e'},
+  {id:25,t:'trans',name:'高鐵站',price:2000,group:'tr'},
+  {id:26,t:'land',name:'科技園區',price:5000,group:'f'},
+  {id:27,t:'util',name:'蓄水廠',price:1800,group:'ut'},
+  {id:28,t:'land',name:'金融街',price:5200,group:'f'},
+  {id:29,t:'land',name:'觀光塔',price:5400,group:'f'},
+  {id:30,t:'overtime',name:'加班室',sub:'強制加班'},
+  {id:31,t:'land',name:'海景大道',price:6000,group:'g'},
+  {id:32,t:'fate',name:'命運'},
+  {id:33,t:'land',name:'展覽館路',price:6200,group:'g'},
+  {id:34,t:'land',name:'豪華酒店',price:6400,group:'g'},
+  {id:35,t:'trans',name:'機場航廈',price:2000,group:'tr'},
+  {id:36,t:'stockt',name:'證券行',sub:'買賣股票'},
+  {id:37,t:'land',name:'電視台',price:7500,group:'h'},
+  {id:38,t:'tax',name:'慈善捐款',fee:800},
+  {id:39,t:'land',name:'摩天大樓',price:8000,group:'h'}
+];
+const UPG=[0,.5,.5,.6,.7,.8];
+const LVNAME=['空地','小屋','公寓','大樓','商場','地標'];
+function tollBase(tile,S){
+  if(tile.t==='trans'){
+    const n=ownedCount(tile.owner,'tr',S);
+    return [0,500,1200,2500,5000][n]||500;
+  }
+  if(tile.t==='util'){
+    const n=ownedCount(tile.owner,'ut',S);
+    const d=S.lastDice||7;
+    return d*(n>=2?200:80);
+  }
+  const lv=tile.lv||0;
+  const mul=[.12,.28,.55,1.1,1.9,3.2][lv]||.12;
+  let r=Math.round(tile.price*mul);
+  if(lv===0 && ownsSet(tile.owner,tile.group,S)) r*=2;
+  return r;
+}
+function ownedCount(pid,g,S){return S.tiles.filter(t=>t.owner===pid&&t.group===g).length}
+function ownsSet(pid,g,S){const all=TILES.filter(t=>t.group===g);return all.length>0&&all.every(t=>S.tiles[t.id].owner===pid)}
+function landValue(t){return (t.price||0)+Math.round((t.price||0)*0.5*(t.lv||0))}
+
+const PERS={
+  money:{id:'money',name:'愛錢型',ai:'greedy'},
+  pride:{id:'pride',name:'傲嬌型',ai:'proud'},
+  unlucky:{id:'unlucky',name:'衰神型',ai:'cautious'},
+  stock:{id:'stock',name:'炒股型',ai:'trader'},
+  airy:{id:'airy',name:'天然型',ai:'airy'},
+  cheer:{id:'cheer',name:'樂天型',ai:'cheer'}
+};
+const LINES={
+  money:{buy:'這塊地，阿伯收下啦！以後日日收租～',pay:'心在滴血……這過路費也太狠了！',recv:'來，乖乖繳錢，阿伯請你喝茶。',br:'慘了慘了，這下真的要去睡公園……',good:'發財啦！阿伯的好運來了！',bad:'嗚哇，荷包又瘦一圈……'},
+  pride:{buy:'才、才不是喜歡這裡，只是順便買下來而已！',pay:'哼，這點小錢本小姐還不放在眼裡。',recv:'感謝贊助本小姐的下午茶～',br:'等、等一下！本小姐怎麼可能會輸……！',good:'當然，本小姐就是幸運的化身。',bad:'討厭！是誰搞的鬼！'},
+  unlucky:{buy:'買了大概也會出事，但還是買吧……',pay:'果然又是我被收過路費，命運啊……',recv:'欸？真的有人付錢給我？不是騙局吧？',br:'我就知道，從打卡的那一刻起就已經輸了。',good:'怪怪的，今天怎麼沒有衰？',bad:'正常，非常正常，我早就習慣了。'},
+  stock:{buy:'先卡位，這地段以後一定會漲！',pay:'這筆當成投資成本，沒關係沒關係。',recv:'股息加房租，雙賺！',br:'空頭殺下來了……先撤退。',good:'這波是多頭！看準了！',bad:'慘，停損不及……'},
+  airy:{buy:'哇這裡好像很好玩，買買買！',pay:'欸？要付錢喔？我午餐錢……',recv:'有錢了！晚上可以吃布丁！',br:'啊咧？結束了嗎？我還沒搞懂耶……',good:'耶嘿～是禮物嗎？',bad:'嗚嗚怎麼突然這樣……'},
+  cheer:{buy:'這地點剛好可以擺攤！來了喔～',pay:'沒關係，再去賣幾碗就賺回來了！',recv:'謝謝光臨，下次再來啊！',br:'唉呀，今天收攤啦，明天再戰！',good:'加點啦！今天生意好好！',bad:'油鍋濺到了……沒關係重來一盤！'}
+};
+const CHARS=[
+  {id:'uncle',name:'愛錢阿伯',color:'#2a9d8f',pers:'money',tag:'見錢開眼'},
+  {id:'lady',name:'傲嬌大小姐',color:'#e85d94',pers:'pride',tag:'口是心非'},
+  {id:'worker',name:'衰神上班族',color:'#6b7c8a',pers:'unlucky',tag:'衰到出水'},
+  {id:'aunt',name:'炒股阿姨',color:'#e09f3e',pers:'stock',tag:'多空都賺'},
+  {id:'student',name:'天然呆學生',color:'#4cc9f0',pers:'airy',tag:'純樸一顆'},
+  {id:'chef',name:'樂天小吃王',color:'#f77f00',pers:'cheer',tag:'樂觀開攤'}
+];
+
+/* ---- Q-style SVG avatars with pseudo-3D shading ---- */
+function faceParts(expr){
+  const eyes={
+    normal:'<ellipse cx="11" cy="13" rx="1.6" ry="2.1" fill="#2a1a10"/><ellipse cx="19" cy="13" rx="1.6" ry="2.1" fill="#2a1a10"/><circle cx="11.5" cy="12.3" r=".5" fill="#fff"/><circle cx="19.5" cy="12.3" r=".5" fill="#fff"/>',
+    happy:'<path d="M9 13 q2.2 2.4 4.2 0" stroke="#2a1a10" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M16.8 13 q2.2 2.4 4.2 0" stroke="#2a1a10" stroke-width="1.3" fill="none" stroke-linecap="round"/>',
+    angry:'<path d="M8.5 11.2 l4 1.6" stroke="#2a1a10" stroke-width="1.3" stroke-linecap="round"/><path d="M21.5 11.2 l-4 1.6" stroke="#2a1a10" stroke-width="1.3" stroke-linecap="round"/><ellipse cx="11" cy="13.4" rx="1.5" ry="1.8" fill="#2a1a10"/><ellipse cx="19" cy="13.4" rx="1.5" ry="1.8" fill="#2a1a10"/>',
+    cry:'<ellipse cx="11" cy="13" rx="1.5" ry="2" fill="#2a1a10"/><ellipse cx="19" cy="13" rx="1.5" ry="2" fill="#2a1a10"/><path d="M10 16 v4" stroke="#6ec6ff" stroke-width="1.3" stroke-linecap="round"/><path d="M20 16 v5" stroke="#6ec6ff" stroke-width="1.3" stroke-linecap="round"/>',
+    smug:'<path d="M8.8 12.5 q2.4 1.2 4.4-.2" stroke="#2a1a10" stroke-width="1.3" fill="none" stroke-linecap="round"/><ellipse cx="19" cy="13" rx="1.6" ry="2" fill="#2a1a10"/><circle cx="19.5" cy="12.3" r=".5" fill="#fff"/>',
+    nervous:'<ellipse cx="11" cy="13.2" rx="1.8" ry="2.3" fill="#2a1a10"/><ellipse cx="19" cy="13.2" rx="1.8" ry="2.3" fill="#2a1a10"/><circle cx="21.6" cy="10.2" r="1.1" fill="#7ec8ff"/>'
+  }[expr]||faceParts('normal');
+  const mouth={
+    normal:'<path d="M13 18 q2 1.4 4 0" stroke="#2a1a10" stroke-width="1.1" fill="none" stroke-linecap="round"/>',
+    happy:'<path d="M12 17.2 q3 3.2 6 0 q-3 1.6 -6 0" fill="#e85d4c" stroke="#2a1a10" stroke-width=".7"/>',
+    angry:'<path d="M13.2 19 q2 -1.6 4.2 0" stroke="#2a1a10" stroke-width="1.2" fill="none"/>',
+    cry:'<path d="M13 18.6 q2 -1.5 4 0" stroke="#2a1a10" stroke-width="1.1" fill="none"/>',
+    smug:'<path d="M14 17.6 q3 1.8 5 .2" stroke="#2a1a10" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
+    nervous:'<path d="M13.5 18.5 h4" stroke="#2a1a10" stroke-width="1.2" stroke-linecap="round"/>'
+  }[expr]||'';
+  const blush=(expr==='happy'||expr==='nervous'||expr==='smug')?'<ellipse cx="8.2" cy="16.2" rx="1.6" ry="1" fill="#ff8aa0" opacity=".7"/><ellipse cx="21.8" cy="16.2" rx="1.6" ry="1" fill="#ff8aa0" opacity=".7"/>':'';
+  return eyes+blush+mouth;
+}
+function svgChar(kind,expr,sz){
+  const e=expr||'normal';
+  const body={
+    uncle:`<ellipse cx="15" cy="27" rx="8.2" ry="5.2" fill="#2a9d8f"/><ellipse cx="15" cy="25.5" rx="7" ry="3" fill="#3cbcaf"/>
+      <circle cx="15" cy="14.2" r="8.2" fill="#f3c39a"/><circle cx="12" cy="12" r="2.4" fill="#ffe2c4" opacity=".5"/>
+      <path d="M7.2 11 q8 -7 15.6 0" fill="#cfcfcf"/><circle cx="8.6" cy="11.2" r="2.1" fill="#cfcfcf"/><circle cx="21.4" cy="11.2" r="2.1" fill="#cfcfcf"/>
+      <circle cx="15" cy="14.5" r="4.6" fill="none" stroke="#e8b02a" stroke-width=".9"/>
+      <rect x="10.2" y="21.2" width="9.6" height="2.2" rx="1" fill="#e8b02a"/>`,
+    lady:`<ellipse cx="15" cy="27.2" rx="7.6" ry="5" fill="#e85d94"/><ellipse cx="15" cy="25.4" rx="6.2" ry="2.8" fill="#ff85b0"/>
+      <path d="M6 8 q3 10 0 16 q4 -4 5 -10z" fill="#3b2a1a"/><path d="M24 8 q-3 10 0 16 q-4 -4 -5 -10z" fill="#3b2a1a"/>
+      <circle cx="15" cy="14" r="8" fill="#f6c7a8"/><circle cx="12.2" cy="12" r="2.2" fill="#ffe2c4" opacity=".5"/>
+      <path d="M7 9 q8 -8 16 0 q-1 5 -8 4.2 q-7 .8 -8 -4.2" fill="#3b2a1a"/>
+      <circle cx="7.4" cy="16" r="1.1" fill="#ffd057"/><circle cx="22.6" cy="16" r="1.1" fill="#ffd057"/>`,
+    worker:`<ellipse cx="15" cy="27.4" rx="8" ry="5" fill="#5c6b7a"/><rect x="10" y="21" width="10" height="3" fill="#dfe6ee"/>
+      <circle cx="15" cy="14.2" r="8" fill="#e8b894"/>
+      <path d="M6.6 12 q8 -6.5 16.8 0 q-2 5 -8.4 4.5 q-6.4.5 -8.4 -4.5" fill="#3d3d42"/>
+      <path d="M11 9 q2 -3 4 0" fill="none" stroke="#3d3d42" stroke-width="1.2"/>
+      <path d="M8 8.5 q3 -2.2 6 1" fill="none" stroke="#9aa" stroke-width=".8"/>`,
+    aunt:`<ellipse cx="15" cy="27.2" rx="8.4" ry="5.2" fill="#c45c7a"/>
+      <circle cx="15" cy="14.4" r="8.1" fill="#f0bc98"/>
+      <path d="M5.5 13 q3 -10 19 0 q-2 8 -9.5 7 q-7.5 1 -9.5 -7" fill="#f3d27a"/>
+      <circle cx="6.2" cy="16" r="1.3" fill="#eee"/><circle cx="23.8" cy="16" r="1.3" fill="#eee"/>
+      <rect x="10" y="20.8" width="10" height="2" rx="1" fill="#e09f3e"/>`,
+    student:`<ellipse cx="15" cy="27.2" rx="7.8" ry="5" fill="#3a7bd0"/>
+      <circle cx="15" cy="14.3" r="8" fill="#f3c39a"/>
+      <path d="M6.5 12.5 q8 -8 17 0 q-1.5 5 -8.5 4.2 q-7 .8 -8.5 -4.2" fill="#2c1a10"/>
+      <path d="M14 4 q1.5 4 3.2 4" stroke="#2c1a10" stroke-width="1.4" fill="none"/>
+      <rect x="9.5" y="21.4" width="11" height="3.2" rx="1" fill="#5c4030"/>`,
+    chef:`<ellipse cx="15" cy="27.3" rx="8.2" ry="5.1" fill="#fff"/>
+      <ellipse cx="15" cy="26" rx="7.2" ry="3.4" fill="#e85d4c"/>
+      <circle cx="15" cy="14.4" r="8" fill="#f0b890"/>
+      <ellipse cx="15" cy="7.2" rx="6.4" ry="4.2" fill="#fff"/><rect x="9.2" y="9.2" width="11.6" height="2.2" fill="#fff"/>
+      <path d="M9 9.4 q6 -3 12 0" fill="none" stroke="#e85d4c" stroke-width="1.4"/>`
+  }[kind]||body.uncle;
+  return `<svg class="ph" viewBox="0 0 30 32" width="${sz||48}" height="${sz||48}" aria-hidden="true">
+    <defs><radialGradient id="sk${kind}" cx="35%" cy="30%"><stop offset="0%" stop-color="#fff3"/><stop offset="100%" stop-color="#0000"/></radialGradient></defs>
+    <ellipse cx="15" cy="31" rx="8" ry="1.3" fill="#0003"/>
+    ${body}
+    <circle cx="15" cy="14.2" r="8" fill="url(#sk${kind})"/>
+    ${faceParts(e)}
+  </svg>`;
+}
+const FX={normal:'',happy:'✨',angry:'💢',cry:'💧',smug:'😎',nervous:'💦'};
+function charById(id){return CHARS.find(c=>c.id===id)}
+function portraitHTML(p,expr,sz,wrapCls){
+  const e=expr||p.expr||'normal';
+  const size=sz||48;
+  const custom=p.img||(p.custom&&p.custom.img);
+  const color=p.color||(p.custom&&p.custom.color)||'#e85d4c';
+  let inner;
+  if(custom) inner=`<img src="${custom}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  else inner=svgChar(p.charId||'uncle',e,size);
+  const fx=custom? (FX[e]||''):'';
+  return `<span class="avwrap ${wrapCls||''} ${p.anim||''}" style="width:${size}px;height:${size}px;border-radius:50%;overflow:visible;display:inline-flex;align-items:center;justify-content:center;background:${color}22;box-shadow:0 4px 0 ${color}55,0 6px 8px #0002">
+    <span style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:block;border:2px solid #fff">${inner}</span>
+    ${fx?`<span class="fx">${fx}</span>`:''}</span>`;
+}
+
+const ITEMS={
+  eqall:{id:'eqall',name:'雨露均霑卡',icon:'🌧️',pts:200,desc:'所有人的現金平均分配。',use:'now'},
+  eqone:{id:'eqone',name:'雙人分帳卡',icon:'🤝',pts:200,desc:'指定一名玩家，兩人現金對半分。',use:'player'},
+  buyout:{id:'buyout',name:'強制收購卡',icon:'📝',pts:35,desc:'用市價強制買下你腳下別人的地。',use:'here'},
+  swapland:{id:'swapland',name:'地契對調卡',icon:'🔄',pts:25,desc:'把腳下這塊地，和你擁有的一塊同級地對調主人。',use:'myland'},
+  swaphouse:{id:'swaphouse',name:'樓層對調卡',icon:'🏠',pts:20,desc:'把腳下房屋層數，和另一塊同級地的樓層對調。',use:'tile'},
+  renovate:{id:'renovate',name:'華麗翻新卡',icon:'🛠️',pts:15,desc:'腳下若是你的地，立刻加蓋一層。',use:'here'},
+  auction:{id:'auction',name:'強制拍賣卡',icon:'🔨',pts:20,desc:'強制拍賣腳下土地，得款歸你，但你不能買。',use:'here'},
+  bless:{id:'bless',name:'福澤加蓋卡',icon:'🕊️',pts:160,desc:'指定一個區塊，整區房屋各加蓋一層。',use:'group'},
+  disaster:{id:'disaster',name:'天災夷平卡',icon:'🌪️',pts:180,desc:'指定一個區塊，整區房屋夷為平地。',use:'group'},
+  monster:{id:'monster',name:'街霸拆樓卡',icon:'👾',pts:60,desc:'指定一處，房屋拆到空地。',use:'tile'},
+  demolish:{id:'demolish',name:'拆除一層卡',icon:'🪚',pts:15,desc:'指定房屋拆一層，也可拆除路障、地雷或倒數爆彈。',use:'tilehaz'},
+  turn:{id:'turn',name:'迴旋轉向卡',icon:'↩️',pts:20,desc:'讓自己或指定玩家向後轉。',use:'playerSelf'},
+  stay:{id:'stay',name:'原地立定卡',icon:'🛑',pts:20,desc:'讓自己或指定玩家下一回合原地不動。',use:'playerSelf'},
+  turtle:{id:'turtle',name:'慢走龜步卡',icon:'🐢',pts:70,desc:'指定玩家連續三回合每次只走 1 步。',use:'playerSelf'},
+  steal:{id:'steal',name:'順手牽羊卡',icon:'🦝',pts:25,desc:'從指定玩家的背包裡搶走一張道具。',use:'player'},
+  dream:{id:'dream',name:'夢遊漫步卡',icon:'🌙',pts:25,desc:'指定對手夢遊 3 回合：能走但不能交易、用卡或收租。',use:'player'},
+  sleep:{id:'sleep',name:'集體午睡卡',icon:'😴',pts:100,desc:'其他玩家午睡 3 回合：不能走、不能交易、不能收租。',use:'now'},
+  frame:{id:'frame',name:'栽贓送辦卡',icon:'⚖️',pts:20,desc:'把指定對手送進加班室 3 回合。',use:'player'},
+  passthe:{id:'passthe',name:'禍水東引卡',icon:'🎯',pts:40,desc:'被陷害、被罰款或被追稅時，可轉嫁給別人。自動觸發。',use:'auto'},
+  revenge:{id:'revenge',name:'以牙還牙卡',icon:'⚔️',pts:20,desc:'被陷害或被催眠時，讓對方遭到同樣下場。自動觸發。',use:'auto'},
+  pardon:{id:'pardon',name:'消災解厄卡',icon:'🛡️',pts:25,desc:'抵銷一次陷害、夢遊、龜步或加班／住院。自動觸發。',use:'auto'},
+  freetoll:{id:'freetoll',name:'免除帳單卡',icon:'🎫',pts:25,desc:'單筆付款達 2000 以上（含追稅）時，可免付一次。自動觸發。',use:'auto'},
+  red:{id:'red',name:'紅盤卡',icon:'📈',pts:50,desc:'指定一支股票漲停 3 天。與黑盤互相抵消。',use:'stock'},
+  black:{id:'black',name:'黑盤卡',icon:'📉',pts:30,desc:'指定一支股票跌停 3 天。與紅盤互相抵消。',use:'stock'},
+  tax:{id:'tax',name:'查帳追稅卡',icon:'📑',pts:35,desc:'向指定玩家收取 20% 現金稅金。',use:'player'},
+  inflate:{id:'inflate',name:'行情加價卡',icon:'🔥',pts:35,desc:'指定區塊 5 回合內過路費加倍。可與停業互相抵消。',use:'group'},
+  seal:{id:'seal',name:'停業查封卡',icon:'🔒',pts:35,desc:'指定區塊 5 回合內不能收過路費。可與加價互相抵消。',use:'group'},
+  ally:{id:'ally',name:'暫時同盟卡',icon:'🖖',pts:40,desc:'與指定玩家同盟 7 回合，互不收租，同區聯合收費。',use:'player'},
+  summon:{id:'summon',name:'請靈符',icon:'🔔',pts:20,desc:'請來距離最近的一位靈體（好壞都有可能）。',use:'now'},
+  banish:{id:'banish',name:'送靈符',icon:'💨',pts:10,desc:'送走附身的壞靈，或身上的倒數爆彈。收魂使送不走。',use:'now'},
+  dice:{id:'dice',name:'指定步數器',icon:'🎛️',pts:40,desc:'自己決定本次要走幾步（1～6）。',use:'dice'},
+  block:{id:'block',name:'施工路障',icon:'🚧',pts:20,desc:'放在空格上，下一個經過的人會被攔下來。',use:'empty'},
+  mine:{id:'mine',name:'地裂地雷',icon:'💥',pts:25,desc:'放在格上，有人踩到就爆炸，送進醫院。',use:'empty'},
+  bomb:{id:'bomb',name:'倒數爆彈',icon:'💣',pts:30,desc:'放在格上，附到人身上後依步數倒數，歸零就炸。',use:'empty'},
+  dice2:{id:'dice2',name:'雙骰風火輪',icon:'🎲',pts:45,desc:'本回合可選使用 1 或 2 顆骰子。',use:'multidice'},
+  dice3:{id:'dice3',name:'三骰衝刺靴',icon:'👟',pts:70,desc:'本回合可選使用 1～3 顆骰子。',use:'multidice'},
+  build:{id:'build',name:'加蓋工人',icon:'👷',pts:20,desc:'指定自己的一處地產加蓋一層。',use:'myland2'},
+  cleaner:{id:'cleaner',name:'清道娃娃',icon:'🧸',pts:35,desc:'清掉你前方 8 格的路障、地雷、爆彈與尚未附身的靈體。',use:'now'}
+};
+const SHOP_ORDER='dice,block,mine,bomb,dice2,dice3,build,cleaner,eqall,eqone,buyout,swapland,swaphouse,renovate,auction,bless,disaster,monster,demolish,turn,stay,turtle,steal,dream,sleep,frame,passthe,revenge,pardon,freetoll,red,black,tax,inflate,seal,ally,summon,banish'.split(',');
+const AUTO_ITEMS=new Set(['passthe','revenge','pardon','freetoll']);
+const GODS={
+  gold_s:{id:'gold_s',name:'小金元福星',icon:'🪙',good:true,desc:'附身時向其他人各收一筆小錢，過路費減半，持續 7 回合。期滿變大。'},
+  gold_b:{id:'gold_b',name:'大金元福星',icon:'🌟',good:true,desc:'附身時獲得一大筆意外之財，過路費全免，持續 7 回合。'},
+  poor_s:{id:'poor_s',name:'小破財晦星',icon:'💸',good:false,desc:'附身時破小財，過路費多付 50%，持續 7 回合。'},
+  poor_b:{id:'poor_b',name:'大破財晦星',icon:'🥀',good:false,desc:'附身時破大財，過路費加倍，持續 7 回合。'},
+  luck_s:{id:'luck_s',name:'小吉祥福星',icon:'🍀',good:true,desc:'送你 1 張道具，買地半價並免費多蓋一層。持續 7 回合。'},
+  luck_b:{id:'luck_b',name:'大吉祥福星',icon:'🌈',good:true,desc:'送你 2 張道具，買地免費並免費多蓋一層。持續 7 回合。'},
+  jinx_s:{id:'jinx_s',name:'小倒霉晦星',icon:'☁️',good:false,desc:'掉 1 張道具，期間不能買地或蓋樓。持續 7 回合。'},
+  jinx_b:{id:'jinx_b',name:'大倒霉晦星',icon:'⛈️',good:false,desc:'掉一半道具，期間不能買地或蓋樓。持續 7 回合。'},
+  addon:{id:'addon',name:'添磚喜靈',icon:'😇',good:true,desc:'你停過的地方會自動加蓋一層（敵我都算），並能避開住院與加班。'},
+  wrecker:{id:'wrecker',name:'拆屋禍靈',icon:'😈',good:false,desc:'你停過的地方會被拆掉一層，罰款加倍，住院加班還會延長。'},
+  reaper:{id:'reaper',name:'收魂使',icon:'💀',good:false,desc:'附身 7 回合後索命：住院並奪走三成現金。送靈符送不走。'}
+};
+const GOD_FLIP={gold_s:'gold_b',gold_b:'gold_s',poor_s:'poor_b',poor_b:'poor_s',luck_s:'luck_b',luck_b:'luck_s',jinx_s:'jinx_b',jinx_b:'jinx_s',addon:'wrecker',wrecker:'addon'};
+const STOCKS0=[
+  {id:'food',name:'晴空食品',price:100},
+  {id:'ship',name:'海風運輸',price:100},
+  {id:'tech',name:'彩虹科技',price:100},
+  {id:'tour',name:'暖陽旅遊',price:100}
+];
+const FATE=[
+  {id:'bonus',good:true,txt:'社區里長發紅包，你領到 {n}。',money:[800,2000]},
+  {id:'invoice',good:true,txt:'統一發票中獎！入帳 {n}。',money:[500,3000]},
+  {id:'auntie',good:true,txt:'遠房阿姨說你瘦了，塞了 {n} 給你。',money:[400,1500]},
+  {id:'taxbill',good:false,txt:'補繳舊帳單 {n}。',money:[-400,-1600]},
+  {id:'phone',good:false,txt:'手機螢幕裂成蜘蛛網，維修費 {n}。',money:[-600,-1800]},
+  {id:'treat',good:false,txt:'被揪去吃到飽，你當了一次冤大頭 {n}。',money:[-500,-2000]},
+  {id:'hospital',good:false,txt:' vertigo 發作？不對，是感冒住院觀察。',go:'hospital'},
+  {id:'work',good:false,txt:'主管在群組標記你：今晚加班，別想跑。',go:'overtime'},
+  {id:'start',good:true,txt:'拾到一張回家的捷運票，直接飛回發薪日。',go:'start'},
+  {id:'pts',good:true,txt:'集點卡滿了，獲得 {n} 點卡牌點。',pts:[15,40]},
+  {id:'item',good:true,txt:'人行道上撿到一個牛皮紙袋，裡面是「{item}」！',item:1},
+  {id:'godluck',good:true,txt:'路邊土地公廟飄來一陣香，一位靈體跟上了你。',god:'good'},
+  {id:'godbad',good:false,txt:'你踩到一張符紙，晦氣靈跟上了。',god:'bad'}
+];
+const CHANCE=[
+  {id:'raise',good:true,txt:'年終提前發放，入帳 {n}。',money:[1000,3500]},
+  {id:'found',good:true,txt:'在沙發縫裡挖到壓歲錢 {n}。',money:[300,1200]},
+  {id:'fine',good:false,txt:'騎車未兩段式左轉，罰單 {n}。',money:[-400,-1200]},
+  {id:'rent',good:false,txt:'錢包掉進水溝，損失 {n}。',money:[-700,-2200]},
+  {id:'fwd',good:true,txt:'綠燈一路順，再往前走 {n} 步。',steps:[2,5]},
+  {id:'back',good:false,txt:'走錯巷子，往回 {n} 步。',steps:[-3,-1]},
+  {id:'item2',good:true,txt:'店長抽獎抽中「{item}」。',item:1},
+  {id:'pts2',good:true,txt:'會員點數入帳 {n} 點。',pts:[10,30]},
+  {id:'stockup',good:true,txt:'小道消息：有檔股票明天可能會飆。',stock:1},
+  {id:'jail',good:false,txt:'被誤認成逃兵（逃班），送去加班室。',go:'overtime'},
+  {id:'doc',good:false,txt:'健康檢查列出一排紅字，先去醫院報到。',go:'hospital'},
+  {id:'start2',good:true,txt:'計程車司機說「這趟我請」，直奔發薪日。',go:'start'}
+];
+
+/* typo fix later for hospital fate text */
+FATE.find(x=>x.id==='hospital').txt='突然一陣暈眩，還是去醫院檢查一下吧。';
+
+const LS_CUST='fuweng-customs-v1';
+function loadCustoms(){try{return JSON.parse(localStorage.getItem(LS_CUST)||'[]')}catch(e){return[]}}
+function saveCustoms(arr){localStorage.setItem(LS_CUST,JSON.stringify(arr))}
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const cvs=document.createElement('canvas');
+      let sz=160;
+      cvs.width=sz;cvs.height=sz;
+      const ctx=cvs.getContext('2d');
+      const s=Math.min(img.width,img.height);
+      const sx=(img.width-s)/2, sy=(img.height-s)/2;
+      ctx.drawImage(img,sx,sy,s,s,0,0,sz,sz);
+      let q=.84, data=cvs.toDataURL('image/jpeg',q);
+      while(data.length>60*1024 && q>.4){q-=.1;data=cvs.toDataURL('image/jpeg',q)}
+      if(data.length>60*1024){
+        sz=112;cvs.width=sz;cvs.height=sz;
+        ctx.drawImage(img,sx,sy,s,s,0,0,sz,sz);
+        data=cvs.toDataURL('image/jpeg',.72);
+      }
+      URL.revokeObjectURL(url);
+      resolve(data);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('讀取圖片失敗'))};
+    img.src=url;
+  });
+}
+
+/* ---------- state ---------- */
+let S=null, me={id:'me',name:'我',host:false}, mode='', portraits={};
+let peer=null, conns={}, closing=false, lastSeen=0, hb=0, animTimer=0;
+let view='lobby', setupKind='ai', selectedChar='uncle', editingCustom=null, crImg='';
+
+function newTiles(){return TILES.map(t=>({id:t.id,t:t.t,name:t.name,price:t.price||0,group:t.group||'',lv:0,owner:null,fee:t.fee||0,block:0,mine:0,bomb:0,seal:0,inflate:0}))}
+function mkPlayer(o){
+  return {
+    id:o.id,name:o.name,charId:o.charId||'uncle',custom:o.custom||null,color:o.color||'#e85d4c',
+    pers:o.pers||'money',img:o.img||null,lines:o.lines||null,isAI:!!o.isAI,human:o.human!==false&&!o.isAI,
+    money:20000,dep:0,loan:0,pos:0,dir:1,pts:40,items:['dice','block','mine'],
+    stocks:{food:0,ship:0,tech:0,tour:0},
+    jail:0,hospital:0,stay:0,turtle:0,dream:0,sleep:0,ally:null,allyN:0,
+    god:null,godN:0,bomb:0,diceMax:1,bankrupt:false,expr:'normal',anim:'',
+    dropped:false
+  };
+}
+function netWorth(p,state){
+  state=state||S;
+  if(!p||p.bankrupt) return 0;
+  let v=p.money+p.dep-p.loan;
+  for(const t of state.tiles) if(t.owner===p.id) v+=landValue(t);
+  for(const st of state.stocks) v+= (p.stocks[st.id]||0)*st.price;
+  return Math.round(v);
+}
+function cur(state){state=state||S;return state.players[state.turn]}
+function alive(state){return (state||S).players.filter(p=>!p.bankrupt)}
+function pById(id,state){return (state||S).players.find(p=>p.id===id)}
+function linesOf(p){return (p.lines)||LINES[p.pers]||LINES.money}
+function say(p,key,fallback){
+  if(!p) return;
+  const L=linesOf(p);
+  const text=L[key]||fallback||'';
+  S.bubble={pid:p.id,text,ttl:3};
+  p.expr= key==='pay'||key==='bad'||key==='br' ? (key==='br'?'cry':key==='pay'?'angry':'nervous')
+        : key==='recv'||key==='good'||key==='buy' ? (key==='recv'?'smug':key==='buy'?'happy':'happy') : 'normal';
+  p.anim= key==='pay'?'shake':key==='br'?'fall':(key==='good'||key==='buy'||key==='recv')?'bounce':'';
+  log(`${p.name}：「${text}」`);
+}
+function log(msg){
+  S.log.unshift(msg);
+  if(S.log.length>40) S.log.length=40;
+}
+function randItem(){
+  const pool=SHOP_ORDER.filter(id=>!AUTO_ITEMS.has(id)||rnd(3)===0);
+  return pick(pool);
+}
+function giveItem(p,id,silent){
+  if(!id||!ITEMS[id]) return;
+  if(p.items.length>=8) p.items.shift();
+  p.items.push(id);
+  if(!silent) log(`${p.name} 獲得「${ITEMS[id].name}」`);
+}
+function takeItem(p,id){
+  const i=p.items.indexOf(id);
+  if(i>=0){p.items.splice(i,1);return true}
+  return false;
+}
+
+function freshState(players,opts){
+  return {
+    code:opts.code||'',
+    win:opts.win||'rounds',
+    maxRound:opts.maxRound||16,
+    round:1, turn:0, phase:'main', busy:false, over:false, winner:null,
+    pot:0, lastDice:0, dice:[],
+    tiles:newTiles(),
+    stocks:STOCKS0.map(s=>({...s,lock:0,lockDir:0})),
+    gods:[], // {id,tile}
+    players, log:['晴空城開市，大家準備搶地！'],
+    bubble:null, pending:null, news:''
+  };
+}
+
+/* ---------- engine ---------- */
+function tickPlayerStart(p){
+  if(p.bankrupt) return 'skip';
+  if(p.dep>0){const inc=Math.round(p.dep*0.05);p.dep+=inc;p.money+=0;log(`${p.name} 存款利息 ${fmt(inc)} 已滾入本金`)}
+  if(p.loan>0){const fee=Math.max(200,Math.round(p.loan*0.1)); mustPay(p,fee,{reason:'貸款利息',fine:true})}
+  if(p.allyN>0){p.allyN--; if(p.allyN<=0){log(`${p.name} 與 ${(pById(p.ally)||{}).name||'某人'} 的同盟結束`);p.ally=null}}
+  if(p.god){
+    p.godN--;
+    if(p.godN<=0){
+      const flip=GOD_FLIP[p.god];
+      log(`${p.name} 身上的「${GODS[p.god].name}」離開了`);
+      if(flip) spawnGod(flip);
+      p.god=null;
+      if(p._wasReaper){ /* handled below */ }
+    }
+  }
+  if(p.god==='reaper' && p.godN<=0){
+    // already removed above; trigger reap if it was reaper - check via leaving
+  }
+  // handle reaper expiry before clearing: do it properly
+}
+
+function startTurn(){
+  if(!S||S.over) return;
+  S.pending=null; S.phase='main'; S.dice=[]; S.lastDice=0;
+  const p=cur();
+  if(!p||p.bankrupt){nextTurn();return}
+  p.expr='normal'; p.anim=''; p.diceMax=1;
+  // interest once per personal turn
+  if(p.dep>0){const inc=Math.round(p.dep*0.05);p.dep+=inc;log(`${p.name} 的存款生出利息 ${fmt(inc)}`)}
+  if(p.loan>0 && !p.bankrupt){const fee=Math.max(200,Math.round(p.loan*0.1));mustPay(p,fee,{reason:'貸款利息',fine:true})}
+  if(p.bankrupt){nextTurn();return}
+  if(p.allyN>0){p.allyN--; if(p.allyN<=0){log(`${p.name} 的同盟結束`);p.ally=null}}
+
+  // god duration
+  if(p.god){
+    const gid=p.god;
+    p.godN--;
+    if(p.godN<=0){
+      if(gid==='reaper'){
+        log(`收魂使向 ${p.name} 索命！`);
+        say(p,'bad');
+        mustPay(p,Math.round(p.money*0.3),{reason:'收魂',fine:true});
+        sendHospital(p,3,{noPardon:false,from:'reaper'});
+      }else{
+        log(`${p.name} 身上的「${GODS[gid].name}」離開了`);
+        const flip=GOD_FLIP[gid]; if(flip) spawnGod(flip);
+      }
+      p.god=null; p.godN=0;
+    }
+  }
+
+  // tile buffs already ticked globally at round start
+
+  if(p.sleep>0){
+    p.sleep--; log(`${p.name} 還在午睡（剩 ${p.sleep} 回合）`);
+    return endTurn(true);
+  }
+  if(p.hospital>0){
+    if(hasGodProtect(p)){p.hospital=0;log(`${GODS[p.god].name} 護著 ${p.name}，提前出院！`);}
+    else{
+      S.pending={type:'hospital',pid:p.id};
+      paint(); maybeAI(); return;
+    }
+  }
+  if(p.jail>0){
+    if(hasGodProtect(p)){p.jail=0;log(`${GODS[p.god].name} 幫 ${p.name} 逃過加班！`);}
+    else{
+      S.pending={type:'jail',pid:p.id};
+      paint(); maybeAI(); return;
+    }
+  }
+  if(p.stay>0){
+    p.stay--; log(`${p.name} 本回合原地立定`);
+    S.phase='after';
+    paint(); maybeAI(); return;
+  }
+  if(p.turtle>0) p.turtle--; // used when rolling
+  S.phase='main';
+  log(`輪到 ${p.name}`);
+  paint(); maybeAI();
+}
+
+function hasGodProtect(p){return p.god==='luck_s'||p.god==='luck_b'||p.god==='addon'||p.god==='gold_b'}
+function godExtendBad(p){return p.god==='wrecker'||p.god==='jinx_s'||p.god==='jinx_b'}
+
+function nextTurn(){
+  if(!S||S.over) return;
+  const living=alive();
+  if(living.length<=1){return finish('last')}
+  // find next
+  let t=S.turn, n=S.players.length, hops=0;
+  do{ t=(t+1)%n; hops++; if(t===0){ onNewRound(); } }
+  while(S.players[t].bankrupt && hops<=n+1);
+  S.turn=t;
+  if(S.over) return;
+  startTurn();
+}
+function onNewRound(){
+  S.round++;
+  // tick land buffs each full round
+  for(const t of S.tiles){
+    if(t.seal>0) t.seal--;
+    if(t.inflate>0) t.inflate--;
+  }
+  fluctuateStocks();
+  maybeSpawnGod();
+  wanderGods();
+  log(`—— 第 ${S.round} 回合 ——`);
+  if(S.win==='rounds' && S.round>S.maxRound){finish('rounds')}
+}
+function finish(why){
+  if(S.over) return;
+  S.over=true; S.phase='over'; S.pending=null;
+  const arr=S.players.map(p=>({p,w:netWorth(p)})).sort((a,b)=>b.w-a.w);
+  S.winner=arr[0].p.id;
+  S.rank=arr;
+  S.why=why;
+  const w=arr[0].p;
+  say(w,'good','贏啦！');
+  log(`遊戲結束！優勝者是 ${w.name}（身家 ${fmt(arr[0].w)}）`);
+  sfx('win');
+  paint();
+  showResult();
+}
+
+function passGo(p){
+  let sal=3000;
+  if(p.god==='gold_b') sal*=2;
+  if(p.god==='poor_b') sal=Math.round(sal*0.5);
+  p.money+=sal; p.pts+=15;
+  log(`${p.name} 經過發薪日，領了 ${fmt(sal)} 和 15 點`);
+  sfx('coin');
+}
+
+function canBuy(p,tile){
+  if(!p||!tile||p.bankrupt||p.dream>0||p.sleep>0) return false;
+  if(p.god==='jinx_s'||p.god==='jinx_b') return false;
+  if(!(tile.t==='land'||tile.t==='trans'||tile.t==='util')) return false;
+  if(tile.owner) return false;
+  let price=buyPrice(p,tile);
+  return p.money>=price;
+}
+function buyPrice(p,tile){
+  let price=tile.price;
+  if(p.god==='luck_s') price=Math.round(price*0.5);
+  if(p.god==='luck_b') price=0;
+  return price;
+}
+function doBuy(p,tile){
+  const price=buyPrice(p,tile);
+  if(p.money<price) return false;
+  p.money-=price; tile.owner=p.id;
+  if(p.god==='luck_s'||p.god==='luck_b'){tile.lv=Math.min(5,(tile.lv||0)+1)}
+  say(p,'buy'); sfx('coin');
+  log(`${p.name} 買下 ${tile.name}（${fmt(price)}）`);
+  return true;
+}
+function upgradeCost(tile){return Math.round((tile.price||0)*UPG[Math.min(5,(tile.lv||0)+1)]||tile.price*0.5)}
+function canUp(p,tile){
+  if(!p||!tile||tile.owner!==p.id) return false;
+  if(p.god==='jinx_s'||p.god==='jinx_b'||p.dream>0) return false;
+  if(!(tile.t==='land')) return false;
+  if((tile.lv||0)>=5) return false;
+  return p.money>=upgradeCost(tile);
+}
+function doUp(p,tile,free){
+  if((tile.lv||0)>=5) return;
+  if(!free){const c=upgradeCost(tile); if(p.money<c) return; p.money-=c}
+  tile.lv=(tile.lv||0)+1;
+  log(`${p.name} 把 ${tile.name} 加蓋成「${LVNAME[tile.lv]}」`);
+  sfx('coin');
+}
+
+function actualToll(p,tile){
+  if(!tile.owner || tile.owner===p.id) return 0;
+  const o=pById(tile.owner);
+  if(!o||o.bankrupt||o.dream>0||o.sleep>0||o.hospital>0||o.jail>0) return 0;
+  if(p.ally && p.ally===o.id && p.allyN>0) return 0;
+  if(tile.seal>0) return 0;
+  // combined monopoly if allied and same group
+  let t={...tile};
+  let r=tollBase(tile,S);
+  if(tile.inflate>0) r*=2;
+  if(p.god==='gold_s') r=Math.round(r*0.5);
+  if(p.god==='gold_b') r=0;
+  if(p.god==='poor_s') r=Math.round(r*1.5);
+  if(p.god==='poor_b') r=Math.round(r*2);
+  return Math.round(r);
+}
+
+function mustPay(p,amount,opt){
+  opt=opt||{};
+  if(!p||p.bankrupt||amount<=0) return 0;
+  let amt=Math.round(amount);
+  if(opt.fine){
+    if(p.god==='gold_s') amt=Math.round(amt*0.5);
+    if(p.god==='gold_b') amt=0;
+    if(p.god==='wrecker'||p.god==='poor_s') amt=Math.round(amt*1.5);
+    if(p.god==='poor_b') amt=Math.round(amt*2);
+  }
+  if(amt<=0) return 0;
+  // freetoll auto
+  if((amt>=2000 || amt>=p.money) && p.items.includes('freetoll') && !opt.noFree){
+    takeItem(p,'freetoll');
+    log(`${p.name} 打出免除帳單卡，這筆 ${fmt(amt)} 不用付了！`);
+    say(p,'good');
+    return 0;
+  }
+  // 嫁禍
+  if(p.items.includes('passthe') && !opt.noPass && opt.fromPid!==undefined){
+    // handled as auto to richest other if AI or always auto to avoid softlock unless human and pending
+  }
+  if(p.items.includes('passthe') && !opt.noPass && !opt.passed){
+    const others=alive().filter(x=>x.id!==p.id);
+    if(others.length){
+      takeItem(p,'passthe');
+      const t=others.slice().sort((a,b)=>b.money-a.money)[0];
+      log(`${p.name} 用禍水東引卡，把 ${fmt(amt)} 轉給 ${t.name}！`);
+      return mustPay(t,amt,{...opt,noPass:true,passed:true,fromPid:p.id});
+    }
+  }
+  if(p.money>=amt){p.money-=amt; return amt}
+  liquidate(p,amt-p.money);
+  if(p.money>=amt){p.money-=amt; return amt}
+  const paid=p.money; p.money=0;
+  bankrupt(p);
+  return paid;
+}
+function liquidate(p,need){
+  // sell stocks
+  for(const st of S.stocks){
+    if(need<=0||p.bankrupt) break;
+    const n=p.stocks[st.id]||0;
+    if(n>0){
+      const sell=n;
+      p.stocks[st.id]=0; const got=sell*st.price; p.money+=got; need-=got;
+      log(`${p.name} 賣出 ${st.name} ×${sell}，換得 ${fmt(got)}`);
+    }
+  }
+  // downgrade houses
+  const lands=S.tiles.filter(t=>t.owner===p.id&&t.lv>0).sort((a,b)=>b.lv-a.lv);
+  for(const t of lands){
+    while(t.lv>0 && need>0){
+      t.lv--; const got=Math.round(upgradeCost(t)*0.5)+Math.round(t.price*0.15);
+      p.money+=got; need-=got;
+      log(`${p.name} 拆除 ${t.name} 一層，拿回 ${fmt(got)}`);
+    }
+  }
+  // sell properties at 50%
+  const props=S.tiles.filter(t=>t.owner===p.id).sort((a,b)=>landValue(a)-landValue(b));
+  for(const t of props){
+    if(need<=0) break;
+    const got=Math.round(landValue(t)*0.5);
+    t.owner=null; t.lv=0; p.money+=got; need-=got;
+    log(`${p.name} 賣出 ${t.name}，拿回 ${fmt(got)}`);
+  }
+  // withdraw deposits
+  if(p.dep>0 && need>0){
+    const w=Math.min(p.dep,need); p.dep-=w; p.money+=w; need-=w;
+    log(`${p.name} 領出存款 ${fmt(w)}`);
+  }
+}
+function bankrupt(p){
+  if(p.bankrupt) return;
+  p.bankrupt=true; p.money=0; p.dep=0; p.items=[]; p.god=null; p.bomb=0;
+  say(p,'br'); sfx('bad');
+  log(`${p.name} 破產了！土地全部交還。`);
+  for(const t of S.tiles) if(t.owner===p.id){t.owner=null;t.lv=0}
+  p.stocks={food:0,ship:0,tech:0,tour:0};
+  const living=alive();
+  if(living.length<=1) finish('last');
+}
+
+function sendHospital(p,days,opt){
+  opt=opt||{};
+  if(hasGodProtect(p) && !opt.noPardon){log(`${GODS[p.god].name} 讓 ${p.name} 免於住院`);return}
+  if(tryDefend(p,'hospital',opt.fromPid)) return;
+  p.hospital=(p.hospital||0)+(godExtendBad(p)?days+2:days);
+  p.pos=10; p.diceMax=1;
+  log(`${p.name} 被送進醫院，要躺 ${p.hospital} 回合`);
+  say(p,'bad');
+}
+function sendJail(p,days,opt){
+  opt=opt||{};
+  if(hasGodProtect(p) && !opt.noPardon){log(`${GODS[p.god].name} 讓 ${p.name} 免於加班`);return}
+  if(tryDefend(p,'jail',opt.fromPid)) return;
+  p.jail=(p.jail||0)+(godExtendBad(p)?days+2:days);
+  p.pos=30;
+  log(`${p.name} 被送進加班室，要加 ${p.jail} 回合班`);
+  say(p,'bad');
+}
+function tryDefend(p,kind,fromPid){
+  if(p.items.includes('pardon')){
+    takeItem(p,'pardon');
+    log(`${p.name} 打出消災解厄卡，化解了！`);
+    say(p,'good');
+    return true;
+  }
+  if(fromPid && p.items.includes('revenge')){
+    takeItem(p,'revenge');
+    const atk=pById(fromPid);
+    log(`${p.name} 打出以牙還牙卡！`);
+    if(atk){
+      if(kind==='jail') sendJail(atk,3,{fromPid:p.id,noPass:true});
+      if(kind==='dream') applyDream(atk,3,{fromPid:p.id});
+      if(kind==='hospital') sendHospital(atk,3,{fromPid:p.id});
+    }
+    // self still suffers unless also pardon - original revenge is additional. I'll let both suffer unless pardon.
+  }
+  if(fromPid && p.items.includes('passthe') && (kind==='jail'||kind==='dream'||kind==='hospital')){
+    const others=alive().filter(x=>x.id!==p.id && x.id!==fromPid);
+    if(others.length){
+      takeItem(p,'passthe');
+      const t=others.slice().sort((a,b)=>b.money-a.money)[0];
+      log(`${p.name} 把災禍轉給 ${t.name}！`);
+      if(kind==='jail') sendJail(t,3,{fromPid:p.id,noPass:true});
+      if(kind==='dream') applyDream(t,3,{fromPid:p.id});
+      if(kind==='hospital') sendHospital(t,3,{fromPid:p.id});
+      return true;
+    }
+  }
+  return false;
+}
+function applyDream(p,days,opt){
+  opt=opt||{};
+  if(tryDefend(p,'dream',opt.fromPid)) return;
+  p.dream=days;
+  log(`${p.name} 開始夢遊 ${days} 回合，不能交易也不能收租`);
+}
+function applySleepOthers(user){
+  for(const p of alive()){
+    if(p.id===user.id) continue;
+    if(p.hospital>0||p.jail>0) continue;
+    p.sleep=3;
+  }
+  log(`${user.name} 讓其他人集體午睡 3 回合！`);
+}
+
+function spawnGod(type,tile){
+  if(S.gods.length>=3) S.gods.shift();
+  let pos=tile;
+  if(pos==null){
+    const spots=[];
+    for(let i=1;i<40;i++) if(![10,30].includes(i) && !S.gods.some(g=>g.tile===i)) spots.push(i);
+    if(!spots.length) return;
+    pos=pick(spots);
+  }
+  S.gods.push({id:type,tile:pos});
+  log(`「${GODS[type].name}」出現在 ${TILES[pos].name}`);
+}
+function maybeSpawnGod(){
+  if(S.gods.length>=2) return;
+  if(rnd(100)<55){
+    const pool='gold_s,poor_s,luck_s,jinx_s,addon,wrecker'.split(',');
+    if(rnd(12)===0) pool.push('reaper');
+    spawnGod(pick(pool));
+  }
+}
+function wanderGods(){
+  for(const g of S.gods){
+    if(rnd(2)) g.tile=(g.tile+pick([1,1,2,-1,39]))%40;
+  }
+}
+function attachGod(p,gid){
+  if(p.god==='reaper' && gid!=='reaper'){log(`收魂使還在，新的靈靠不近 ${p.name}`);return}
+  // leaving previous
+  if(p.god) log(`${p.name} 身上的「${GODS[p.god].name}」被擠走了`);
+  p.god=gid; p.godN=7;
+  const G=GODS[gid];
+  log(`${G.icon} ${G.name} 附到 ${p.name} 身上！`);
+  say(p,G.good?'good':'bad');
+  if(gid==='gold_s'){
+    for(const o of alive()){ if(o.id===p.id) continue; const k=100+rnd(900); const got=mustPay(o,k,{reason:'金元福星',fine:false}); p.money+=got; }
+  }else if(gid==='gold_b'){
+    const k=1000+rnd(9000); p.money+=k; log(`${p.name} 獲得意外之財 ${fmt(k)}`);
+  }else if(gid==='poor_s'){
+    for(const o of alive()){ if(o.id===p.id) continue; const k=100+rnd(900); const got=mustPay(p,k,{reason:'破財',fine:true}); o.money+=got; }
+  }else if(gid==='poor_b'){
+    mustPay(p,1000+rnd(9000),{reason:'大破財',fine:true});
+  }else if(gid==='luck_s'){ giveItem(p,randItem()); }
+  else if(gid==='luck_b'){ giveItem(p,randItem()); giveItem(p,randItem()); }
+  else if(gid==='jinx_s'){ if(p.items.length){ const it=p.items.splice(rnd(p.items.length),1)[0]; log(`${p.name} 掉了「${ITEMS[it].name}」`); } }
+  else if(gid==='jinx_b'){ const n=Math.ceil(p.items.length/2); for(let i=0;i<n;i++){ if(p.items.length) p.items.shift(); } log(`${p.name} 掉了一半道具`); }
+}
+
+function fluctuateStocks(){
+  for(const st of S.stocks){
+    if(st.lock>0){
+      st.lock--;
+      const ch=st.lockDir>0 ? (8+rnd(8)) : -(8+rnd(8));
+      st.price=clamp(Math.round(st.price*(1+ch/100)),20,400);
+      if(st.lock<=0) st.lockDir=0;
+    }else{
+      let ch=rnd(17)-8;
+      if(rnd(18)===0) ch=(rnd(2)?1:-1)*(12+rnd(10));
+      st.price=clamp(Math.round(st.price*(1+ch/100)),20,400);
+    }
+  }
+  S.news='今日股價：'+S.stocks.map(s=>s.name+s.price).join('　');
+}
+
+async function doRoll(p, forced, nDice){
+  if(S.phase!=='main'||S.busy||S.pending) return;
+  if(p.id!==cur().id) return;
+  let nd=nDice||p.diceMax||1;
+  if(p.turtle>0) nd=1;
+  S.busy=true; S.phase='moving';
+  let dice;
+  if(forced!=null){
+    dice=Array.isArray(forced)?forced:[forced];
+  }else{
+    dice=Array.from({length:nd},()=>1+rnd(6));
+  }
+  S.dice=dice; S.lastDice=dice.reduce((a,b)=>a+b,0);
+  if(p.turtle>0) S.lastDice=1;
+  sfx('dice'); paint();
+  await sleep(FAST?0:450);
+  await walk(p,S.lastDice);
+  S.busy=false;
+  await resolveLand(p);
+}
+
+async function walk(p,steps){
+  const stepDir=p.dir||1;
+  for(let i=0;i<steps;i++){
+    if(p.bomb>0){
+      p.bomb--;
+      if(p.bomb<=0){ explodeBomb(p); return; }
+    }
+    const next=(p.pos+stepDir+40)%40;
+    const tile=S.tiles[next];
+    // transfer bomb if passing a player
+    if(p.bomb>0){
+      const hit=S.players.find(o=>!o.bankrupt&&o.id!==p.id&&o.pos===next);
+      if(hit){ hit.bomb=p.bomb; p.bomb=0; log(`倒數爆彈從 ${p.name} 身上彈到 ${hit.name}！（剩 ${hit.bomb} 步）`); }
+    }
+    if(tile.mine){
+      tile.mine=0; p.pos=next;
+      if(next===0) passGo(p);
+      log(`${p.name} 踩到地裂地雷！`); sfx('boom');
+      mustPay(p,800,{reason:'地雷',fine:true});
+      sendHospital(p,3,{});
+      paint(); await sleep(FAST?0:200);
+      return;
+    }
+    if(tile.block){
+      tile.block=0; p.pos=next;
+      if(next===0) passGo(p);
+      log(`${p.name} 被施工路障攔住了！`);
+      paint(); await sleep(FAST?0:160);
+      return;
+    }
+    if(tile.bomb){
+      tile.bomb=0; p.bomb=15;
+      log(`${p.name} 撿到倒數爆彈，還有 15 步就爆炸！`);
+    }
+    p.pos=next;
+    if(next===0) passGo(p);
+    // hop tokens
+    paint();
+    sfx('walk');
+    await sleep(FAST?0:90);
+  }
+}
+
+function explodeBomb(p){
+  log(`倒數爆彈在 ${p.name} 身上炸開了！`); sfx('boom');
+  p.bomb=0;
+  mustPay(p,1200,{reason:'爆彈',fine:true});
+  const around=[p.pos,(p.pos+1)%40,(p.pos+39)%40];
+  for(const i of around){
+    const t=S.tiles[i];
+    if(t.lv>0){t.lv--; log(`${t.name} 被炸到，樓層下降`)}
+  }
+  sendHospital(p,3,{});
+}
+
+async function resolveLand(p){
+  if(p.bankrupt||p.hospital>0&&p.pos!==10) { // if already sent to hospital mid-walk
+    if(p.hospital>0||p.jail>0){ S.phase='after'; paint(); return endAfterIfAI(p); }
+  }
+  const tile=S.tiles[p.pos];
+  // pickup god
+  const gi=S.gods.findIndex(g=>g.tile===p.pos);
+  if(gi>=0){
+    const g=S.gods.splice(gi,1)[0];
+    attachGod(p,g.id);
+  }
+  // angel / demon
+  if(p.god==='addon' && tile.t==='land' && tile.owner){ tile.lv=Math.min(5,(tile.lv||0)+1); log(`添磚喜靈把 ${tile.name} 加蓋了一層`); }
+  if(p.god==='wrecker' && tile.t==='land' && (tile.lv||0)>0){ tile.lv--; log(`拆屋禍靈把 ${tile.name} 拆了一層`); }
+
+  if(tile.t==='start'){ /* already paid if passed/landed via walk */ S.phase='after'; paint(); return endAfterIfAI(p); }
+  if(tile.t==='tax'){
+    const fee=tile.fee||500;
+    S.pot+=mustPay(p,fee,{reason:'稅',fine:true});
+    say(p,'bad'); S.phase='after'; paint(); return endAfterIfAI(p);
+  }
+  if(tile.t==='hospital'){
+    if(p.hospital<=0) sendHospital(p,2,{});
+    S.phase='after'; paint(); return endAfterIfAI(p);
+  }
+  if(tile.t==='overtime'){
+    if(p.jail<=0) sendJail(p,2,{});
+    S.phase='after'; paint(); return endAfterIfAI(p);
+  }
+  if(tile.t==='plaza'){
+    const got=S.pot>0?S.pot:(200+rnd(400));
+    p.money+=got; S.pot=0; log(`${p.name} 在市集廣場領到 ${fmt(got)}`); say(p,'good'); sfx('coin');
+    S.phase='after'; paint(); return endAfterIfAI(p);
+  }
+  if(tile.t==='shop'){
+    S.pending={type:'shop',pid:p.id};
+    paint(); maybeAI(); return;
+  }
+  if(tile.t==='stockt'){
+    S.pending={type:'stock',pid:p.id,fromTile:true};
+    paint(); maybeAI(); return;
+  }
+  if(tile.t==='fate'||tile.t==='chance'){
+    const landed=await drawCard(p, tile.t==='fate'?FATE:CHANCE);
+    if(S.over||S.pending||landed==='landed') return;
+    S.phase='after'; paint(); return endAfterIfAI(p);
+  }
+  if(tile.t==='land'||tile.t==='trans'||tile.t==='util'){
+    if(!tile.owner){
+      if(canBuy(p,tile)){
+        S.pending={type:'buy',pid:p.id,tile:tile.id};
+        paint(); maybeAI(); return;
+      }else{
+        log(`${p.name} 買不起或不能買 ${tile.name}`);
+        S.phase='after'; paint(); return endAfterIfAI(p);
+      }
+    }else if(tile.owner!==p.id){
+      const fee=actualToll(p,tile);
+      if(fee>0){
+        const o=pById(tile.owner);
+        const paid=mustPay(p,fee,{reason:'過路費'});
+        o.money+=paid;
+        log(`${p.name} 付給 ${o.name} 過路費 ${fmt(paid)}`);
+        say(p,'pay'); say(o,'recv'); sfx(paid?'coin':'bad');
+      }else log(`${p.name} 停在 ${tile.name}，這次不用付過路費`);
+      // offer buyout if has card? later via items in after phase
+      S.phase='after'; paint(); return endAfterIfAI(p);
+    }else{
+      if(canUp(p,tile)){
+        S.pending={type:'upgrade',pid:p.id,tile:tile.id};
+        paint(); maybeAI(); return;
+      }
+      S.phase='after'; paint(); return endAfterIfAI(p);
+    }
+  }
+  S.phase='after'; paint(); return endAfterIfAI(p);
+}
+
+async function drawCard(p,deck){
+  const c=pick(deck);
+  let txt=c.txt;
+  let money=0;
+  if(c.money){ const a=c.money[0],b=c.money[1]; const lo=Math.min(a,b),hi=Math.max(a,b); money=lo+rnd(hi-lo+1); txt=txt.replace('{n}',fmt(Math.abs(money))); }
+  if(c.pts){ const n=c.pts[0]+rnd(c.pts[1]-c.pts[0]+1); p.pts+=n; txt=txt.replace('{n}',n); }
+  if(c.item){ const it=randItem(); giveItem(p,it,true); txt=txt.replace('{item}',ITEMS[it].name); }
+  if(c.steps){ const n=c.steps[0]+rnd((c.steps[1]-c.steps[0])+1); txt=txt.replace('{n}',Math.abs(n)); log(`命運／機會：${txt}`); say(p,c.good?'good':'bad');
+    const flip=n<0; if(flip) p.dir=-(p.dir||1);
+    S.busy=true; await walk(p, Math.abs(n));
+    if(flip) p.dir=-(p.dir||1);
+    S.busy=false; await resolveLand(p); return 'landed'; }
+  log(`命運／機會：${txt}`);
+  say(p,c.good?'good':'bad');
+  sfx(c.good?'good':'bad');
+  if(money>0){
+    let m=money;
+    if(p.god==='gold_s'||p.god==='gold_b'||p.god==='addon') m*=2;
+    if(p.god==='poor_s') m=Math.round(m*0.5);
+    if(p.god==='poor_b'||p.god==='wrecker') m=0;
+    p.money+=m;
+  }
+  if(money<0){ mustPay(p,-money,{reason:'事件',fine:true}); }
+  if(c.go==='start'){ p.pos=0; passGo(p); }
+  if(c.go==='hospital') sendHospital(p,3,{});
+  if(c.go==='overtime') sendJail(p,3,{});
+  if(c.god==='good'){ attachGod(p, pick(['gold_s','luck_s','addon'])); }
+  if(c.god==='bad'){ attachGod(p, pick(['poor_s','jinx_s','wrecker'])); }
+  if(c.stock){ const st=pick(S.stocks); st.price=clamp(Math.round(st.price*1.12),20,400); log(`${st.name} 被市場看好，價格來到 ${st.price}`); }
+}
+
+// Fix negative steps: I'll implement a walkBack in doCard later if needed. For chance back, temporarily set dir.
+
+function endAfterIfAI(p){
+  if(S.over) return;
+  S.phase='after';
+  paint();
+  if(isAuto(p)){ // AI may use one item then end
+    setTimeout(()=>{ if(!S||S.over||cur().id!==p.id) return; aiAfter(p); }, FAST?0:280);
+  }
+}
+function isAuto(p){return !p||p.isAI||p.dropped||FAST||(mode==='ai'&&p.id!==me.id)||(mode==='host'&&p.id!==me.id&&!conns[p.id]&&p.isAI)}
+
+function endTurn(silent){
+  if(!S||S.over) return;
+  if(S.busy) return;
+  S.pending=null; S.phase='end';
+  const p=cur();
+  if(p){p.expr='normal';p.anim='';p.diceMax=1}
+  nextTurn();
+}
+
+/* ---- item use ---- */
+function useItem(p,id,extra){
+  extra=extra||{};
+  if(!p||p.bankrupt||p.dream>0||p.sleep>0) return false;
+  if(S.pending && S.pending.type!=='itemwait') {
+    // allow during main/after if no other pending
+    if(!['main','after'].includes(S.phase) && S.pending) return false;
+  }
+  if(!['main','after'].includes(S.phase)) return false;
+  if(!p.items.includes(id)) return false;
+  const it=ITEMS[id];
+  if(!it||it.use==='auto') return false;
+  // consume later when confirmed
+  return beginItem(p,it,extra);
+}
+
+function beginItem(p,it,extra){
+  const u=it.use;
+  if(u==='now'){ takeItem(p,it.id); applyNow(p,it); paint(); return true; }
+  if(u==='here'){ takeItem(p,it.id); applyHere(p,it); paint(); return true; }
+  if(u==='dice'){
+    S.pending={type:'pickdice',pid:p.id,item:it.id};
+    paint(); maybeAI(); return true;
+  }
+  if(u==='multidice'){
+    takeItem(p,it.id);
+    const max=it.id==='dice3'?3:2;
+    S.pending={type:'ndice',pid:p.id,max};
+    paint(); maybeAI(); return true;
+  }
+  if(u==='player'||u==='playerSelf'){
+    S.pending={type:'pickplayer',pid:p.id,item:it.id,allowSelf:u==='playerSelf'};
+    paint(); maybeAI(); return true;
+  }
+  if(u==='group'){
+    S.pending={type:'pickgroup',pid:p.id,item:it.id};
+    paint(); maybeAI(); return true;
+  }
+  if(u==='stock'){
+    S.pending={type:'pickstock',pid:p.id,item:it.id};
+    paint(); maybeAI(); return true;
+  }
+  if(u==='empty'||u==='tile'||u==='tilehaz'||u==='myland'||u==='myland2'){
+    S.pending={type:'picktile',pid:p.id,item:it.id,mode:u};
+    paint(); maybeAI(); return true;
+  }
+  return false;
+}
+
+function applyNow(p,it){
+  log(`${p.name} 使用「${it.name}」`);
+  if(it.id==='eqall'){
+    const ps=alive(); const sum=ps.reduce((s,x)=>s+x.money,0); const each=Math.floor(sum/ps.length);
+    ps.forEach(x=>x.money=each); log(`所有人現金變成 ${fmt(each)}`); say(p,'good');
+  }else if(it.id==='sleep'){ applySleepOthers(p); }
+  else if(it.id==='summon'){
+    if(!S.gods.length){log('附近沒有靈體可以請');return}
+    let best=S.gods[0], bd=99;
+    for(const g of S.gods){const d=Math.min((g.tile-p.pos+40)%40,(p.pos-g.tile+40)%40); if(d<bd){bd=d;best=g}}
+    S.gods=S.gods.filter(g=>g!==best);
+    attachGod(p,best.id);
+  }else if(it.id==='banish'){
+    if(p.bomb>0){p.bomb=0;log(`${p.name} 送走了倒數爆彈`);say(p,'good');return}
+    if(p.god && p.god!=='reaper' && !GODS[p.god].good){log(`${p.name} 送走了「${GODS[p.god].name}」`);p.god=null;p.godN=0;say(p,'good');}
+    else log('沒有可送走的壞靈或爆彈');
+  }else if(it.id==='cleaner'){
+    const dir=p.dir||1;
+    for(let k=1;k<=8;k++){
+      const i=(p.pos+dir*k+40)%40; const t=S.tiles[i];
+      t.block=0;t.mine=0;t.bomb=0;
+      S.gods=S.gods.filter(g=>g.tile!==i);
+    }
+    log(`${p.name} 的清道娃娃掃過前方 8 格`);
+  }
+}
+
+function applyHere(p,it){
+  const tile=S.tiles[p.pos];
+  log(`${p.name} 使用「${it.name}」`);
+  if(it.id==='buyout'){
+    if(!tile.owner||tile.owner===p.id||!(tile.t==='land'||tile.t==='trans'||tile.t==='util')){log('這裡不能收購');return}
+    const price=landValue(tile);
+    if(p.money<price){log('現金不夠，收購失敗'); giveItem(p,'buyout',true); return}
+    const o=pById(tile.owner);
+    p.money-=price; if(o&&!o.bankrupt) o.money+=price;
+    tile.owner=p.id;
+    log(`${p.name} 強制收購了 ${tile.name}，付給 ${(o||{}).name||'原地主'} ${fmt(price)}`);
+    say(p,'buy');
+  }else if(it.id==='renovate'){
+    if(tile.owner!==p.id||tile.t!=='land'){log('只能翻新自己的地');return}
+    if((tile.lv||0)>=5){log('已經是最高層');return}
+    tile.lv++; log(`${tile.name} 加蓋成「${LVNAME[tile.lv]}」`);
+  }else if(it.id==='auction'){
+    if(!(tile.t==='land'||tile.t==='trans'||tile.t==='util')||!tile.owner){log('這裡不能拍賣');return}
+    runAuction(p,tile);
+  }
+}
+
+function runAuction(user,tile){
+  // quick silent auction among others
+  const base=Math.round(landValue(tile)*0.6);
+  let best={pid:null,bid:base};
+  for(const p of alive()){
+    if(p.id===user.id) continue;
+    const max=Math.min(p.money, landValue(tile)+500);
+    if(max>best.bid+50 && (p.isAI||p.dropped||isAuto(p) || p.id!==me.id)){
+      const bid=Math.min(max, best.bid+200+rnd(400));
+      if(bid>best.bid) best={pid:p.id,bid};
+    }
+  }
+  // human bid via pending if a human is in game and not user - skip in FAST/autotest
+  if(!FAST){
+    const humans=alive().filter(p=>!isAuto(p)&&p.id!==user.id);
+    if(humans.length){
+      S.pending={type:'auction',pid:humans[0].id, tile:tile.id, user:user.id, best, base};
+      paint(); return;
+    }
+  }
+  settleAuction(user,tile,best);
+}
+function settleAuction(user,tile,best){
+  if(!best.pid){log(`${tile.name} 流標，暫時沒人要`);return}
+  const w=pById(best.pid);
+  if(!w||w.money<best.bid){log('得標者付不出錢，流標');return}
+  const prev=pById(tile.owner);
+  w.money-=best.bid; user.money+=best.bid;
+  tile.owner=w.id;
+  log(`${w.name} 以 ${fmt(best.bid)} 得標 ${tile.name}，款項給 ${user.name}`);
+}
+
+function applyItemTarget(p,it,target){
+  takeItem(p,it.id);
+  log(`${p.name} 使用「${it.name}」`);
+  if(it.id==='eqone'){
+    const o=pById(target); if(!o) return;
+    const each=Math.floor((p.money+o.money)/2); p.money=each; o.money=each;
+    log(`${p.name} 與 ${o.name} 現金各為 ${fmt(each)}`);
+  }else if(it.id==='turn'){
+    const o=pById(target); if(o){o.dir=-(o.dir||1);log(`${o.name} 轉向了，改往${o.dir===1?'順':'逆'}時針走`)}
+  }else if(it.id==='stay'){
+    const o=pById(target); if(o){o.stay=(o.stay||0)+1;log(`${o.name} 下一回合將原地立定`)}
+  }else if(it.id==='turtle'){
+    const o=pById(target); if(o){ if(tryDefend(o,'turtle',p.id)) return; o.turtle=3; log(`${o.name} 進入龜步狀態 3 回合`); }
+  }else if(it.id==='steal'){
+    const o=pById(target);
+    if(!o||!o.items.length){log('對方沒有可搶的道具');return}
+    const it2=o.items.splice(rnd(o.items.length),1)[0];
+    giveItem(p,it2,true); log(`${p.name} 從 ${o.name} 搶到「${ITEMS[it2].name}」`);
+  }else if(it.id==='dream'){ applyDream(pById(target),3,{fromPid:p.id}); }
+  else if(it.id==='frame'){ sendJail(pById(target),3,{fromPid:p.id}); }
+  else if(it.id==='tax'){
+    const o=pById(target); if(!o) return;
+    const amt=Math.round(o.money*0.2);
+    const paid=mustPay(o,amt,{reason:'追稅',fine:true,fromPid:p.id});
+    p.money+=paid; log(`${p.name} 向 ${o.name} 追稅 ${fmt(paid)}`); say(p,'recv');
+  }else if(it.id==='ally'){
+    const o=pById(target); if(!o||o.id===p.id) return;
+    p.ally=o.id; o.ally=p.id; p.allyN=7; o.allyN=7;
+    log(`${p.name} 與 ${o.name} 結成同盟 7 回合`);
+  }
+  paint();
+}
+
+function applyGroup(p,it,g){
+  takeItem(p,it.id);
+  const tiles=S.tiles.filter(t=>t.group===g);
+  log(`${p.name} 對「${GROUPS[g].name}」使用「${it.name}」`);
+  if(it.id==='bless'){ tiles.forEach(t=>{ if(t.t==='land') t.lv=Math.min(5,(t.lv||0)+1)}); }
+  if(it.id==='disaster'){ tiles.forEach(t=>{ if(t.t==='land') t.lv=0}); }
+  if(it.id==='inflate'){ tiles.forEach(t=>{ if(t.seal>0){t.seal=0;t.inflate=0} else t.inflate=5}); }
+  if(it.id==='seal'){ tiles.forEach(t=>{ if(t.inflate>0){t.inflate=0;t.seal=0} else t.seal=5}); }
+  paint();
+}
+function applyStockCard(p,it,sid){
+  takeItem(p,it.id);
+  const st=S.stocks.find(s=>s.id===sid); if(!st) return;
+  log(`${p.name} 對 ${st.name} 使用「${it.name}」`);
+  if(it.id==='red'){
+    if(st.lockDir<0){st.lock=0;st.lockDir=0;log('紅盤與黑盤抵消了');}
+    else{st.lock=3;st.lockDir=1;st.price=clamp(Math.round(st.price*1.1),20,400)}
+  }else{
+    if(st.lockDir>0){st.lock=0;st.lockDir=0;log('黑盤與紅盤抵消了');}
+    else{st.lock=3;st.lockDir=-1;st.price=clamp(Math.round(st.price*0.9),20,400)}
+  }
+  paint();
+}
+function applyTileItem(p,it,tid){
+  const tile=S.tiles[tid]; if(!tile) return;
+  if(it.use==='empty' && (tile.block||tile.mine||tile.bomb||S.gods.some(g=>g.tile===tid))) {log('這一格放不下');return}
+  takeItem(p,it.id);
+  log(`${p.name} 在 ${tile.name} 使用「${it.name}」`);
+  if(it.id==='block') tile.block=1;
+  else if(it.id==='mine') tile.mine=1;
+  else if(it.id==='bomb') tile.bomb=1;
+  else if(it.id==='monster'){ if(tile.t==='land'){tile.lv=0;log(`${tile.name} 被拆到空地`)}}
+  else if(it.id==='demolish'){
+    if(tile.block||tile.mine||tile.bomb){tile.block=0;tile.mine=0;tile.bomb=0;log('障礙被拆除了')}
+    else if((tile.lv||0)>0){tile.lv--;log(`${tile.name} 被拆掉一層`)}
+  }else if(it.id==='swaphouse'){
+    const here=S.tiles[p.pos];
+    if(!here||!sameTier(here,tile)){log('只能對調同級地的樓層');giveItem(p,it.id,true);return}
+    const a=here.lv||0; here.lv=tile.lv||0; tile.lv=a;
+    log(`${here.name} 與 ${tile.name} 樓層對調`);
+  }else if(it.id==='swapland'){
+    const here=S.tiles[p.pos];
+    if(!here||here.owner!==p.id && tile.owner!==p.id){ /* need one of yours */
+    }
+    if(!sameTier(here,tile)){log('只能對調同級地');giveItem(p,it.id,true);return}
+    if(here.owner!==p.id && tile.owner!==p.id){log('其中一塊必須是你的地');giveItem(p,it.id,true);return}
+    const o=here.owner; here.owner=tile.owner; tile.owner=o;
+    log(`${here.name} 與 ${tile.name} 地契對調`);
+  }else if(it.id==='build'){
+    if(tile.owner!==p.id||tile.t!=='land'){log('只能給自己的地加蓋');giveItem(p,it.id,true);return}
+    if((tile.lv||0)>=5) return;
+    tile.lv++; log(`${tile.name} 加蓋成「${LVNAME[tile.lv]}」`);
+  }
+  paint();
+}
+function sameTier(a,b){
+  if(!a||!b||!a.price||!b.price) return false;
+  const ta=Math.floor(a.price/1500), tb=Math.floor(b.price/1500);
+  return ta===tb || a.group===b.group;
+}
+
+/* shop / bank / stock actions */
+function buyShop(p,id){
+  const it=ITEMS[id]; if(!it) return;
+  if(p.pts<it.pts){log('卡牌點不夠');return}
+  if(p.items.length>=8){log('背包滿了，先用掉再買');return}
+  p.pts-=it.pts; giveItem(p,id); sfx('coin');
+}
+function bankAct(p,kind,amt){
+  amt=Math.max(0,Math.round(+amt||0));
+  if(kind==='dep'){ amt=Math.min(amt,p.money); p.money-=amt; p.dep+=amt; log(`${p.name} 存入 ${fmt(amt)}`); }
+  if(kind==='wd'){ amt=Math.min(amt,p.dep); p.dep-=amt; p.money+=amt; log(`${p.name} 領出 ${fmt(amt)}`); }
+  if(kind==='loan'){ const max=Math.max(0,10000-p.loan); amt=Math.min(amt,max); p.loan+=amt; p.money+=amt; log(`${p.name} 貸款 ${fmt(amt)}`); }
+  if(kind==='repay'){ amt=Math.min(amt,p.loan,p.money); p.money-=amt; p.loan-=amt; log(`${p.name} 還款 ${fmt(amt)}`); }
+}
+function stockAct(p,sid,n,buy){
+  const st=S.stocks.find(s=>s.id===sid); if(!st||!n) return;
+  n=Math.round(n);
+  if(buy){
+    const cost=n*st.price;
+    if(p.money<cost) return;
+    p.money-=cost; p.stocks[sid]=(p.stocks[sid]||0)+n;
+    log(`${p.name} 買入 ${st.name} ×${n}`);
+  }else{
+    n=Math.min(n,p.stocks[sid]||0);
+    p.stocks[sid]-=n; p.money+=n*st.price;
+    log(`${p.name} 賣出 ${st.name} ×${n}`);
+  }
+}
+
+/* ---------- action dispatcher ---------- */
+function handleAct(pid,a){
+  if(!S||S.over||!a) return;
+  const p=pById(pid); if(!p||p.bankrupt) return;
+  const pend=S.pending;
+  if(pend && pend.pid!==pid && a.t!=='ping') return;
+  if(S.busy && a.t!=='ping') return;
+
+  if(a.t==='roll'){ doRoll(p,a.forced,a.nd); return; }
+  if(a.t==='buy'){ const t=S.tiles[pend&&pend.tile]; if(t) doBuy(p,t); S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='skipbuy'){ S.pending=null; S.phase='after'; log(`${p.name} 放棄購買`); paint(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='up'){ const t=S.tiles[pend&&pend.tile]; if(t) doUp(p,t); S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='skipup'){ S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='shopbuy'){ buyShop(p,a.id); paint(); sync(); return; }
+  if(a.t==='shopdone'){ S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='hospital'){
+    if(a.pay){ if(mustPay(p,800,{reason:'出院',fine:true}), p.hospital=0, p.money>=0) { /* paid or bankrupt */ } p.hospital=0; S.pending=null; S.phase='main'; paint(); maybeAI(); sync(); return; }
+    p.hospital--; log(`${p.name} 繼續住院（剩 ${p.hospital}）`); S.pending=null; endTurn(true); sync(); return;
+  }
+  if(a.t==='jail'){
+    if(a.pay){ mustPay(p,800,{reason:'請假',fine:true}); p.jail=0; S.pending=null; S.phase='main'; paint(); maybeAI(); sync(); return; }
+    p.jail--; log(`${p.name} 繼續加班（剩 ${p.jail}）`); S.pending=null; endTurn(true); sync(); return;
+  }
+  if(a.t==='item'){ useItem(p,a.id); sync(); return; }
+  if(a.t==='pickdice'){
+    const n=clamp(+a.n||1,1,6); takeItem(p,'dice'); S.pending=null; doRoll(p,[n],1); return;
+  }
+  if(a.t==='ndice'){
+    const n=clamp(+a.n||1,1,pend.max||2); p.diceMax=n; S.pending=null; S.phase='main';
+    log(`${p.name} 這回合要用 ${n} 顆骰子`); paint(); maybeAI(); sync(); return;
+  }
+  if(a.t==='pickplayer'){
+    const it=ITEMS[pend.item]; S.pending=null; applyItemTarget(p,it,a.id); S.phase=S.phase||'main'; sync(); return;
+  }
+  if(a.t==='pickgroup'){ const it=ITEMS[pend.item]; S.pending=null; applyGroup(p,it,a.g); sync(); return; }
+  if(a.t==='pickstock'){ const it=ITEMS[pend.item]; S.pending=null; applyStockCard(p,it,a.sid); sync(); return; }
+  if(a.t==='picktile'){ const it=ITEMS[pend.item]; S.pending=null; applyTileItem(p,it,+a.tid); sync(); return; }
+  if(a.t==='auction'){
+    const tile=S.tiles[pend.tile]; const user=pById(pend.user);
+    let best=pend.best||{pid:null,bid:pend.base||0};
+    if(a.bid && a.bid>best.bid && p.money>=a.bid) best={pid:p.id,bid:a.bid};
+    S.pending=null; settleAuction(user,tile,best); S.phase='after'; paint(); endAfterIfAI(user); sync(); return;
+  }
+  if(a.t==='bank'){ bankAct(p,a.kind,a.amt); paint(); sync(); return; }
+  if(a.t==='stock'){ stockAct(p,a.sid,a.n,!!a.buy); paint(); sync(); return; }
+  if(a.t==='closestock'||a.t==='closebank'){ if(pend&&(pend.type==='stock'||pend.type==='bank')){S.pending=null; if(pend.fromTile){S.phase='after'; paint(); endAfterIfAI(p);} else {S.phase=S.phase||'main'; paint(); maybeAI();} sync();} return; }
+  if(a.t==='openbank'){ if(['main','after'].includes(S.phase)&&!S.pending){ S.pending={type:'bank',pid:p.id}; paint(); maybeAI(); } return; }
+  if(a.t==='openstock'){ if(['main','after'].includes(S.phase)&&!S.pending){ S.pending={type:'stock',pid:p.id}; paint(); maybeAI(); } return; }
+  if(a.t==='end'){ if(S.phase==='after'||S.phase==='main'&&p.stay>0){ endTurn(); sync(); } return; }
+}
+
+function sync(){ if(mode==='host') bcast(); }
+
+/* ---------- AI ---------- */
+function maybeAI(){
+  if(!S||S.over||S.busy) return;
+  if(S.pending){
+    const q=pById(S.pending.pid);
+    if(q&&isAuto(q)) timerAI(()=>aiPending(q,S.pending));
+    return;
+  }
+  const p=cur(); if(!p) return;
+  if(S.phase==='main' && isAuto(p)) timerAI(()=>aiMain(p));
+  if(S.phase==='after' && isAuto(p)) timerAI(()=>aiAfter(p));
+}
+function timerAI(fn){ setTimeout(()=>{ try{ if(S&&!S.over) fn(); }catch(e){ console.error(e); if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e)); } }, FAST?0:260); }
+
+function shouldBuy(p,tile){
+  const price=buyPrice(p,tile);
+  if(p.money<price) return false;
+  const keep={money:600,pride:1800,unlucky:4000,stock:2500,airy:400,cheer:1200}[p.pers]||1500;
+  if(p.pers==='pride' && tile.price<1800 && rnd(3)!==0) return false;
+  if(p.pers==='stock' && rnd(4)===0) return false;
+  if(p.pers==='airy') return rnd(5)!==0;
+  return p.money-price>=keep || p.money>price*2 || ownsSet(p.id,tile.group,S) || ownedCount(p.id,tile.group,S)>=1;
+}
+function aiMain(p){
+  if(!S||S.over||S.pending||S.phase!=='main') return;
+  aiMaybeItem(p);
+  if(S.pending||S.phase!=='main') return;
+  if(p.pers==='stock' && rnd(3)===0 && p.money>4000){
+    const st=S.stocks.slice().sort((a,b)=>a.price-b.price)[0];
+    const n=Math.min(8,Math.floor((p.money-3000)/st.price));
+    if(n>0) stockAct(p,st.id,n,true);
+  }
+  handleAct(p.id,{t:'roll'});
+}
+function aiAfter(p){
+  if(!S||S.over||cur().id!==p.id) return;
+  if(S.pending) return;
+  aiMaybeItem(p);
+  if(S.pending) return;
+  handleAct(p.id,{t:'end'});
+}
+function aiMaybeItem(p){
+  if(p.dream>0||!p.items.length||rnd(3)===0) return;
+  // remote dice if useful
+  if(p.items.includes('dice') && S.phase==='main'){
+    // try land on own or cheap unowned 1-6 ahead
+    let choice=0;
+    for(let d=6;d>=1;d--){
+      const t=S.tiles[(p.pos+(p.dir||1)*d+40)%40];
+      if(!t.owner && (t.t==='land'||t.t==='trans') && t.price<=p.money && t.price>=2000){choice=d;break}
+      if(t.owner===p.id && t.t==='land' && (t.lv||0)<5){choice=d;break}
+    }
+    if(choice){ handleAct(p.id,{t:'item',id:'dice'}); if(S.pending&&S.pending.type==='pickdice') handleAct(p.id,{t:'pickdice',n:choice}); return; }
+  }
+  if(p.items.includes('eqall') && p.money< alive().reduce((s,x)=>s+x.money,0)/alive().length*0.55){
+    handleAct(p.id,{t:'item',id:'eqall'}); return;
+  }
+  const rich=alive().filter(o=>o.id!==p.id).sort((a,b)=>b.money-a.money)[0];
+  if(rich && p.items.includes('tax') && rich.money>8000){ handleAct(p.id,{t:'item',id:'tax'}); if(S.pending&&S.pending.type==='pickplayer') handleAct(p.id,{t:'pickplayer',id:rich.id}); return; }
+  if(rich && p.items.includes('frame') && rnd(4)===0){ handleAct(p.id,{t:'item',id:'frame'}); if(S.pending&&S.pending.type==='pickplayer') handleAct(p.id,{t:'pickplayer',id:rich.id}); return; }
+  if(p.god && !GODS[p.god].good && p.god!=='reaper' && p.items.includes('banish')){ handleAct(p.id,{t:'item',id:'banish'}); return; }
+}
+function aiPending(p,pend){
+  if(!pend||pend.pid!==p.id) return;
+  if(pend.type==='buy') handleAct(p.id,{t:shouldBuy(p,S.tiles[pend.tile])?'buy':'skipbuy'});
+  else if(pend.type==='upgrade') handleAct(p.id,{t:(p.money>upgradeCost(S.tiles[pend.tile])+1500 && p.pers!=='unlucky')?'up':'skipup'});
+  else if(pend.type==='shop'){
+    const aff=SHOP_ORDER.find(id=>ITEMS[id].pts<=p.pts && p.items.length<8 && !AUTO_ITEMS.has(id) && (p.pts-ITEMS[id].pts>=0) && ITEMS[id].pts<=80);
+    if(aff && p.pts>=ITEMS[aff].pts) handleAct(p.id,{t:'shopbuy',id:aff});
+    handleAct(p.id,{t:'shopdone'});
+  }else if(pend.type==='hospital') handleAct(p.id,{t:'hospital',pay:p.money>6000});
+  else if(pend.type==='jail') handleAct(p.id,{t:'jail',pay:p.money>6000});
+  else if(pend.type==='pickdice'){
+    let n=1+rnd(6);
+    for(let d=6;d>=1;d--){const t=S.tiles[(p.pos+(p.dir||1)*d+40)%40]; if(!t.owner&&t.price&&p.money>=t.price){n=d;break}}
+    handleAct(p.id,{t:'pickdice',n});
+  }else if(pend.type==='ndice') handleAct(p.id,{t:'ndice',n:pend.max||2});
+  else if(pend.type==='pickplayer'){
+    const others=alive().filter(o=>o.id!==p.id||pend.allowSelf);
+    const t=others.slice().sort((a,b)=>b.money-a.money)[0]||p;
+    handleAct(p.id,{t:'pickplayer',id:t.id});
+  }else if(pend.type==='pickgroup'){
+    const g=Object.keys(GROUPS).find(k=>k!=='tr'&&k!=='ut'&&S.tiles.some(t=>t.group===k&&t.owner&&t.owner!==p.id))||'a';
+    handleAct(p.id,{t:'pickgroup',g});
+  }else if(pend.type==='pickstock') handleAct(p.id,{t:'pickstock',sid:(p.pers==='stock'?S.stocks[2]:S.stocks[0]).id});
+  else if(pend.type==='picktile'){
+    let tid= (p.pos+3)%40;
+    if(pend.mode==='empty'){ for(let i=1;i<40;i++){const t=S.tiles[(p.pos+i)%40]; if(!t.block&&!t.mine&&!t.bomb){tid=t.id;break}} }
+    if(pend.mode==='myland'||pend.mode==='myland2'){ const t=S.tiles.find(x=>x.owner===p.id); if(t) tid=t.id; }
+    if(pend.mode==='tile'||pend.mode==='tilehaz'){ const t=S.tiles.filter(x=>x.lv>0&&x.owner!==p.id).sort((a,b)=>b.lv-a.lv)[0]; if(t) tid=t.id; }
+    handleAct(p.id,{t:'picktile',tid});
+  }else if(pend.type==='auction') handleAct(p.id,{t:'auction',bid:0});
+  else if(pend.type==='stock'||pend.type==='bank') handleAct(p.id,{t:'closestock'});
+  else { S.pending=null; paint(); maybeAI(); }
+}
+
+/* ---------- render ---------- */
+function show(name){
+  view=name;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+name));
+}
+function tileGeom(i){
+  const C=14.8, SD=(100-2*C)/9;
+  if(i===0) return {l:100-C,t:100-C,w:C,h:C,side:'corner'};
+  if(i===10) return {l:0,t:100-C,w:C,h:C,side:'corner'};
+  if(i===20) return {l:0,t:0,w:C,h:C,side:'corner'};
+  if(i===30) return {l:100-C,t:0,w:C,h:C,side:'corner'};
+  if(i>=1&&i<=9) return {l:C+(9-i)*SD,t:100-C,w:SD,h:C,side:'bottom'};
+  if(i>=11&&i<=19) return {l:0,t:C+(19-i)*SD,w:C,h:SD,side:'left'};
+  if(i>=21&&i<=29) return {l:C+(i-21)*SD,t:0,w:SD,h:C,side:'top'};
+  return {l:100-C,t:C+(i-31)*SD,w:C,h:SD,side:'right'};
+}
+function buildBoard(){
+  const b=$('board');
+  b.innerHTML='<div class="felt" id="felt"></div>';
+  for(let i=0;i<40;i++){
+    const g=tileGeom(i), src=TILES[i];
+    const d=document.createElement('div');
+    d.className='tile '+g.side+(src.t!=='land'&&src.t!=='trans'&&src.t!=='util'?' special':'')+' '+(src.t||'');
+    d.id='tl'+i;
+    d.style.cssText=`left:${g.l}%;top:${g.t}%;width:${g.w}%;height:${g.h}%;`;
+    const col=src.group&&GROUPS[src.group]?GROUPS[src.group].color:'';
+    const SHORT={'風力發電廠':'風電','渡輪碼頭':'渡輪','音樂廳路':'音樂廳','購物廣場':'購物場','百貨大樓':'百貨','科技園區':'科技園','機場航廈':'機場','豪華酒店':'酒店','慈善捐款':'捐款','摩天大樓':'摩天','公交總站':'公交','圖書館大道':'圖書館','體育館路':'體育館','市集廣場':'廣場','高鐵站':'高鐵','蓄水廠':'蓄水'};
+    const short=SHORT[src.name]||(src.name.length>4?src.name.replace(/大道|路|巷|街|日|廠$/,'') : src.name);
+    d.innerHTML=(col?`<div class="bar" style="background:${col}"></div>`:'')+`<div class="tn">${esc(short)}</div>`+(src.price?`<div class="pr">${src.price}</div>`:'')+`<div class="lv"></div>`;
+    b.appendChild(d);
+  }
+  const tok=document.createElement('div'); tok.id='toks'; b.appendChild(tok);
+  const hz=document.createElement('div'); hz.id='hazs'; b.appendChild(hz);
+}
+function updateTiles(){
+  if(!S) return;
+  for(const t of S.tiles){
+    const el=$('tl'+t.id); if(!el) continue;
+    el.classList.toggle('on', cur()&&cur().pos===t.id);
+    const lv=el.querySelector('.lv');
+    if(lv){
+      let s='';
+      if(t.owner){ const op=pById(t.owner); s+=(op?'●':''); if(t.lv) s+='⌂'+t.lv; }
+      lv.textContent=s;
+      lv.style.color=t.owner?(pById(t.owner)||{}).color||'#333':'';
+    }
+  }
+  const hz=$('hazs'); if(!hz) return;
+  hz.innerHTML='';
+  for(const t of S.tiles){
+    if(t.block||t.mine||t.bomb||t.seal||t.inflate){
+      const g=tileGeom(t.id);
+      const ico=t.mine?'💥':t.bomb?'💣':t.block?'🚧':t.seal?'🔒':t.inflate?'🔥':'';
+      hz.insertAdjacentHTML('beforeend',`<div class="haz" style="left:${g.l+g.w/2-2}%;top:${g.t+g.h/2-2}%">${ico}</div>`);
+    }
+  }
+  for(const g of S.gods){
+    const geo=tileGeom(g.tile); const G=GODS[g.id];
+    hz.insertAdjacentHTML('beforeend',`<div class="godchip" style="left:${geo.l+geo.w/2-2}%;top:${geo.t+4}%">${G.icon}</div>`);
+  }
+}
+function paintTokens(){
+  if(!S) return;
+  let toks=$('toks'); if(!toks) return;
+  toks.innerHTML='';
+  const occ={};
+  for(const p of S.players){
+    if(p.bankrupt) continue;
+    const g=tileGeom(p.pos);
+    occ[p.pos]=(occ[p.pos]||0)+1;
+    const k=occ[p.pos]-1;
+    const ox=(k%2)*10-4, oy=Math.floor(k/2)*10-2;
+    const left=g.l+g.w*0.35+ox*(100/390);
+    const top=g.t+g.h*0.35+oy*(100/390);
+    const el=document.createElement('div');
+    el.className='tok hop';
+    el.style.left=left+'%'; el.style.top=top+'%';
+    el.style.background=p.color||'#eee';
+    el.innerHTML=p.img?`<img src="${p.img}" alt="">`:svgChar(p.charId||'uncle',p.expr||'normal',18);
+    toks.appendChild(el);
+  }
+}
+function paintFelt(){
+  const f=$('felt'); if(!f||!S) return;
+  const p=cur();
+  const dice=(S.dice||[]).map(n=>`<div class="die ${S.phase==='moving'?'shake':''}">${n}</div>`).join('') || (S.phase==='main'?'<div class="muted" style="color:#dff">準備擲骰</div>':'');
+  const god=p&&p.god?`<span title="${esc(GODS[p.god].desc)}">${GODS[p.god].icon}${GODS[p.god].name} ${p.godN}回合</span>`:'';
+  const bub=(S.bubble&&S.bubble.text&&p&&S.bubble.pid===p.id)?esc(S.bubble.text):esc((S.log&&S.log[0])||'');
+  f.innerHTML=`<div class="who">${p?portraitHTML(p,p.expr,44):''}<div><div class="nm">${p?esc(p.name):''}</div><div style="font-size:10px;opacity:.85">${god}</div></div></div>
+    <div id="bubble">${bub}</div><div id="dicebox">${dice}</div>`;
+}
+function paintDock(){
+  if(!S) return;
+  $('g-round').textContent=`第 ${S.round} 回合`+(S.win==='rounds'?`／${S.maxRound}`:'');
+  $('g-code').textContent=S.code?('房 '+S.code):'單機';
+  $('btn-mute').textContent=muted?'🔇':'🔊';
+  const pl=$('plist');
+  pl.innerHTML=S.players.map(p=>{
+    const on=cur()&&cur().id===p.id;
+    return `<div class="pchip ${on?'turn':''} ${p.bankrupt?'out':''}">${portraitHTML(p,p.expr,28)}
+      <div><b>${esc(p.name)}${p.isAI?'·電腦':''}${p.dropped?'·掉線':''}</b>
+      ${fmt(p.money)} · ${p.pts}點${p.god?(' '+GODS[p.god].icon):''}${p.bomb?'💣':''}</div></div>`;
+  }).join('');
+  $('log').innerHTML=(S.log||[]).slice(0,3).map(x=>`<div>${esc(x)}</div>`).join('');
+  const p=pById(me.id)||cur();
+  const mine=S.players.find(x=>x.id===me.id)||null;
+  const canAct=mine&&cur()&&cur().id===mine.id && !S.busy && !isAuto(cur());
+  const items=$('items');
+  if(mine){
+    items.innerHTML=mine.items.map(id=>{
+      const it=ITEMS[id]; if(!it) return '';
+      const auto=AUTO_ITEMS.has(id);
+      return `<div class="item" data-item="${id}" title="${esc(it.desc)}">${it.icon} ${it.name}${auto?'·自動':''}</div>`;
+    }).join('')||'<span class="muted">背包空空</span>';
+  }else items.innerHTML='';
+  const bar=$('actbar');
+  const btns=[];
+  if(S.over){/* result view */}
+  else if(canAct && S.pending && S.pending.pid===mine.id){
+    // modal handles most; still show hint
+  }else if(canAct && S.phase==='main'){
+    btns.push(['擲骰！','roll', '']);
+    btns.push(['銀行','openbank','ghost']);
+    btns.push(['股市','openstock','ghost']);
+  }else if(canAct && S.phase==='after'){
+    btns.push(['結束回合','end','']);
+    btns.push(['銀行','openbank','ghost']);
+    btns.push(['股市','openstock','teal']);
+  }else{
+    btns.push([S.busy?'移動中…':'等待其他人','noop','ghost']);
+  }
+  bar.innerHTML=btns.map(([l,t,c])=>`<button class="btn ${c}" data-act="${t}" ${t==='noop'?'disabled':''}>${l}</button>`).join('');
+  paintModal();
+}
+function paintModal(){
+  const mask=$('mask'), modal=$('modal');
+  if(!S||!S.pending){mask.classList.remove('on');return}
+  const pend=S.pending;
+  const mine=S.players.find(x=>x.id===me.id);
+  const myTurn=mine&&pend.pid===mine.id && !isAuto(mine);
+  if(!myTurn){ mask.classList.remove('on'); return; }
+  const actor=pById(pend.pid);
+  let html=`<h3>${esc((actor||{}).name||'')} 的行動</h3>`;
+  const wait='';
+  if(pend.type==='buy'){
+    const t=S.tiles[pend.tile];
+    html+=`<p>要花 ${fmt(buyPrice(actor,t))} 買下 <b>${esc(t.name)}</b> 嗎？</p>${wait}`;
+    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="skipbuy">放棄</button><button class="btn" data-act="buy">買下來</button></div>`;
+  }else if(pend.type==='upgrade'){
+    const t=S.tiles[pend.tile];
+    html+=`<p>要把 <b>${esc(t.name)}</b> 加蓋成「${LVNAME[(t.lv||0)+1]}」嗎？費用 ${fmt(upgradeCost(t))}</p>${wait}`;
+    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="skipup">不用</button><button class="btn" data-act="up">加蓋</button></div>`;
+  }else if(pend.type==='shop'){
+    html+=`<p>卡牌點：<b>${actor.pts}</b>　選一個道具，或直接離開。</p>${wait}`;
+    if(myTurn){
+      html+=SHOP_ORDER.map(id=>{
+        const it=ITEMS[id];
+        const dis=actor.pts<it.pts||actor.items.length>=8;
+        return `<button class="listbtn" data-shop="${id}" ${dis?'disabled':''}>${it.icon} ${it.name}　${it.pts}點<br><span class="muted">${esc(it.desc)}</span></button>`;
+      }).join('')+`<button class="btn" data-act="shopdone">離開道具舖</button>`;
+    }
+  }else if(pend.type==='hospital'){
+    html+=`<p>還要住院 ${actor.hospital} 回合。花 ${fmt(800)} 提前出院？</p>${wait}`;
+    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="hospital-wait">繼續躺</button><button class="btn" data-act="hospital-pay">付錢出院</button></div>`;
+  }else if(pend.type==='jail'){
+    html+=`<p>還要加班 ${actor.jail} 回合。花 ${fmt(800)} 請假離開？</p>${wait}`;
+    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="jail-wait">繼續加</button><button class="btn" data-act="jail-pay">請假走人</button></div>`;
+  }else if(pend.type==='pickdice'){
+    html+=`<p>指定步數器：要走幾步？</p>${wait}`;
+    if(myTurn) html+=`<div class="row">${[1,2,3,4,5,6].map(n=>`<button class="btn sm" data-dice="${n}">${n}</button>`).join('')}</div>`;
+  }else if(pend.type==='ndice'){
+    html+=`<p>這回合要用幾顆骰子？（最多 ${pend.max}）</p>${wait}`;
+    if(myTurn) html+=`<div class="row">${Array.from({length:pend.max},(_,i)=>`<button class="btn sm" data-ndice="${i+1}">${i+1} 顆</button>`).join('')}</div>`;
+  }else if(pend.type==='pickplayer'){
+    html+=`<p>指定一名玩家：</p>${wait}`;
+    if(myTurn){
+      const list=S.players.filter(o=>!o.bankrupt&&(pend.allowSelf||o.id!==actor.id));
+      html+=list.map(o=>`<button class="listbtn" data-pid="${o.id}">${o.name}　${fmt(o.money)}</button>`).join('');
+    }
+  }else if(pend.type==='pickgroup'){
+    html+=`<p>指定一個區塊：</p>${wait}`;
+    if(myTurn) html+=Object.keys(GROUPS).filter(g=>g!=='tr'&&g!=='ut').map(g=>`<button class="listbtn" data-g="${g}"><span style="display:inline-block;width:12px;height:12px;background:${GROUPS[g].color};border-radius:3px"></span> ${GROUPS[g].name}</button>`).join('');
+  }else if(pend.type==='pickstock'){
+    html+=`<p>指定一支股票：</p>${wait}`;
+    if(myTurn) html+=S.stocks.map(s=>`<button class="listbtn" data-sid="${s.id}">${s.name}　現價 ${s.price}${s.lock?(s.lockDir>0?' 漲停':' 跌停'):''}</button>`).join('');
+  }else if(pend.type==='picktile'){
+    html+=`<p>指定一格：</p>${wait}`;
+    if(myTurn){
+      html+=S.tiles.filter(t=>{
+        if(pend.mode==='empty') return !t.block&&!t.mine&&!t.bomb;
+        if(pend.mode==='myland'||pend.mode==='myland2') return t.owner===actor.id;
+        if(pend.mode==='tile') return t.t==='land'||t.t==='trans'||t.t==='util';
+        return true;
+      }).map(t=>`<button class="listbtn" data-tid="${t.id}">${t.name}${t.owner?(' · '+(pById(t.owner)||{}).name):''}${t.lv?(' · '+LVNAME[t.lv]):''}</button>`).join('');
+    }
+  }else if(pend.type==='auction'){
+    html+=`<p>拍賣 ${esc(S.tiles[pend.tile].name)}，目前最高 ${fmt((pend.best&&pend.best.bid)||pend.base||0)}</p>${wait}`;
+    if(myTurn) html+=`<label class="f">你的出價</label><input id="bid-amt" type="number" value="${(pend.best&&pend.best.bid||0)+200}">
+      <div class="row"><button class="btn ghost" data-act="auction-pass">放棄</button><button class="btn" data-act="auction-bid">出價</button></div>`;
+  }else if(pend.type==='bank'){
+    html+=`<p>現金 ${fmt(actor.money)}　存款 ${fmt(actor.dep)}　貸款 ${fmt(actor.loan)}</p>${wait}`;
+    if(myTurn) html+=`<label class="f">金額</label><input id="bank-amt" type="number" value="1000">
+      <div class="row"><button class="btn sm teal" data-bank="dep">存款</button><button class="btn sm" data-bank="wd">提款</button>
+      <button class="btn sm gold" data-bank="loan">貸款</button><button class="btn sm ghost" data-bank="repay">還款</button></div>
+      <button class="btn" data-act="closebank">關銀行</button>`;
+  }else if(pend.type==='stock'){
+    html+=`<p>現金 ${fmt(actor.money)}</p>${S.news?`<p class="muted">${esc(S.news)}</p>`:''}${wait}`;
+    if(myTurn) html+=S.stocks.map(s=>`<div class="card" style="margin:6px 0"><b>${s.name}</b> 現價 ${s.price}　持有 ${actor.stocks[s.id]||0} 股${s.lock?(s.lockDir>0?' ·漲停':' ·跌停'):''}
+      <div class="row"><button class="btn sm" data-sbu="${s.id}">買 5 股</button><button class="btn sm ghost" data-ssl="${s.id}">賣 5 股</button></div></div>`).join('')
+      +`<button class="btn" data-act="closestock">離開股市</button>`;
+  }else html+=wait;
+  modal.innerHTML=html;
+  mask.classList.add('on');
+}
+
+function paint(fromNet){
+  if(view!=='game'||!S) return;
+  if(!$('tl0')) buildBoard();
+  updateTiles(); paintTokens(); paintFelt(); paintDock();
+  if(S.over) showResult();
+  if(!fromNet && mode==='host') bcast();
+}
+
+function showResult(){
+  if(!S||!S.over) return;
+  show('result');
+  const w=pById(S.winner);
+  $('res-title').textContent=`${w?w.name:'—'} 勝出！`;
+  $('res-sub').textContent=S.why==='rounds'?`第 ${S.maxRound} 回合結束，以身家定勝負`:'對手都破產了';
+  $('res-list').innerHTML=(S.rank||[]).map((r,i)=>`<div class="card" style="display:flex;align-items:center;gap:8px">${portraitHTML(r.p,i===0?'happy':r.p.bankrupt?'cry':'normal',48)}<div><b>${i+1}. ${esc(r.p.name)}</b><div class="muted">身家 ${fmt(r.w)}　現金 ${fmt(r.p.money)}</div></div></div>`).join('');
+}
+
+/* ---------- events / send ---------- */
+function sendAct(a){
+  if(!S) return;
+  if(mode==='guest'){
+    const c=window._hostconn;
+    if(c) try{c.send({t:'act',a,pid:me.id})}catch(e){}
+    return;
+  }
+  handleAct(me.id,a);
+}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act],[data-item],[data-shop],[data-dice],[data-ndice],[data-pid],[data-g],[data-sid],[data-tid],[data-bank],[data-sbu],[data-ssl]');
+  if(!t) return;
+  if(t.dataset.item){
+    const id=t.dataset.item; if(AUTO_ITEMS.has(id)) return;
+    const mine=S&&S.players.find(x=>x.id===me.id);
+    if(mine&&cur()&&cur().id===mine.id) sendAct({t:'item',id});
+    return;
+  }
+  const act=t.dataset.act;
+  if(act==='roll') sendAct({t:'roll'});
+  else if(act==='buy'||act==='skipbuy'||act==='up'||act==='skipup'||act==='shopdone'||act==='end'||act==='openbank'||act==='openstock'||act==='closebank'||act==='closestock') sendAct({t:act});
+  else if(act==='hospital-pay') sendAct({t:'hospital',pay:true});
+  else if(act==='hospital-wait') sendAct({t:'hospital',pay:false});
+  else if(act==='jail-pay') sendAct({t:'jail',pay:true});
+  else if(act==='jail-wait') sendAct({t:'jail',pay:false});
+  else if(act==='auction-pass') sendAct({t:'auction',bid:0});
+  else if(act==='auction-bid') sendAct({t:'auction',bid:+($('bid-amt')&&$('bid-amt').value||0)});
+  if(t.dataset.shop) sendAct({t:'shopbuy',id:t.dataset.shop});
+  if(t.dataset.dice) sendAct({t:'pickdice',n:+t.dataset.dice});
+  if(t.dataset.ndice) sendAct({t:'ndice',n:+t.dataset.ndice});
+  if(t.dataset.pid) sendAct({t:'pickplayer',id:t.dataset.pid});
+  if(t.dataset.g) sendAct({t:'pickgroup',g:t.dataset.g});
+  if(t.dataset.sid && !t.dataset.sbu && !t.dataset.ssl) sendAct({t:'pickstock',sid:t.dataset.sid});
+  if(t.dataset.tid) sendAct({t:'picktile',tid:+t.dataset.tid});
+  if(t.dataset.bank) sendAct({t:'bank',kind:t.dataset.bank,amt:+($('bank-amt')&&$('bank-amt').value||0)});
+  if(t.dataset.sbu) sendAct({t:'stock',sid:t.dataset.sbu,n:5,buy:true});
+  if(t.dataset.ssl) sendAct({t:'stock',sid:t.dataset.ssl,n:5,buy:false});
+});
+
+$('btn-mute').onclick=()=>{muted=!muted; localStorage.setItem('fuweng-mute',muted?'1':'0'); $('btn-mute').textContent=muted?'🔇':'🔊'; sfx('click')};
+
+/* ---------- screens ---------- */
+function renderParade(){
+  $('parade').innerHTML=CHARS.map(c=>`<div class="av">${svgChar(c.id,'happy',56)}</div>`).join('');
+}
+function renderCharGrid(){
+  const customs=loadCustoms();
+  const all=[...CHARS.map(c=>({kind:'b',c})),...customs.map(c=>({kind:'u',c}))];
+  $('char-grid').innerHTML=all.map(x=>{
+    const c=x.c, id=x.kind==='b'?c.id:('c:'+c.id);
+    const p=x.kind==='b'?{charId:c.id,color:c.color}:{charId:'uncle',img:c.img,color:c.color,custom:c};
+    const on=selectedChar===id?'on':'';
+    return `<div class="ch ${on}" data-ch="${id}">${portraitHTML(p,'normal',64)}<b>${esc(c.name)}</b><small>${x.kind==='b'?c.tag:PERS[c.pers].name}</small></div>`;
+  }).join('')+`<div class="ch" data-ch="__new__"><div style="font-size:28px;line-height:64px">＋</div><b>自創角色</b><small>上傳照片</small></div>`;
+}
+$('char-grid').addEventListener('click',e=>{
+  const el=e.target.closest('[data-ch]'); if(!el) return;
+  if(el.dataset.ch==='__new__'){ openCreator(); return; }
+  selectedChar=el.dataset.ch;
+  renderCharGrid();
+});
+function currentCharPayload(name){
+  if(selectedChar.startsWith('c:')){
+    const c=loadCustoms().find(x=>x.id===selectedChar.slice(2));
+    if(!c) return {name,charId:'uncle',pers:'money',color:'#e85d4c'};
+    return {name:name||c.name,charId:'custom',pers:c.pers,color:c.color,img:c.img,lines:c.lines,custom:c};
+  }
+  const c=charById(selectedChar)||CHARS[0];
+  return {name:name||c.name,charId:c.id,pers:c.pers,color:c.color,lines:LINES[c.pers],img:null};
+}
+
+function openSetup(kind){
+  setupKind=kind;
+  show('setup');
+  $('setup-sub').textContent=kind==='join'?'輸入暱稱、選角色，接著填房號':kind==='host'?'你是房主，選完角色後會得到房號':'選角色，空位將由電腦補上';
+  $('host-opts').style.display=kind==='host'||kind==='ai'?'block':'none';
+  $('join-box').style.display=kind==='join'?'block':'none';
+  $('room-wait').style.display='none';
+  $('setup-go').style.display='';
+  const nick=localStorage.getItem('fuweng-nick')||'';
+  $('nick').value=nick;
+  selectedChar=selectedChar||'uncle';
+  renderCharGrid();
+  $('setup-msg').textContent='';
+}
+$('btn-ai').onclick=()=>{sfx('click');openSetup('ai')};
+$('btn-host').onclick=()=>{sfx('click');openSetup('host')};
+$('btn-join').onclick=()=>{sfx('click');openSetup('join')};
+$('btn-create').onclick=()=>{sfx('click');openCreator()};
+$('btn-help').onclick=()=>{sfx('click');show('help')};
+$('help-back').onclick=()=>show('lobby');
+$('setup-back').onclick=()=>{ leaveRoom(true); show('lobby'); };
+$('res-home').onclick=()=>{ leaveRoom(true); show('lobby'); };
+$('res-again').onclick=()=>{ leaveRoom(true); openSetup(setupKind==='join'?'join':setupKind==='host'?'host':'ai'); };
+
+$('setup-go').onclick=async()=>{
+  sfx('click');
+  const name=($('nick').value||'').trim()||'旅人';
+  localStorage.setItem('fuweng-nick',name);
+  const payload=currentCharPayload(name);
+  me.name=name;
+  if(setupKind==='ai'){
+    const n=+$('seatN').value||3;
+    const win=$('winMode').value, maxRound=+$('roundN').value||16;
+    startLocal(payload,n,win,maxRound);
+    return;
+  }
+  if(setupKind==='host'){
+    await startHost(payload);
+    return;
+  }
+  if(setupKind==='join'){
+    const code=($('join-code').value||'').trim().toUpperCase();
+    if(!code || code.length<4){ $('setup-msg').textContent='請輸入房號'; return; }
+    await startGuest(payload,code);
+  }
+};
+
+const PEER_CFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}};
+function ensurePid(){
+  let id=sessionStorage.getItem('fuweng-pid');
+  if(!id){id='P'+uid(); sessionStorage.setItem('fuweng-pid',id)}
+  return id;
+}
+
+function startLocal(payload,n,win,maxRound){
+  mode='ai'; me.host=true; me.id='me';
+  const players=[mkPlayer({...payload,id:'me',isAI:FAST,human:!FAST})];
+  const used=new Set([payload.charId]);
+  for(let i=1;i<n;i++){
+    const c=CHARS.find(x=>!used.has(x.id))||CHARS[i%CHARS.length];
+    used.add(c.id);
+    players.push(mkPlayer({id:'AI'+i,name:c.name,charId:c.id,pers:c.pers,color:c.color,lines:LINES[c.pers],isAI:true,human:false}));
+  }
+  S=freshState(players,{win,maxRound,code:''});
+  show('game'); buildBoard(); startTurn();
+}
+
+async function loadPeer(){
+  return window.Peer?Promise.resolve():new Promise((ok,no)=>{
+    const s=document.createElement('script');
+    s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload=ok; s.onerror=()=>no(new Error('無法載入連線模組，請確認網路'));
+    document.head.appendChild(s);
+  });
+}
+function bindConn(conn,asHost){
+  conn.on('data',m=>{
+    lastSeen=Date.now();
+    if(asHost) hostMsg(conn,m); else guestMsg(m);
+  });
+  conn.on('close',()=>{ if(asHost) hostDrop(conn.peer); else hostLost(); });
+  conn.on('error',()=>{ if(asHost) hostDrop(conn.peer); });
+}
+async function startHost(payload){
+  $('setup-msg').textContent='建立中…';
+  try{await loadPeer()}catch(e){return $('setup-msg').textContent=e.message}
+  leaveRoom(true); closing=false;
+  const code=Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[rnd(32)]).join('');
+  mode='host'; me.host=true; me.id='H';
+  const p0=mkPlayer({...payload,id:'H',isAI:false,human:true});
+  portraits[p0.id]=p0.img||'';
+  S=freshState([p0],{code,win:$('winMode').value,maxRound:+$('roundN').value||16});
+  S.phase='lobby';
+  peer=new Peer('fuweng-'+code,PEER_CFG);
+  peer.on('error',e=>$('setup-msg').textContent='連線錯誤：'+e.type);
+  peer.on('open',()=>{
+    $('setup-msg').textContent='';
+    $('room-wait').style.display='block';
+    $('room-code').textContent=code;
+    $('setup-go').style.display='none';
+    $('btn-start').style.display='block';
+    renderWait();
+  });
+  peer.on('connection',conn=>{
+    const hook=()=>{ if(conn._bound) return; conn._bound=true; bindConn(conn,true); };
+    conn.on('open',hook);
+    if(conn.open) hook();
+  });
+}
+function renderWait(){
+  if(!S) return;
+  $('wait-list').innerHTML=S.players.map(p=>`<div class="card" style="display:flex;align-items:center;gap:8px">${portraitHTML(p,'happy',40)}<b>${esc(p.name)}</b> ${p.id==='H'?'（房主）':''}</div>`).join('');
+}
+function hostMsg(conn,m){
+  if(!m||!m.t) return;
+  if(m.t==='ping'){ try{conn.send({t:'pong'})}catch(e){} return; }
+  if(m.t==='join'){
+    // reconnect?
+    const exist=S.players.find(p=>p.id===m.pid || (p.dropped&&p.name===m.name));
+    if(exist && (S.phase!=='lobby')){
+      exist.dropped=false; exist.isAI=false; exist.human=true; exist.id=m.pid;
+      if(m.img) {exist.img=m.img; portraits[exist.id]=m.img}
+      conns[m.pid]=conn;
+      try{conn.send({t:'portraits',portraits});}catch(e){}
+      bcast(); return;
+    }
+    if(S.phase!=='lobby'){ try{conn.send({t:'reject',why:'遊戲已開始'})}catch(e){} return; }
+    if(S.players.length>=4){ try{conn.send({t:'reject',why:'房間已滿'})}catch(e){} return; }
+    const p=mkPlayer({id:m.pid,name:m.name,charId:m.charId,pers:m.pers,color:m.color,img:m.img,lines:m.lines,isAI:false,human:true});
+    portraits[p.id]=p.img||'';
+    S.players.push(p);
+    conns[m.pid]=conn; conn._pid=m.pid;
+    try{conn.send({t:'portraits',portraits})}catch(e){}
+    renderWait(); bcast();
+    return;
+  }
+  if(m.t==='act'){ handleAct(m.pid||findPidByConn(conn), m.a); }
+}
+function findPidByConn(conn){
+  for(const [k,c] of Object.entries(conns)) if(c===conn){
+    const p=S&&S.players.find(x=>x.id===k); if(p) return p.id;
+  }
+  // conn.peer is guest's peer id, not our pid; store mapping
+  return conn._pid;
+}
+function hostDrop(peerId){
+  if(!S) return;
+  let pid=null;
+  for(const [k,c] of Object.entries(conns)) if(c && (c.peer===peerId||k===peerId||c._pid===peerId)) pid=c._pid||k;
+  if(!pid) return;
+  delete conns[pid];
+  const p=pById(pid);
+  if(!p) return;
+  if(S.phase==='lobby'){
+    S.players=S.players.filter(x=>x.id!==pid); renderWait(); bcast(); return;
+  }
+  p.dropped=true; p.isAI=true;
+  log(`${p.name} 斷線了，暫時由電腦代打`);
+  paint(); maybeAI(); bcast();
+}
+$('btn-start').onclick=()=>{
+  if(!S) return;
+  const n=+$('seatN').value||3;
+  const used=new Set(S.players.map(p=>p.charId));
+  let i=1;
+  while(S.players.length<n){
+    const c=CHARS.find(x=>!used.has(x.id))||CHARS[S.players.length%CHARS.length];
+    used.add(c.id);
+    S.players.push(mkPlayer({id:'AI'+i,name:c.name,charId:c.id,pers:c.pers,color:c.color,lines:LINES[c.pers],isAI:true,human:false}));
+    i++;
+  }
+  if(S.players.length<2){ $('setup-msg').textContent='至少要兩人才能開始'; return; }
+  S.win=$('winMode').value; S.maxRound=+$('roundN').value||16;
+  show('game'); buildBoard(); startTurn(); bcast();
+};
+
+async function startGuest(payload,code){
+  $('setup-msg').textContent='加入中…';
+  try{await loadPeer()}catch(e){return $('setup-msg').textContent=e.message}
+  leaveRoom(true); closing=false; mode='guest'; me.host=false; me.id=ensurePid();
+  S=null;
+  peer=new Peer(PEER_CFG);
+  peer.on('error',e=>$('setup-msg').textContent=e.type==='peer-unavailable'?'找不到房間，請確認房號':'連線錯誤：'+(e.type||e.message||e));
+  peer.on('open',()=>{
+    $('setup-msg').textContent='已連上伺服器，正在進入房間…';
+    const conn=peer.connect('fuweng-'+code,{reliable:true});
+    window._hostconn=conn;
+    conn.on('open',()=>{
+      lastSeen=Date.now();
+      $('setup-msg').textContent='正在向房主報到…';
+      conn.send({t:'join',pid:me.id,name:payload.name,charId:payload.charId,pers:payload.pers,color:payload.color,img:payload.img,lines:payload.lines});
+      hb=setInterval(()=>{try{conn.send({t:'ping'})}catch(e){} if(Date.now()-lastSeen>12000) hostLost();},2000);
+    });
+    conn.on('error',e=>$('setup-msg').textContent='連線失敗：'+(e.type||e.message||'未知'));
+    bindConn(conn,false);
+    setTimeout(()=>{ if(!S && $('setup-msg').textContent.includes('正在進入')) $('setup-msg').textContent='連線逾時，請確認房號與網路後再試'; },15000);
+  });
+}
+function guestMsg(m){
+  if(!m||!m.t) return;
+  if(m.t==='pong') return;
+  if(m.t==='reject'){ $('setup-msg').textContent=m.why||'無法加入'; return; }
+  if(m.t==='portraits'){ portraits=Object.assign(portraits,m.portraits||{}); return; }
+  if(m.t==='state'){
+    const prev=S&&S.players?S.players.map(p=>p.pos):null;
+    hydrate(m.S);
+    if(S.phase==='lobby'){ renderWait(); $('room-wait').style.display='block'; $('room-code').textContent=S.code; $('setup-go').style.display='none'; $('setup-msg').textContent='已進入房間，等待房主開始'; return; }
+    if(view!=='game'){ show('game'); buildBoard(); }
+    paint(true);
+    if(S.over) showResult();
+  }
+}
+function hydrate(s){
+  for(const p of s.players){
+    if(p.img==='@'+(p.id) || (p.img&&p.img.length<8 && portraits[p.id])) p.img=portraits[p.id]||p.img;
+    if(p.custom&&typeof p.custom.img==='string'&&p.custom.img.startsWith('@')) p.custom.img=portraits[p.id];
+  }
+  S=s;
+}
+function slimState(){
+  const s=deep(S);
+  for(const p of s.players){
+    if(p.img&&p.img.length>40){ portraits[p.id]=p.img; p.img='@'+p.id; }
+    if(p.custom&&p.custom.img&&p.custom.img.length>40){ portraits[p.id]=p.custom.img; p.custom.img='@'+p.id; }
+    if(p.lines) { /* keep, small */ }
+  }
+  return s;
+}
+function bcast(){
+  if(mode!=='host'||!S) return;
+  const msg={t:'state',S:slimState()};
+  for(const c of Object.values(conns)) try{c.send(msg)}catch(e){}
+}
+function hostLost(){
+  if(closing) return; closing=true; clearInterval(hb);
+  alert('與主機的連線中斷了'); leaveRoom(); show('lobby');
+}
+function leaveRoom(silent){
+  closing=true; clearInterval(hb);
+  try{ if(window._hostconn) window._hostconn.close(); }catch(e){}
+  window._hostconn=null;
+  try{ Object.values(conns).forEach(c=>c.close()); }catch(e){}
+  conns={};
+  try{ if(peer) peer.destroy(); }catch(e){}
+  peer=null; if(!silent){ S=null; }
+  closing=false;
+}
+
+/* ---------- character creator ---------- */
+function openCreator(edit){
+  show('creator');
+  editingCustom=edit||null;
+  const c=edit;
+  crImg=c&&c.img||'';
+  $('cr-name').value=c&&c.name||'';
+  $('cr-color').value=c&&c.color||'#e85d4c';
+  $('cr-pers').innerHTML=Object.values(PERS).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  $('cr-pers').value=c&&c.pers||'money';
+  fillLinesFromPers($('cr-pers').value, c&&c.lines);
+  renderCrPrev();
+  $('cr-msg').textContent='';
+  renderCrList();
+}
+function fillLinesFromPers(pers, lines){
+  const L=lines||LINES[pers]||LINES.money;
+  $('cr-buy').value=L.buy||''; $('cr-pay').value=L.pay||''; $('cr-recv').value=L.recv||'';
+  $('cr-br').value=L.br||''; $('cr-good').value=L.good||''; $('cr-bad').value=L.bad||'';
+}
+function renderCrPrev(){
+  const name=$('cr-name').value||'新角色';
+  const color=$('cr-color').value;
+  $('cr-prev').style.boxShadow=`0 8px 0 ${color}55,0 12px 20px #0002`;
+  $('cr-prev').innerHTML=crImg?`<img src="${crImg}" alt="">`:`<div style="display:grid;place-items:center;height:100%;color:#8a7360">尚未選圖</div>`;
+}
+$('cr-pick').onclick=()=>$('cr-file').click();
+$('cr-file').onchange=async ev=>{
+  const f=ev.target.files&&ev.target.files[0]; if(!f) return;
+  $('cr-msg').textContent='壓縮圖片中…';
+  try{ crImg=await compressImage(f); $('cr-msg').textContent='已採用這張照片（已壓縮）'; renderCrPrev(); }
+  catch(e){ $('cr-msg').textContent=e.message||'圖片讀取失敗'; }
+  ev.target.value='';
+};
+$('cr-pers').onchange=()=>{ fillLinesFromPers($('cr-pers').value); };
+$('cr-name').oninput=renderCrPrev; $('cr-color').oninput=renderCrPrev;
+$('cr-back').onclick=()=>show('lobby');
+$('cr-save').onclick=()=>{
+  const name=($('cr-name').value||'').trim();
+  if(!name) return $('cr-msg').textContent='請先幫角色取名';
+  if(!crImg) return $('cr-msg').textContent='請先選一張照片（相機或相簿都可以）';
+  const lines={buy:$('cr-buy').value,pay:$('cr-pay').value,recv:$('cr-recv').value,br:$('cr-br').value,good:$('cr-good').value,bad:$('cr-bad').value};
+  const arr=loadCustoms();
+  const obj={id:editingCustom?editingCustom.id:uid(),name,color:$('cr-color').value,pers:$('cr-pers').value,img:crImg,lines};
+  const i=arr.findIndex(x=>x.id===obj.id);
+  if(i>=0) arr[i]=obj; else arr.push(obj);
+  saveCustoms(arr);
+  $('cr-msg').textContent='已儲存，可在準備畫面選用';
+  editingCustom=obj; renderCrList();
+  selectedChar='c:'+obj.id;
+  sfx('good');
+};
+function renderCrList(){
+  const arr=loadCustoms();
+  $('cr-list').innerHTML='<label class="f">已儲存的角色</label>'+(arr.length?arr.map(c=>`<div class="card" style="display:flex;align-items:center;gap:8px">
+    ${portraitHTML({img:c.img,color:c.color},'normal',48)}
+    <div style="flex:1"><b>${esc(c.name)}</b><div class="muted">${PERS[c.pers].name}</div></div>
+    <button class="btn sm ghost" data-ed="${c.id}">編輯</button>
+    <button class="btn sm" data-del="${c.id}">刪除</button>
+  </div>`).join('') : '<p class="muted">還沒有自創角色。</p>');
+}
+$('cr-list').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-ed]'); const del=e.target.closest('[data-del]');
+  if(ed){ const c=loadCustoms().find(x=>x.id===ed.dataset.ed); if(c) openCreator(c); }
+  if(del){
+    if(!confirm('確定刪除這個角色？')) return;
+    saveCustoms(loadCustoms().filter(x=>x.id!==del.dataset.del));
+    renderCrList();
+  }
+});
+
+/* ---------- boot ---------- */
+function boot(){
+  renderParade();
+  $('btn-mute').textContent=muted?'🔇':'🔊';
+  const q=new URLSearchParams(location.search);
+  if(q.get('autotest')==='1'){
+    FAST=true; muted=true; window.__TEST_ERRS=[];
+    const n=+(q.get('n')||4);
+    const win=q.get('win')||'rounds'; const maxRound=+(q.get('rounds')||8);
+    const payload={name:'測試員',charId:'uncle',pers:'money',color:'#2a9d8f',lines:LINES.money};
+    startLocal(payload,n,win,maxRound);
+    // all AI already if FAST sets isAI on me
+    const t0=Date.now();
+    const iv=setInterval(()=>{
+      if(!S) return;
+      if(S.pending && isAuto(pById(S.pending.pid))) maybeAI();
+      else if(!S.pending && !S.busy && cur() && isAuto(cur()) && (S.phase==='main'||S.phase==='after')) maybeAI();
+      if(S.over || Date.now()-t0>90000){
+        clearInterval(iv);
+        window.__TEST_RESULT__={ok:!!S.over && !(window.__TEST_ERRS||[]).length, winner:(pById(S.winner)||{}).name, rounds:S.round, errors:window.__TEST_ERRS||[], over:S.over, ms:Date.now()-t0};
+        document.title=(window.__TEST_RESULT__.ok?'OK':'FAIL')+' '+document.title;
+      }
+    },50);
+  }
+  if(q.get('shot')==='1'){
+    // open game with a lively mid-setup for screenshot after a couple FAST turns? we'll start normal look lobby - actually start a game then take mid state
+    muted=true;
+  }
+}
+
+window.__startTest=function(){ /* used by tests */ };
+window.addEventListener('unhandledrejection',e=>{ if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.reason)); });
+window.addEventListener('error',e=>{ if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.message)); });
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); if(navigator.onLine) setTimeout(()=>loadPeer().catch(()=>{}),3000); });
+}
+boot();
+})();
+
+</script>
+</body>
+</html>
