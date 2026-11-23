@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#e85d4c">
+<meta name="theme-color" content="#1a6b5c">
 <meta name="description" content="晴空城連線大富翁，和朋友一起搶地收租">
 <title>富翁大亂鬥</title>
 <link rel="manifest" href="manifest.json">
@@ -13,161 +14,146 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
-  --ink:#3b2a1a;--paper:#fff3dc;--card:#fffaf0;--coral:#e85d4c;--coral-d:#c44738;
-  --teal:#2a9d8f;--teal-d:#1d7469;--gold:#e8b02a;--gold-d:#c48a14;--muted:#8a7360;
+  --ink:#2a2118;--paper:#fff4e0;--cream:#f8e6c0;--gold:#e2b14a;--gold-d:#b8862a;
+  --coral:#e85d4c;--coral-d:#c44738;--teal:#1f7d6c;--teal-d:#155a4e;
+  --wood:#6b3f24;--hud:#fff8eaee;
   --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:#1e140c;color:var(--ink);
+html,body{height:100%;overflow:hidden;background:#0e2a24;color:var(--ink);
   font-family:"PingFang TC","Noto Sans CJK TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
   user-select:none;-webkit-user-select:none}
-#app{max-width:480px;margin:0 auto;height:100%;height:100dvh;background:var(--paper);position:relative;overflow:hidden;
-  box-shadow:0 0 40px #0008}
-.view{position:absolute;inset:0;display:none;flex-direction:column;padding:calc(12px + var(--safe-t)) 14px calc(12px + var(--safe-b));
-  overflow:auto;-webkit-overflow-scrolling:touch}
+#app{max-width:480px;margin:0 auto;height:100%;height:100dvh;position:relative;overflow:hidden;background:#143830}
+.view{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
 .view.on{display:flex}
-h1{font-size:28px;letter-spacing:2px;text-align:center;color:#9a3b2a;text-shadow:0 2px 0 #ffd9a3}
-.sub{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 14px}
+.menu{padding:calc(16px + var(--safe-t)) 16px calc(16px + var(--safe-b));overflow:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(#fff3dc,#f0d9a8)}
+h1{font-size:28px;letter-spacing:2px;text-align:center;color:#9a3b2a;text-shadow:0 2px 0 #ffe4b3}
+.sub{text-align:center;color:#8a7360;font-size:13px;margin:4px 0 12px}
 .btn{display:block;width:100%;border:0;border-radius:14px;padding:13px 16px;font-size:16px;font-weight:800;letter-spacing:1px;
   color:#fff;background:linear-gradient(#ff7a68,#e85d4c);box-shadow:0 5px 0 var(--coral-d),0 8px 16px #e85d4c44;
-  margin:8px 0;cursor:pointer;transform:translateZ(0)}
+  margin:8px 0;cursor:pointer}
 .btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--coral-d)}
-.btn.teal{background:linear-gradient(#3cbcaf,#2a9d8f);box-shadow:0 5px 0 var(--teal-d),0 8px 16px #2a9d8f44}
+.btn.teal{background:linear-gradient(#3cbcaf,#2a9d8f);box-shadow:0 5px 0 var(--teal-d)}
 .btn.gold{background:linear-gradient(#ffd057,#e8b02a);color:#5a3a00;box-shadow:0 5px 0 var(--gold-d)}
 .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 #e0d0b4}
 .btn.sm{display:inline-block;width:auto;padding:8px 12px;font-size:13px;margin:4px;border-radius:10px}
-.btn:disabled{opacity:.45;transform:none;cursor:default}
+.btn:disabled{opacity:.45;transform:none}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .row .btn{flex:1}
 input,select,textarea{width:100%;padding:10px 12px;border:2px solid #ead9bc;border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
-textarea{min-height:56px;resize:vertical}
-label.f{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px;font-weight:700}
-.card{background:var(--card);border-radius:16px;padding:14px;margin:8px 0;
-  box-shadow:inset 0 1px 0 #fff,0 6px 0 #e8d5b0,0 10px 18px #0001}
-.muted{color:var(--muted);font-size:12px;line-height:1.6}
+label.f{display:block;font-size:12px;color:#8a7360;margin:8px 0 4px;font-weight:700}
+.card{background:#fffaf0;border-radius:16px;padding:14px;margin:8px 0;box-shadow:inset 0 1px 0 #fff,0 6px 0 #e8d5b0}
+.muted{color:#8a7360;font-size:12px;line-height:1.6}
 .err{color:#c44738;font-size:13px;min-height:1.2em;text-align:center}
-/* lobby parade */
-.parade{display:flex;justify-content:center;gap:2px;margin:8px 0 16px;flex-wrap:nowrap}
+.parade{display:flex;justify-content:center;gap:2px;margin:8px 0 14px;flex-wrap:nowrap}
 .parade .av{width:48px;height:48px;flex:0 0 48px;animation:bob 2.4s ease-in-out infinite;filter:drop-shadow(2px 4px 0 #0002)}
-.parade .av:nth-child(2){animation-delay:.2s}
-.parade .av:nth-child(3){animation-delay:.4s}
-.parade .av:nth-child(4){animation-delay:.15s}
-.parade .av:nth-child(5){animation-delay:.35s}
-.parade .av:nth-child(6){animation-delay:.55s}
+.parade .av:nth-child(2){animation-delay:.2s}.parade .av:nth-child(3){animation-delay:.4s}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-/* character pick */
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.ch{background:#fff;border:3px solid transparent;border-radius:14px;padding:8px 4px;text-align:center;cursor:pointer;
-  box-shadow:0 4px 0 #e8d5b0}
+.ch{background:#fff;border:3px solid transparent;border-radius:14px;padding:8px 4px;text-align:center;cursor:pointer;box-shadow:0 4px 0 #e8d5b0}
 .ch.on{border-color:var(--coral);box-shadow:0 4px 0 var(--coral-d)}
-.ch .av{width:64px;height:64px;margin:0 auto}
+.ch .av,.ch .avwrap{margin:0 auto}
 .ch b{display:block;font-size:12px;margin-top:4px}
-.ch small{color:var(--muted);font-size:10px}
-/* game layout */
-#view-game{padding:0;background:linear-gradient(#f6d9a8,#fff3dc 40%,#efe0c0);overflow:hidden}
-#ghead{display:flex;align-items:center;gap:6px;padding:calc(6px + var(--safe-t)) 8px 4px;min-height:42px;z-index:5}
-#ghead .ttl{font-weight:800;font-size:14px;color:#9a3b2a;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#ghead .chip{background:#fff8;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;backdrop-filter:blur(6px)}
-.ico{width:34px;height:34px;border:0;border-radius:50%;background:#fff;box-shadow:0 3px 0 #e0d0b4;font-size:16px;cursor:pointer}
-.board-wrap{flex:0 0 auto;padding:0 6px;touch-action:none}
-#board{position:relative;width:100%;aspect-ratio:1;max-height:54dvh;margin:0 auto;transform:translateZ(0);
-  background:
-    radial-gradient(circle at 50% 45%,#3aa38a 0%,#1f7a6a 70%,#165c50 100%);
-  border-radius:18px;box-shadow:0 10px 0 #c9a36a,0 16px 24px #0003,inset 0 0 0 6px #e8c987,inset 0 0 0 10px #b8874a;
-  overflow:hidden}
-#board .felt{position:absolute;inset:16%;border-radius:12px;background:radial-gradient(circle at 50% 30%,#4bb89e,#1e7d6c);
-  box-shadow:inset 0 8px 16px #0003,inset 0 1px 0 #fff2;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  color:#fff;text-align:center;padding:6px;z-index:2;pointer-events:none}
-#board .felt .who{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-#board .felt .nm{font-weight:800;font-size:13px;text-shadow:0 2px 0 #0004}
-#bubble{position:relative;background:#fff;color:var(--ink);border-radius:12px;padding:6px 8px;font-size:11px;line-height:1.35;
-  max-width:86%;min-height:1.3em;box-shadow:0 4px 0 #0002;margin:4px 0;pointer-events:none}
-#bubble:after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
-#dicebox{display:flex;gap:6px;margin-top:4px;min-height:36px;align-items:center;justify-content:center}
-.die{width:32px;height:32px;border-radius:7px;background:linear-gradient(#fff,#f0e6d0);box-shadow:2px 3px 0 #0003,inset 0 1px 0 #fff;
-  display:grid;place-items:center;font-weight:900;font-size:16px;color:#9a3b2a}
-.die.shake{animation:dshake .5s linear}
-@keyframes dshake{0%,100%{transform:translate(0) rotate(0)}25%{transform:translate(-3px,2px) rotate(-12deg)}75%{transform:translate(3px,-2px) rotate(10deg)}}
-.tile{position:absolute;overflow:hidden;background:linear-gradient(165deg,#fffdf6 0%,#f3e3c4 100%);
-  box-shadow:inset 1px 1px 0 #fff,inset -1px -2px 0 #0001,1px 2px 2px #0002;z-index:1}
-.tile.corner{z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2px}
-.tile .bar{position:absolute;left:0;right:0;top:0;height:22%;box-shadow:inset 0 1px 0 #fff6,0 1px 0 #0002}
-.tile.left .bar,.tile.right .bar{top:0;bottom:0;width:22%;height:auto;right:auto}
-.tile.right .bar{left:auto;right:0}
-.tile .tn{position:absolute;left:2px;right:2px;bottom:10px;font-size:8px;font-weight:800;line-height:1.05;text-align:center;letter-spacing:-.2px}
-.tile.left .bar{left:auto;right:0;width:18%;height:auto;top:0;bottom:0}
-.tile.right .bar{left:0;right:auto;width:18%;height:auto;top:0;bottom:0}
-.tile.left .tn,.tile.right .tn{writing-mode:horizontal-tb;left:2px;right:2px;top:auto;bottom:11px;width:auto;font-size:7px}
-.tile.left .tn{right:18%}
-.tile.right .tn{left:18%}
-.tile .pr{position:absolute;left:0;right:0;bottom:1px;font-size:7px;color:#6a5340;text-align:center}
-.tile.left .pr{writing-mode:horizontal-tb;left:0;right:16%;top:auto;bottom:1px;width:auto}
-.tile.right .pr{writing-mode:horizontal-tb;right:0;left:16%;width:auto}
-.tile .lv{position:absolute;top:24%;left:1px;right:1px;text-align:center;font-size:8px;pointer-events:none}
-.tile.special{background:linear-gradient(165deg,#fff5d6,#f0d49a)}
-.tile.start{background:linear-gradient(165deg,#ffd9a0,#f0a04a)}
-.tile.hospital{background:linear-gradient(165deg,#d6f0ff,#8ec8ef)}
-.tile.overtime{background:linear-gradient(165deg,#ffd0c8,#e88980)}
-.tile.plaza{background:linear-gradient(165deg,#dff8d0,#8fce6a)}
-.tile.shop{background:linear-gradient(165deg,#ffe3f0,#f5a0c8)}
-.tile.stockt{background:linear-gradient(165deg,#e0e8ff,#8aa0e8)}
-.tile.on{outline:2px solid #fff;outline-offset:-2px;filter:brightness(1.08);z-index:3}
-.tok{position:absolute;width:18px;height:18px;border-radius:50%;z-index:4;pointer-events:none;
-  box-shadow:0 6px 0 -3px #0004;transition:left .12s linear,top .12s linear;overflow:hidden;border:1.5px solid #fff;
-  will-change:left,top,transform}
-.tok.hop{animation:hop .18s ease}
-@keyframes hop{0%{transform:translateY(0)}40%{transform:translateY(-8px)}100%{transform:translateY(0)}}
-.tok img,.tok svg,.tok .ph{width:100%;height:100%;object-fit:cover;display:block}
-.godchip{position:absolute;z-index:5;font-size:11px;pointer-events:none;filter:drop-shadow(0 2px 1px #0006);animation:bob 1.8s ease-in-out infinite}
-.haz{position:absolute;z-index:5;font-size:11px;pointer-events:none}
-/* bottom dock */
-#dock{flex:1;display:flex;flex-direction:column;min-height:0;padding:6px 8px calc(8px + var(--safe-b));gap:4px}
-#plist{display:flex;gap:4px;overflow-x:auto;padding:2px 0;flex:0 0 auto}
-.pchip{flex:1;min-width:72px;background:#fff;border-radius:10px;padding:4px 6px;display:flex;align-items:center;gap:4px;
-  box-shadow:0 3px 0 #e8d5b0;font-size:10px;line-height:1.2}
-.pchip.turn{box-shadow:0 3px 0 var(--coral-d);border:2px solid var(--coral)}
-.pchip.out{opacity:.45}
-.pchip .av{width:28px;height:28px;flex-shrink:0}
-.pchip b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
-#actbar{display:flex;flex-wrap:wrap;gap:6px}
-#actbar .btn{width:auto;flex:1 1 30%;margin:0;padding:11px 8px;font-size:14px}
-#items{display:flex;gap:4px;overflow-x:auto;min-height:36px;padding:2px 0}
-.item{flex:0 0 auto;background:#fff;border-radius:8px;padding:4px 7px;font-size:11px;font-weight:700;
-  box-shadow:0 2px 0 #e0d0b4;cursor:pointer;white-space:nowrap}
+.ch small{color:#8a7360;font-size:10px}
+.help ol{padding-left:1.2em;font-size:13px;line-height:1.7}
+.prev{width:120px;height:120px;border-radius:50%;margin:8px auto;overflow:hidden;border:4px solid #fff;box-shadow:0 8px 0 #e8d5b0;background:#f4e6c8}
+.prev img{width:100%;height:100%;object-fit:cover}
+
+/* ===== GAME ===== */
+#view-game{background:#1a6b5c}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;z-index:1}
+#forks{position:absolute;inset:0;z-index:3;pointer-events:none}
+.fork-btn{pointer-events:auto;position:absolute;transform:translate(-50%,-50%);
+  min-width:64px;min-height:44px;padding:8px 10px;border:0;border-radius:12px;
+  background:linear-gradient(#fff,#ffe7b0);color:#5a3a00;font-weight:800;font-size:12px;
+  box-shadow:0 4px 0 #c49a3a,0 6px 12px #0005;z-index:4}
+.fork-btn:active{transform:translate(-50%,-50%) translateY(3px);box-shadow:0 1px 0 #c49a3a}
+
+#hud-top{position:absolute;left:0;right:0;top:0;z-index:5;
+  padding:calc(4px + var(--safe-t)) 6px 4px;background:linear-gradient(#0c3d3488,#0c3d3400);pointer-events:none}
+#hud-top *{pointer-events:auto}
+#players{display:flex;gap:4px}
+.pbox{flex:1;min-width:0;background:linear-gradient(#fff9ec,#f3e0b8);border:2px solid #d4b36a;
+  border-radius:10px;padding:3px 4px 4px;display:flex;align-items:center;gap:3px;
+  box-shadow:0 3px 0 #8a6230,0 4px 8px #0004;position:relative}
+.pbox.turn{border-color:#e85d4c;box-shadow:0 3px 0 #c44738,0 0 0 2px #e85d4c88}
+.pbox.out{opacity:.45;filter:grayscale(.6)}
+.pbox .avwrap{flex-shrink:0}
+.pbox .meta{min-width:0;flex:1;line-height:1.15}
+.pbox .nm{font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbox .cash{font-size:10px;font-weight:700;color:#9a3b2a}
+.pbox .subc{font-size:9px;color:#6a5340;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#calbar{display:flex;align-items:center;justify-content:space-between;margin-top:4px;gap:6px}
+#cal{background:#fff8ea;border-radius:8px;padding:2px 8px;font-size:11px;font-weight:800;color:#6b3f24;
+  box-shadow:0 2px 0 #c4a36a;border:1px solid #e2c48a}
+#cal-news{flex:1;font-size:10px;color:#fff;text-shadow:0 1px 2px #0008;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ico{width:32px;height:32px;border:0;border-radius:50%;background:#fff8ea;box-shadow:0 3px 0 #c4a36a;font-size:15px;cursor:pointer}
+
+#hud-bot{position:absolute;left:0;right:0;bottom:0;z-index:5;
+  padding:4px 6px calc(8px + var(--safe-b));background:linear-gradient(#0c3d3400,#1a2a18ee 30%,#1a2a18)}
+#hand{display:flex;gap:4px;overflow-x:auto;min-height:36px;padding:2px 0 6px;-webkit-overflow-scrolling:touch}
+.item{flex:0 0 auto;background:linear-gradient(#fff,#ffe9c4);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:700;
+  box-shadow:0 2px 0 #c4a36a;cursor:pointer;white-space:nowrap;border:1px solid #e2c48a}
 .item:active{transform:translateY(2px)}
-#log{height:34px;overflow:hidden;font-size:11px;color:#6a5340;line-height:1.15}
-#log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* modal */
-#mask{position:absolute;inset:0;background:#0006;display:none;z-index:20;align-items:flex-end;justify-content:center}
-#mask.on{display:flex}
-#modal{background:var(--card);width:100%;max-height:78%;overflow:auto;border-radius:20px 20px 0 0;padding:14px 14px calc(16px + var(--safe-b));
-  box-shadow:0 -8px 30px #0004;-webkit-overflow-scrolling:touch}
-#modal h3{margin-bottom:8px;font-size:16px}
-.listbtn{display:block;width:100%;text-align:left;padding:10px 12px;margin:5px 0;border:0;border-radius:10px;background:#fff;
-  box-shadow:0 3px 0 #e8d5b0;font:inherit;font-weight:700;cursor:pointer}
-.listbtn:active{transform:translateY(2px)}
-/* overlays on custom portraits */
-.avwrap{position:relative;display:inline-block}
-.avwrap .fx{position:absolute;right:-4px;top:-6px;font-size:14px;animation:pop .35s ease;z-index:2;pointer-events:none}
+#actrow{display:flex;align-items:flex-end;gap:6px}
+#actrow .sbtn{flex:1;border:0;border-radius:12px;padding:10px 4px 8px;font-weight:800;font-size:12px;
+  background:linear-gradient(#fff8ea,#efd7a0);color:#4a3018;box-shadow:0 4px 0 #8a6230;cursor:pointer}
+#actrow .sbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6230}
+#dicebtn{flex:0 0 78px;height:78px;border-radius:50%;border:0;cursor:pointer;position:relative;
+  background:radial-gradient(circle at 35% 30%,#fff,#e8e0d0 45%,#c9b89a);
+  box-shadow:0 8px 0 #6b4e2e,0 12px 18px #0005,inset 0 2px 0 #fff;color:#9a3b2a;font-weight:900}
+#dicebtn:active{transform:translateY(4px);box-shadow:0 4px 0 #6b4e2e}
+#dicebtn:disabled{opacity:.6}
+#dicebtn .lab{font-size:11px;position:absolute;left:0;right:0;bottom:10px}
+#dice3d{width:42px;height:42px;margin:6px auto 0;perspective:200px}
+.cube{width:42px;height:42px;position:relative;transform-style:preserve-3d;transition:transform .6s ease}
+.cube.roll{animation:tumble .7s linear}
+@keyframes tumble{0%{transform:rotateX(0) rotateY(0)}25%{transform:rotateX(180deg) rotateY(90deg)}60%{transform:rotateX(360deg) rotateY(200deg)}100%{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}}
+.face{position:absolute;width:42px;height:42px;border-radius:8px;background:linear-gradient(#fff,#f0e6d4);
+  box-shadow:inset 0 0 0 2px #d0c0a8;display:grid;place-items:center;font-size:22px;font-weight:900;color:#c44738;backface-visibility:hidden}
+.face.f1{transform:rotateY(0) translateZ(21px)}
+.face.f2{transform:rotateY(90deg) translateZ(21px)}
+.face.f3{transform:rotateY(180deg) translateZ(21px)}
+.face.f4{transform:rotateY(-90deg) translateZ(21px)}
+.face.f5{transform:rotateX(90deg) translateZ(21px)}
+.face.f6{transform:rotateX(-90deg) translateZ(21px)}
+
+/* dialog */
+#dmask{position:absolute;inset:0;background:#0005;display:none;z-index:20;align-items:flex-end;justify-content:center;padding:0 8px calc(118px + var(--safe-b))}
+#dmask.on{display:flex}
+#dbox{width:100%;background:linear-gradient(#fffaf0,#f3e2bc);border:3px solid #c49a3a;border-radius:16px 16px 8px 8px;
+  box-shadow:0 8px 0 #6b4e2e,0 14px 30px #0006,inset 0 1px 0 #fff;padding:10px 12px 12px;max-height:52dvh;overflow:auto}
+#dbox .dhead{display:flex;align-items:center;gap:10px}
+#dbox h3{font-size:15px;color:#7a2e20;flex:1}
+#dbox .dtext{margin:8px 0;font-size:14px;line-height:1.6}
+#dbox .dacts{display:flex;gap:8px;flex-wrap:wrap}
+.avwrap{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.avwrap .fx{position:absolute;right:-4px;top:-6px;font-size:14px;z-index:2;pointer-events:none}
 .avwrap.shake{animation:pshake .45s linear}
 .avwrap.fall{animation:fall .7s ease forwards}
 .avwrap.bounce{animation:bounce .5s ease}
 @keyframes pshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px) rotate(-4deg)}75%{transform:translateX(4px) rotate(4deg)}}
 @keyframes fall{to{transform:rotate(70deg) translateY(10px);opacity:.5}}
 @keyframes bounce{0%,100%{transform:scale(1)}40%{transform:scale(1.15) translateY(-4px)}}
-@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
-.prev{width:120px;height:120px;border-radius:50%;margin:8px auto;overflow:hidden;border:4px solid #fff;
-  box-shadow:0 8px 0 #e8d5b0,0 12px 20px #0002;background:#f4e6c8}
-.prev img{width:100%;height:100%;object-fit:cover}
-.help ol{padding-left:1.2em;font-size:13px;line-height:1.7}
-.badge{display:inline-block;background:#fff3;border-radius:6px;padding:0 5px;font-size:10px}
+#fly{position:absolute;inset:0;z-index:18;pointer-events:none;overflow:hidden}
+.coin{position:absolute;font-weight:900;font-size:14px;color:#e8b02a;text-shadow:0 1px 0 #7a5a10,0 2px 4px #0006;
+  animation:fly 800ms ease-out forwards}
+@keyframes fly{0%{opacity:1;transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70px) scale(1.2)}}
+
+#mm{position:absolute;right:8px;bottom:calc(128px + var(--safe-b));z-index:6;width:96px;height:76px;
+  background:#0c3d34cc;border:2px solid #e2c48a;border-radius:8px;overflow:hidden;display:none}
+#mm.on{display:block}
+#mm canvas{width:100%;height:100%;display:block}
+#recenter{position:absolute;right:8px;bottom:calc(210px + var(--safe-b));z-index:6;display:none}
+
+.badge{display:inline-block;background:#fff3;border-radius:6px;padding:0 4px;font-size:9px}
 </style>
 </head>
 <body>
 <div id="app">
-  <section id="view-lobby" class="view on">
+  <section id="view-lobby" class="view on menu">
     <h1>富翁大亂鬥</h1>
-    <div class="sub">晴空城爭霸 · 原創連線大富翁</div>
+    <div class="sub">晴空城爭霸 · 街道經營 · 連線對戰</div>
     <div class="parade" id="parade"></div>
     <button class="btn" id="btn-ai">單機對戰（打電腦）</button>
     <button class="btn teal" id="btn-host">建立房間</button>
@@ -178,7 +164,7 @@ label.f{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px;font-we
     <p class="err" id="lobby-msg"></p>
   </section>
 
-  <section id="view-setup" class="view">
+  <section id="view-setup" class="view menu">
     <h1 style="font-size:22px">準備出發</h1>
     <div class="sub" id="setup-sub">選一個角色，輸入暱稱</div>
     <label class="f">你的暱稱</label>
@@ -207,27 +193,23 @@ label.f{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px;font-we
     <p class="err" id="setup-msg"></p>
     <div id="room-wait" style="display:none" class="card">
       <b>房號</b> <span id="room-code" style="font-size:28px;letter-spacing:4px;color:#c44738"></span>
-      <div class="muted">把房號傳給朋友，他們在「加入房間」輸入即可。你是主機，請保持這個畫面開著。</div>
+      <div class="muted">把房號傳給朋友。你是主機，請保持這個畫面開著。</div>
       <div id="wait-list"></div>
       <button class="btn" id="btn-start" style="display:none">開始遊戲</button>
     </div>
   </section>
 
-  <section id="view-creator" class="view">
+  <section id="view-creator" class="view menu">
     <h1 style="font-size:22px">自創角色</h1>
     <div class="sub">上傳照片、寫台詞，下次還可以再改</div>
     <div class="prev" id="cr-prev"></div>
-    <div class="row">
-      <button class="btn sm teal" id="cr-pick">從相簿／相機選圖</button>
-    </div>
+    <div class="row"><button class="btn sm teal" id="cr-pick">從相簿／相機選圖</button></div>
     <input type="file" id="cr-file" accept="image/*" hidden>
-    <label class="f">角色名稱</label>
-    <input id="cr-name" maxlength="8" placeholder="幫角色取名">
-    <label class="f">主題顏色</label>
-    <input id="cr-color" type="color" value="#e85d4c" style="height:40px;padding:4px">
+    <label class="f">角色名稱</label><input id="cr-name" maxlength="8" placeholder="幫角色取名">
+    <label class="f">主題顏色</label><input id="cr-color" type="color" value="#e85d4c" style="height:40px;padding:4px">
     <label class="f">個性預設（影響電腦風格與預設台詞）</label>
     <select id="cr-pers"></select>
-    <label class="f">買到地時</label><input id="cr-buy" maxlength="36" placeholder="買地台詞">
+    <label class="f">買到地時</label><input id="cr-buy" maxlength="36">
     <label class="f">付過路費時</label><input id="cr-pay" maxlength="36">
     <label class="f">收到過路費時</label><input id="cr-recv" maxlength="36">
     <label class="f">破產時</label><input id="cr-br" maxlength="36">
@@ -241,17 +223,18 @@ label.f{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px;font-we
     <div id="cr-list"></div>
   </section>
 
-  <section id="view-help" class="view">
+  <section id="view-help" class="view menu">
     <h1 style="font-size:22px">怎麼玩</h1>
     <div class="card help">
       <ol>
-        <li>擲骰沿著晴空城走路，經過發薪日可領薪水與卡牌點。</li>
-        <li>停在沒主的地可以買，再花錢蓋樓，別人停下來就要付過路費。</li>
-        <li>命運／機會會抽到好笑事件。道具舖能用「卡牌點」買道具。</li>
-        <li>道具效果很多：指定步數、路障、地雷、均分現金、強制買地、加蓋或拆樓、轉向停留、請靈送靈……</li>
-        <li>路上會出現靈體，停在上面就會附身幾回合，有的幫你發財，有的專門讓你破財。</li>
-        <li>輪到你時可進銀行存貸款、或到股市買賣。股票每天都會波動。</li>
-        <li>現金不夠就得賣股、拆屋或賣地；都還不上就破產。最後活著或回合結束時身家最高的人獲勝。</li>
+        <li>晴空城是一座有分岔的城市，不是繞圈的棋盤。角色沿著馬路一步一步走。</li>
+        <li>走到路口若有分岔，點畫面上的箭頭選方向。電腦會依個性自己選。</li>
+        <li>經過發薪廣場可領薪水與卡牌點。停在沒主的地可以買，蓋樓後別人停下來要付過路費。整條街都是你的，租金會更高。</li>
+        <li>可以隨時用下方按鈕進出銀行、股市。道具舖能用卡牌點買道具。</li>
+        <li>路上會遇到機會、命運、樂透、公園奇遇，也會碰到到處閒逛的靈體；擦身或走上去就會附身幾天。</li>
+        <li>每走一回合，日曆過一天。月初發股息，月中要繳市政稅，不時還有城市新聞。</li>
+        <li>用兩指縮放、單指拖曳可看地圖；右下角可打開小地圖或回到角色。</li>
+        <li>現金不夠就得賣股、拆屋或賣地。最後活著或回合結束時身家最高的人獲勝。</li>
         <li>連線時建立房間的人是主機，請不要關畫面。朋友掉線會暫時由電腦代打。</li>
       </ol>
     </div>
@@ -259,30 +242,47 @@ label.f{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px;font-we
   </section>
 
   <section id="view-game" class="view">
-    <div id="ghead">
-      <div class="ttl">富翁大亂鬥</div>
-      <span class="chip" id="g-round">第 1 回合</span>
-      <span class="chip" id="g-code"></span>
-      <button class="ico" id="btn-mute" title="靜音">🔊</button>
+    <canvas id="map"></canvas>
+    <div id="forks"></div>
+    <div id="fly"></div>
+    <canvas id="mm" width="192" height="152"></canvas>
+    <button class="ico" id="recenter" title="回到角色">📍</button>
+    <div id="hud-top">
+      <div id="players"></div>
+      <div id="calbar">
+        <div id="cal">晴空曆 1年1月1日</div>
+        <div id="cal-news"></div>
+        <button class="ico" id="btn-mm" title="小地圖">🗺️</button>
+        <button class="ico" id="btn-fast" title="加速">⏩</button>
+        <button class="ico" id="btn-mute" title="靜音">🔊</button>
+      </div>
     </div>
-    <div class="board-wrap"><div id="board"></div></div>
-    <div id="dock">
-      <div id="plist"></div>
-      <div id="log"></div>
-      <div id="items"></div>
-      <div id="actbar"></div>
+    <div id="hud-bot">
+      <div id="hand"></div>
+      <div id="actrow">
+        <button class="sbtn" data-act="openbank">銀行</button>
+        <button class="sbtn" data-act="openstock">股市</button>
+        <button id="dicebtn">
+          <div id="dice3d"><div class="cube" id="cube">
+            <div class="face f1">1</div><div class="face f2">2</div><div class="face f3">3</div>
+            <div class="face f4">4</div><div class="face f5">5</div><div class="face f6">6</div>
+          </div></div>
+          <div class="lab">擲骰</div>
+        </button>
+        <button class="sbtn" data-act="info">資訊</button>
+        <button class="sbtn" data-act="end">結束</button>
+      </div>
     </div>
+    <div id="dmask"><div id="dbox"></div></div>
   </section>
 
-  <section id="view-result" class="view">
+  <section id="view-result" class="view menu">
     <h1 style="font-size:24px" id="res-title">遊戲結束</h1>
     <div class="sub" id="res-sub"></div>
     <div id="res-list"></div>
     <button class="btn" id="res-again">再玩一局</button>
     <button class="btn ghost" id="res-home">回到首頁</button>
   </section>
-
-  <div id="mask"><div id="modal"></div></div>
 </div>
 <script>
 (()=>{
@@ -318,77 +318,6 @@ function sfx(type){
     o.start(now); o.stop(now+d+.02);
   }catch(e){}
 }
-
-const GROUPS={
-  a:{color:'#8d6e63',name:'甜蜜區'},b:{color:'#42a5f5',name:'熱鬧區'},
-  c:{color:'#66bb6a',name:'文青區'},d:{color:'#ab47bc',name:'雅緻區'},
-  e:{color:'#ffa726',name:'商圈'},f:{color:'#ef5350',name:'都會區'},
-  g:{color:'#26c6da',name:'海濱區'},h:{color:'#5c6bc0',name:'巔峰區'},
-  tr:{color:'#607d8b',name:'交通'},ut:{color:'#ffca28',name:'公共'}
-};
-const TILES=[
-  {id:0,t:'start',name:'發薪日',sub:'領薪水與卡牌點'},
-  {id:1,t:'land',name:'棉花糖巷',price:800,group:'a'},
-  {id:2,t:'fate',name:'命運'},
-  {id:3,t:'land',name:'彈珠巷',price:1000,group:'a'},
-  {id:4,t:'tax',name:'市政稅',fee:500},
-  {id:5,t:'trans',name:'公交總站',price:2000,group:'tr'},
-  {id:6,t:'land',name:'夜市口',price:1400,group:'b'},
-  {id:7,t:'chance',name:'機會'},
-  {id:8,t:'land',name:'漫畫街',price:1600,group:'b'},
-  {id:9,t:'land',name:'體育館路',price:1800,group:'b'},
-  {id:10,t:'hospital',name:'醫院',sub:'住院休息'},
-  {id:11,t:'land',name:'圖書館大道',price:2200,group:'c'},
-  {id:12,t:'util',name:'風力發電廠',price:1800,group:'ut'},
-  {id:13,t:'land',name:'公園路',price:2400,group:'c'},
-  {id:14,t:'land',name:'咖啡巷',price:2600,group:'c'},
-  {id:15,t:'trans',name:'渡輪碼頭',price:2000,group:'tr'},
-  {id:16,t:'land',name:'古董街',price:3000,group:'d'},
-  {id:17,t:'shop',name:'道具舖',sub:'用卡牌點買道具'},
-  {id:18,t:'land',name:'花市',price:3200,group:'d'},
-  {id:19,t:'land',name:'音樂廳路',price:3400,group:'d'},
-  {id:20,t:'plaza',name:'市集廣場',sub:'領取獎池'},
-  {id:21,t:'land',name:'購物廣場',price:4000,group:'e'},
-  {id:22,t:'chance',name:'機會'},
-  {id:23,t:'land',name:'美食街',price:4200,group:'e'},
-  {id:24,t:'land',name:'百貨大樓',price:4400,group:'e'},
-  {id:25,t:'trans',name:'高鐵站',price:2000,group:'tr'},
-  {id:26,t:'land',name:'科技園區',price:5000,group:'f'},
-  {id:27,t:'util',name:'蓄水廠',price:1800,group:'ut'},
-  {id:28,t:'land',name:'金融街',price:5200,group:'f'},
-  {id:29,t:'land',name:'觀光塔',price:5400,group:'f'},
-  {id:30,t:'overtime',name:'加班室',sub:'強制加班'},
-  {id:31,t:'land',name:'海景大道',price:6000,group:'g'},
-  {id:32,t:'fate',name:'命運'},
-  {id:33,t:'land',name:'展覽館路',price:6200,group:'g'},
-  {id:34,t:'land',name:'豪華酒店',price:6400,group:'g'},
-  {id:35,t:'trans',name:'機場航廈',price:2000,group:'tr'},
-  {id:36,t:'stockt',name:'證券行',sub:'買賣股票'},
-  {id:37,t:'land',name:'電視台',price:7500,group:'h'},
-  {id:38,t:'tax',name:'慈善捐款',fee:800},
-  {id:39,t:'land',name:'摩天大樓',price:8000,group:'h'}
-];
-const UPG=[0,.5,.5,.6,.7,.8];
-const LVNAME=['空地','小屋','公寓','大樓','商場','地標'];
-function tollBase(tile,S){
-  if(tile.t==='trans'){
-    const n=ownedCount(tile.owner,'tr',S);
-    return [0,500,1200,2500,5000][n]||500;
-  }
-  if(tile.t==='util'){
-    const n=ownedCount(tile.owner,'ut',S);
-    const d=S.lastDice||7;
-    return d*(n>=2?200:80);
-  }
-  const lv=tile.lv||0;
-  const mul=[.12,.28,.55,1.1,1.9,3.2][lv]||.12;
-  let r=Math.round(tile.price*mul);
-  if(lv===0 && ownsSet(tile.owner,tile.group,S)) r*=2;
-  return r;
-}
-function ownedCount(pid,g,S){return S.tiles.filter(t=>t.owner===pid&&t.group===g).length}
-function ownsSet(pid,g,S){const all=TILES.filter(t=>t.group===g);return all.length>0&&all.every(t=>S.tiles[t.id].owner===pid)}
-function landValue(t){return (t.price||0)+Math.round((t.price||0)*0.5*(t.lv||0))}
 
 const PERS={
   money:{id:'money',name:'愛錢型',ai:'greedy'},
@@ -563,7 +492,7 @@ const FATE=[
   {id:'taxbill',good:false,txt:'補繳舊帳單 {n}。',money:[-400,-1600]},
   {id:'phone',good:false,txt:'手機螢幕裂成蜘蛛網，維修費 {n}。',money:[-600,-1800]},
   {id:'treat',good:false,txt:'被揪去吃到飽，你當了一次冤大頭 {n}。',money:[-500,-2000]},
-  {id:'hospital',good:false,txt:' vertigo 發作？不對，是感冒住院觀察。',go:'hospital'},
+  {id:'hospital',good:false,txt:'突然一陣暈眩，還是去醫院檢查一下吧。',go:'hospital'},
   {id:'work',good:false,txt:'主管在群組標記你：今晚加班，別想跑。',go:'overtime'},
   {id:'start',good:true,txt:'拾到一張回家的捷運票，直接飛回發薪日。',go:'start'},
   {id:'pts',good:true,txt:'集點卡滿了，獲得 {n} 點卡牌點。',pts:[15,40]},
@@ -585,9 +514,6 @@ const CHANCE=[
   {id:'doc',good:false,txt:'健康檢查列出一排紅字，先去醫院報到。',go:'hospital'},
   {id:'start2',good:true,txt:'計程車司機說「這趟我請」，直奔發薪日。',go:'start'}
 ];
-
-/* typo fix later for hospital fate text */
-FATE.find(x=>x.id==='hospital').txt='突然一陣暈眩，還是去醫院檢查一下吧。';
 
 const LS_CUST='fuweng-customs-v1';
 function loadCustoms(){try{return JSON.parse(localStorage.getItem(LS_CUST)||'[]')}catch(e){return[]}}
@@ -619,29 +545,716 @@ function compressImage(file){
   });
 }
 
-/* ---------- state ---------- */
-let S=null, me={id:'me',name:'我',host:false}, mode='', portraits={};
-let peer=null, conns={}, closing=false, lastSeen=0, hb=0, animTimer=0;
-let view='lobby', setupKind='ai', selectedChar='uncle', editingCustom=null, crImg='';
 
-function newTiles(){return TILES.map(t=>({id:t.id,t:t.t,name:t.name,price:t.price||0,group:t.group||'',lv:0,owner:null,fee:t.fee||0,block:0,mine:0,bomb:0,seal:0,inflate:0}))}
+const UPG=[0,.5,.5,.6,.7,.8];
+const LVNAME=['空地','小屋','公寓','大樓','商場','地標'];
+const GROUPS={
+  a:{color:'#8d6e63',name:'棉花糖街'},b:{color:'#42a5f5',name:'夜市路'},
+  c:{color:'#66bb6a',name:'公園北路'},d:{color:'#ab47bc',name:'中環雅段'},
+  e:{color:'#ffa726',name:'東市商圈'},f:{color:'#ef5350',name:'都會南路'},
+  g:{color:'#26c6da',name:'海岸大道'},h:{color:'#5c6bc0',name:'晴空東段'},
+  tr:{color:'#607d8b',name:'交通'},ut:{color:'#ffca28',name:'公共'}
+};
+
+const TW=72, TH=36;
+let WORLD=null;
+
+function nk(x,y){return x+','+y}
+function buildWorld(){
+  const nodes=[]; const at={};
+  function addRoad(x,y){
+    const k=nk(x,y); if(at[k]) return at[k];
+    const n={id:nodes.length,x,y,nbrs:[],kind:'road',name:'路口'};
+    nodes.push(n); at[k]=n; return n;
+  }
+  const H=[[2,3,18],[6,3,11],[9,3,18],[13,3,18]];
+  const V=[[3,2,13],[7,2,13],[11,2,13],[15,2,13],[18,2,9]];
+  for(const [y,x0,x1] of H) for(let x=x0;x<=x1;x++) addRoad(x,y);
+  for(const [x,y0,y1] of V) for(let y=y0;y<=y1;y++) addRoad(x,y);
+  for(const n of nodes){
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const o=at[nk(n.x+dx,n.y+dy)]; if(o) n.nbrs.push(o.id);
+    }
+  }
+  function nodeAt(x,y){return at[nk(x,y)]}
+  function setSpec(x,y,kind,name){
+    const n=nodeAt(x,y); if(!n) throw new Error('no node '+x+','+y);
+    n.kind=kind; n.name=name; return n;
+  }
+  setSpec(7,9,'start','發薪廣場');
+  setSpec(3,2,'hospital','陽光醫院');
+  setSpec(18,9,'jail','加班總署');
+  setSpec(3,9,'bank','港灣銀行');
+  setSpec(15,9,'stock','晴空證券');
+  setSpec(15,13,'shop','便利道具舖');
+  setSpec(3,13,'fate','命運');
+  setSpec(11,2,'fate','命運');
+  setSpec(18,2,'fate','命運');
+  setSpec(7,2,'chance','機會');
+  setSpec(11,13,'chance','機會');
+  setSpec(15,2,'chance','機會');
+  setSpec(3,6,'points','集點站');
+  setSpec(11,6,'points','集點站');
+  setSpec(7,13,'lottery','晴空樂透');
+  setSpec(7,6,'park','拾光公園');
+  setSpec(11,9,'news','市政公告亭');
+
+  const PLOTD=[
+    [3,4,'a','棉花糖巷',800],[3,5,'a','彈珠巷',1000],[3,8,'a','童心雜貨',1200],
+    [7,3,'b','夜市口',1400],[7,4,'b','漫畫街',1600],[7,5,'b','燈籠街',1800],
+    [4,6,'c','圖書館',2200],[5,6,'c','咖啡巷',2400],[9,6,'c','畫廊小路',2600],
+    [11,3,'d','古董街',3000],[11,4,'d','花市',3200],[11,5,'d','音樂廳',3400],
+    [15,3,'e','購物廣場',4000],[15,4,'e','美食街',4200],[15,5,'e','百貨大樓',4400],
+    [15,10,'f','科技園區',5000],[15,11,'f','金融街',5200],[15,12,'f','觀光塔',5400],
+    [5,2,'g','海景一號',6000],[9,2,'g','展覽館',6200],[13,2,'g','豪華酒店',6400],
+    [16,9,'h','電視台',7500],[17,9,'h','摩天大樓',8000],
+    [16,2,'tr','渡輪碼頭',2000],[3,11,'tr','公交總站',2000],[18,5,'tr','高鐵站',2000],[18,13,'tr','機場航廈',2000],
+    [3,12,'ut','風力發電廠',1800],[11,12,'ut','蓄水廠',1800]
+  ];
+  const plots=[];
+  const usedFoot=new Set();
+  function footOf(n){
+    const dirs=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]];
+    for(const [dx,dy] of dirs){
+      const x=n.x+dx,y=n.y+dy,k=nk(x,y);
+      if(at[k]||usedFoot.has(k)||x<0||y<0||x>21||y>16) continue;
+      // keep park interior free-ish
+      usedFoot.add(k); return {x,y};
+    }
+    return {x:n.x, y:n.y}; // fallback overlay
+  }
+  // first pass foots after we have at
+  for(const [x,y,g,name,price] of PLOTD){
+    const n=nodeAt(x,y); if(!n) throw new Error('plot missing '+name+' '+x+','+y);
+    if(n.kind!=='road') throw new Error('plot on special '+name+' is '+n.kind);
+    const ft=footOf(n);
+    const p={id:plots.length,nodeId:n.id,name,group:g,price,lv:0,owner:null,bx:ft.x,by:ft.y,street:(GROUPS[g]||{}).name||'',seal:0,inflate:0};
+    plots.push(p);
+    n.kind='plot'; n.name=name; n.plotId=p.id;
+  }
+  const W=22,Hgt=17;
+  // special building foots
+  const specFoot={};
+  for(const n of nodes){
+    if(n.kind==='road'||n.kind==='plot') continue;
+    const ft=footOf(n);
+    specFoot[n.id]=ft;
+  }
+  // deco seeds
+  return {nodes,at,plots,specFoot,W,H:Hgt,start:nodeAt(7,9).id};
+}
+
+function ownedCount(pid,g,state){state=state||S;return state.plots.filter(p=>p.owner===pid&&p.group===g).length}
+function ownsSet(pid,g,state){state=state||S;const all=state.plots.filter(p=>p.group===g);return all.length>0&&all.every(p=>p.owner===pid)}
+function landValue(p){return (p.price||0)+Math.round((p.price||0)*0.5*(p.lv||0))}
+function upgradeCost(p){return Math.round((p.price||0)*(UPG[Math.min(5,(p.lv||0)+1)]||0.5))}
+function plotOfNode(nid,state){state=state||S;const n=state.nodes[nid]; if(!n||n.plotId==null) return null; return state.plots[n.plotId]}
+function tollBase(plot,state){
+  state=state||S;
+  if(plot.group==='tr'){
+    const n=ownedCount(plot.owner,'tr',state);
+    return [0,500,1200,2500,5000][n]||500;
+  }
+  if(plot.group==='ut'){
+    const n=ownedCount(plot.owner,'ut',state);
+    const d=state.lastDice||7;
+    return d*(n>=2?200:80);
+  }
+  const lv=plot.lv||0;
+  const mul=[.12,.28,.55,1.1,1.9,3.2][lv]||.12;
+  let r=Math.round(plot.price*mul);
+  if(lv===0 && ownsSet(plot.owner,plot.group,state)) r*=2;
+  return r;
+}
+
+/* ---------- isometric renderer ---------- */
+let CAN, CTX, MM, MMX, dpr=1, viewW=390, viewH=844;
+let camX=0, camY=0, zoom=1, camFree=false, camTx=0, camTy=0;
+let cacheG=null, cacheB=null, dirtyG=true, dirtyB=true, cacheKey='';
+let fxList=[]; // {type, x,y, t, life, ...}
+
+function iso(x,y){return {x:(x-y)*TW/2, y:(x+y)*TH/2}}
+function shade(hex,k){
+  const n=parseInt((hex||'#888888').slice(1),16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  r=clamp(Math.round(r*k),0,255); g=clamp(Math.round(g*k),0,255); b=clamp(Math.round(b*k),0,255);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+function drawDiamond(ctx,x,y,col,stroke){
+  const p=iso(x,y);
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y-TH/2);
+  ctx.lineTo(p.x+TW/2, p.y);
+  ctx.lineTo(p.x, p.y+TH/2);
+  ctx.lineTo(p.x-TW/2, p.y);
+  ctx.closePath();
+  ctx.fillStyle=col; ctx.fill();
+  if(stroke){ctx.strokeStyle=stroke; ctx.lineWidth=0.8; ctx.stroke()}
+}
+function drawPrism(ctx,x,y,h,top,left,right,opt){
+  opt=opt||{};
+  const p=iso(x,y);
+  const t=opt.tweak||0;
+  const x0=p.x, y0=p.y-h;
+  // top
+  ctx.beginPath();
+  ctx.moveTo(x0, y0-TH/2);
+  ctx.lineTo(x0+TW/2, y0);
+  ctx.lineTo(x0, y0+TH/2);
+  ctx.lineTo(x0-TW/2, y0);
+  ctx.closePath(); ctx.fillStyle=top; ctx.fill();
+  if(opt.topStroke){ctx.strokeStyle=opt.topStroke;ctx.lineWidth=1;ctx.stroke()}
+  // left face
+  ctx.beginPath();
+  ctx.moveTo(x0-TW/2, y0);
+  ctx.lineTo(x0, y0+TH/2);
+  ctx.lineTo(x0, y0+TH/2+h);
+  ctx.lineTo(x0-TW/2, y0+h);
+  ctx.closePath(); ctx.fillStyle=left; ctx.fill();
+  // right face
+  ctx.beginPath();
+  ctx.moveTo(x0+TW/2, y0);
+  ctx.lineTo(x0, y0+TH/2);
+  ctx.lineTo(x0, y0+TH/2+h);
+  ctx.lineTo(x0+TW/2, y0+h);
+  ctx.closePath(); ctx.fillStyle=right; ctx.fill();
+  return p;
+}
+function cellType(x,y,W){
+  // water / beach / park / grass
+  if(y<=0) return 'water';
+  if(y===1 && x<=16) return 'water';
+  if(y===1 && x>16) return 'sand';
+  if(y===2 && x<=2) return 'sand';
+  if(x>=8&&x<=10&&y>=3&&y<=5) return 'park';
+  if(x>=8&&x<=10&&y>=7&&y<=8) return 'plaza';
+  return 'grass';
+}
+function hash(x,y){return ((x*374761+y*668265+x*y*97)%1000)/1000}
+
+function drawTree(ctx,x,y,v){
+  const p=iso(x,y);
+  const h=16+v*10;
+  ctx.fillStyle='#0003';
+  ctx.beginPath(); ctx.ellipse(p.x, p.y+6, 10, 5, 0, 0, 7); ctx.fill();
+  ctx.fillStyle='#6b3f24';
+  ctx.fillRect(p.x-2, p.y-h+8, 4, h);
+  const cols=['#2f8a4a','#3aa15a','#246b38'];
+  const c=cols[Math.floor(v*3)%3];
+  ctx.fillStyle=c;
+  ctx.beginPath(); ctx.ellipse(p.x, p.y-h+4, 12+v*4, 10+v*3, 0, 0, 7); ctx.fill();
+  ctx.fillStyle=shade(c,1.25);
+  ctx.beginPath(); ctx.ellipse(p.x-3, p.y-h, 6, 5, 0, 0, 7); ctx.fill();
+}
+function drawDecoHouse(ctx,x,y,v){
+  const col=pickSoft(v);
+  drawPrism(ctx,x,y,14+v*10, shade(col,1.15), shade(col,.75), shade(col,.55));
+  const p=iso(x,y);
+  const h=14+v*10;
+  // roof darker ridge
+  ctx.fillStyle='#fff8';
+  ctx.fillRect(p.x-3, p.y-h-TH/2+8, 3, 3);
+}
+function pickSoft(v){
+  const cs=['#e8c9a8','#d9c4a0','#c9b8c8','#b8d0c8','#e0d0a8','#d0c8b0'];
+  return cs[Math.floor(v*cs.length)%cs.length];
+}
+function drawCar(ctx,x,y,v,horiz){
+  const p=iso(x,y);
+  const col=['#e85d4c','#2a9d8f','#e8b02a','#5c6bc0','#fff'][Math.floor(v*5)%5];
+  ctx.save();
+  ctx.translate(p.x+(v-.5)*8, p.y+(horiz?2:-2));
+  ctx.fillStyle='#0004';
+  ctx.beginPath(); ctx.ellipse(0,8,10,4,0,0,7); ctx.fill();
+  ctx.fillStyle=col;
+  if(horiz){
+    ctx.beginPath();
+    ctx.moveTo(-12,0); ctx.lineTo(12,-2); ctx.lineTo(12,6); ctx.lineTo(-12,8); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=shade(col,1.3); ctx.fillRect(-4,-6,10,6);
+  }else{
+    ctx.beginPath();
+    ctx.moveTo(-6,-8); ctx.lineTo(6,-4); ctx.lineTo(6,8); ctx.lineTo(-6,4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=shade(col,1.3); ctx.fillRect(-4,-2,6,6);
+  }
+  ctx.restore();
+}
+
+function drawHouse(ctx,x,y,lv,color,flagCol){
+  color=color||'#d7c4a8';
+  if(lv<=0){
+    // empty lot
+    drawDiamond(ctx,x,y,'#c9b48a','#a89068');
+    const p=iso(x,y);
+    ctx.strokeStyle=flagCol||'#8a7350';
+    ctx.lineWidth=1.2;
+    ctx.strokeRect(p.x-14, p.y-6, 28, 14);
+    // sign
+    ctx.fillStyle='#f4e6c0'; ctx.fillRect(p.x+8, p.y-16, 10, 8);
+    ctx.strokeStyle='#6b4e2e'; ctx.strokeRect(p.x+8, p.y-16, 10, 8);
+    if(flagCol){ctx.fillStyle=flagCol; ctx.fillRect(p.x+9, p.y-15, 8, 3)}
+    return;
+  }
+  const h=12+lv*16+(lv>=4?8:0);
+  drawPrism(ctx,x,y,h, shade(color,1.18), shade(color,.72), shade(color,.52), {topStroke:shade(color,.4)});
+  const p=iso(x,y);
+  const y0=p.y-h;
+  // windows
+  const rows=Math.min(lv,4);
+  ctx.fillStyle='#fff6c8';
+  for(let r=0;r<rows;r++){
+    const wy=y0+TH/2+4+r*((h-8)/rows);
+    ctx.fillStyle='#ffeaa0';
+    ctx.fillRect(p.x-14, wy, 5, 5);
+    ctx.fillRect(p.x-7, wy, 5, 5);
+    ctx.fillStyle='#c9e8ff';
+    ctx.fillRect(p.x+4, wy-2, 5, 5);
+    ctx.fillRect(p.x+10, wy-2, 5, 5);
+  }
+  // door
+  ctx.fillStyle='#6b3f24';
+  ctx.fillRect(p.x-3, p.y-4, 6, 10);
+  // flag
+  if(flagCol){
+    ctx.strokeStyle='#444'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(p.x+TW/4, y0-TH/2+4); ctx.lineTo(p.x+TW/4, y0-TH/2-14); ctx.stroke();
+    ctx.fillStyle=flagCol;
+    ctx.beginPath();
+    ctx.moveTo(p.x+TW/4, y0-TH/2-14);
+    ctx.lineTo(p.x+TW/4+14, y0-TH/2-10);
+    ctx.lineTo(p.x+TW/4, y0-TH/2-6);
+    ctx.closePath(); ctx.fill();
+  }
+  // landmark spire
+  if(lv>=5){
+    ctx.fillStyle='#e8d28a';
+    ctx.beginPath();
+    ctx.moveTo(p.x, y0-TH/2-22);
+    ctx.lineTo(p.x+6, y0-TH/2);
+    ctx.lineTo(p.x-6, y0-TH/2);
+    ctx.closePath(); ctx.fill();
+  }
+}
+
+function drawSpecialBldg(ctx,n,ft){
+  const x=ft.x,y=ft.y;
+  const kind=n.kind;
+  if(kind==='start'){
+    drawPrism(ctx,x,y,22,'#ffd57a','#e09a3a','#c47a22');
+    const p=iso(x,y);
+    ctx.fillStyle='#c44738'; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('發薪', p.x, p.y-28);
+    // fountain
+    ctx.fillStyle='#7ec8ff'; ctx.beginPath(); ctx.ellipse(p.x, p.y-10, 8, 4, 0, 0, 7); ctx.fill();
+  }else if(kind==='hospital'){
+    drawPrism(ctx,x,y,36,'#f4f7fb','#d0d8e4','#b0bcc8');
+    const p=iso(x,y);
+    ctx.fillStyle='#e85d4c';
+    ctx.fillRect(p.x-3, p.y-40, 6, 16); ctx.fillRect(p.x-8, p.y-36, 16, 6);
+  }else if(kind==='jail'){
+    drawPrism(ctx,x,y,32,'#c9b0b0','#8a5a5a','#6a4040');
+    const p=iso(x,y);
+    ctx.strokeStyle='#3a2020'; ctx.lineWidth=1.5;
+    for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(p.x+i*5,p.y-28);ctx.lineTo(p.x+i*5,p.y-8);ctx.stroke()}
+  }else if(kind==='bank'){
+    drawPrism(ctx,x,y,28,'#f0e6c8','#c8b888','#a89868');
+    const p=iso(x,y);
+    ctx.fillStyle='#fff8'; ctx.fillRect(p.x-14,p.y-26,6,16); ctx.fillRect(p.x-4,p.y-26,6,16); ctx.fillRect(p.x+6,p.y-26,6,16);
+  }else if(kind==='stock'){
+    drawPrism(ctx,x,y,30,'#cce0ff','#6a8ac0','#4a6aa0');
+    const p=iso(x,y);
+    ctx.strokeStyle='#3cbcaf'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(p.x-10,p.y-16); ctx.lineTo(p.x-2,p.y-24); ctx.lineTo(p.x+4,p.y-18); ctx.lineTo(p.x+12,p.y-30); ctx.stroke();
+  }else if(kind==='shop'){
+    drawPrism(ctx,x,y,24,'#ffb0d0','#e070a0','#c05080');
+    const p=iso(x,y);
+    ctx.fillStyle='#ffd057'; ctx.fillRect(p.x-16,p.y-22,32,6);
+  }else if(kind==='fate'){
+    drawPrism(ctx,x,y,20,'#d4b8f0','#8a60b8','#6a4098');
+    const p=iso(x,y); ctx.fillStyle='#fff'; ctx.font='bold 14px serif'; ctx.textAlign='center'; ctx.fillText('命',p.x,p.y-16);
+  }else if(kind==='chance'){
+    drawPrism(ctx,x,y,20,'#b8e0ff','#5090c8','#3878b0');
+    const p=iso(x,y); ctx.fillStyle='#fff'; ctx.font='bold 14px serif'; ctx.textAlign='center'; ctx.fillText('機',p.x,p.y-16);
+  }else if(kind==='points'){
+    drawPrism(ctx,x,y,18,'#c8f0c0','#5aa85a','#3a883a');
+  }else if(kind==='lottery'){
+    drawPrism(ctx,x,y,24,'#ffe08a','#e0a030','#c08020');
+    const p=iso(x,y); ctx.fillStyle='#c44738'; ctx.font='bold 10px sans-serif'; ctx.textAlign='center'; ctx.fillText('樂透',p.x,p.y-20);
+  }else if(kind==='park'){
+    drawTree(ctx,x,y,.6); drawTree(ctx,x+0.15,y-0.1,.3);
+  }else if(kind==='news'){
+    drawPrism(ctx,x,y,18,'#ffe9c8','#c8a070','#a88050');
+    const p=iso(x,y); ctx.fillStyle='#4a3018'; ctx.font='bold 10px sans-serif'; ctx.textAlign='center'; ctx.fillText('公告',p.x,p.y-16);
+  }else if(kind==='bank'){ /* already */ }
+}
+
+function worldBounds(W){
+  const pts=[iso(0,0),iso(W.W,0),iso(0,W.H),iso(W.W,W.H)];
+  return {minX:Math.min(...pts.map(p=>p.x))-80, maxX:Math.max(...pts.map(p=>p.x))+80,
+          minY:Math.min(...pts.map(p=>p.y))-80, maxY:Math.max(...pts.map(p=>p.y))+120};
+}
+
+function rebuildCache(){
+  if(!WORLD) return;
+  const b=worldBounds(WORLD);
+  const pad=4;
+  const cw=Math.ceil(b.maxX-b.minX)+pad, ch=Math.ceil(b.maxY-b.minY)+pad;
+  cacheG=document.createElement('canvas'); cacheG.width=cw; cacheG.height=ch;
+  cacheB=document.createElement('canvas'); cacheB.width=cw; cacheB.height=ch;
+  cacheG._ox=b.minX; cacheG._oy=b.minY;
+  const g=cacheG.getContext('2d');
+  g.translate(-b.minX,-b.minY);
+  // water & grass
+  for(let y=0;y<WORLD.H;y++){
+    for(let x=0;x<WORLD.W;x++){
+      const t=cellType(x,y);
+      if(t==='water'){
+        const w=0.92+0.08*((x+y)%3);
+        drawDiamond(g,x,y, shade('#3aa0c8',w), '#2a80a8');
+      }else if(t==='sand'){
+        drawDiamond(g,x,y,'#f0d8a0','#d0b878');
+      }else if(t==='park'){
+        drawDiamond(g,x,y,'#5bb86a','#3a8a48');
+      }else if(t==='plaza'){
+        drawDiamond(g,x,y,'#e8d2a0','#c8b080');
+      }else{
+        const v=0.95+0.08*hash(x,y);
+        drawDiamond(g,x,y,shade('#5a9a4a',v),'#3a7a38');
+      }
+    }
+  }
+  // roads
+  for(const n of WORLD.nodes){
+    drawDiamond(g,n.x,n.y,'#c8c0b4','#9a9288');
+    const p=iso(n.x,n.y);
+    // center line if has opposite neighbors
+    const hasE=n.nbrs.some(id=>WORLD.nodes[id].x===n.x+1);
+    const hasW=n.nbrs.some(id=>WORLD.nodes[id].x===n.x-1);
+    const hasS=n.nbrs.some(id=>WORLD.nodes[id].y===n.y+1);
+    const hasN=n.nbrs.some(id=>WORLD.nodes[id].y===n.y-1);
+    g.strokeStyle='#e8d87a'; g.lineWidth=1.2; g.setLineDash([4,4]);
+    g.beginPath();
+    if(hasE||hasW){ const a=iso(n.x-0.45,n.y), c=iso(n.x+0.45,n.y); g.moveTo(a.x,a.y); g.lineTo(c.x,c.y); }
+    if(hasN||hasS){ const a=iso(n.x,n.y-0.45), c=iso(n.x,n.y+0.45); g.moveTo(a.x,a.y); g.lineTo(c.x,c.y); }
+    g.stroke(); g.setLineDash([]);
+  }
+  // park trees and deco
+  for(let y=0;y<WORLD.H;y++){
+    for(let x=0;x<WORLD.W;x++){
+      if(WORLD.at[nk(x,y)]) continue;
+      const foot=WORLD.plots.some(p=>p.bx===x&&p.by===y) || Object.values(WORLD.specFoot).some(f=>f.x===x&&f.y===y);
+      if(foot) continue;
+      const t=cellType(x,y); const v=hash(x,y);
+      if(t==='water'){
+        if(v>0.82){ // boat
+          const p=iso(x,y); g.fillStyle='#6b3f24'; g.fillRect(p.x-8,p.y-2,16,5); g.fillStyle='#fff'; g.beginPath(); g.moveTo(p.x,p.y-14); g.lineTo(p.x+6,p.y-2); g.lineTo(p.x,p.y-2); g.fill();
+        }
+        continue;
+      }
+      if(t==='park' && v>0.35) drawTree(g,x,y,v);
+      else if(t==='sand') continue;
+      else if(v>0.78) drawTree(g,x,y,v);
+      else if(v>0.58) drawDecoHouse(g,x,y,v);
+    }
+  }
+  // parked cars near roads
+  for(const n of WORLD.nodes){
+    const v=hash(n.x,n.y+9);
+    if(v>0.88 && n.kind==='road') drawCar(g,n.x,n.y,v, n.nbrs.some(id=>WORLD.nodes[id].x!==n.x));
+  }
+  dirtyG=false;
+  rebuildBuildings();
+}
+function rebuildBuildings(){
+  if(!WORLD||!cacheB||!cacheG) return;
+  const b=worldBounds(WORLD);
+  const g=cacheB.getContext('2d');
+  g.setTransform(1,0,0,1,0,0); g.clearRect(0,0,cacheB.width,cacheB.height);
+  g.translate(-cacheG._ox,-cacheG._oy);
+  // specials first, then plots (sort by iso depth = x+y)
+  const specs=WORLD.nodes.filter(n=>n.kind!=='road'&&n.kind!=='plot').map(n=>({depth:n.x+n.y, n, ft:WORLD.specFoot[n.id]||{x:n.x,y:n.y}}));
+  const pls=(S?S.plots:WORLD.plots).map(p=>({depth:p.bx+p.by, p}));
+  const all=[...specs.map(s=>({depth:s.depth, k:'s',s})), ...pls.map(s=>({depth:s.depth,k:'p',s}))].sort((a,b)=>a.depth-b.depth);
+  for(const it of all){
+    if(it.k==='s') drawSpecialBldg(g,it.s.n,it.s.ft);
+    else{
+      const p=it.s.p; const col=p.owner&&S? (pById(p.owner)||{}).color || GROUPS[p.group].color : GROUPS[p.group].color;
+      const flag=p.owner&&S? (pById(p.owner)||{}).color : GROUPS[p.group].color;
+      drawHouse(g,p.bx,p.by,p.lv||0, p.lv?col:shade(GROUPS[p.group].color,1.35), flag);
+    }
+  }
+  dirtyB=false;
+}
+
+function worldToScreen(wx,wy){
+  return {x:(wx-camX)*zoom + viewW/2, y:(wy-camY)*zoom + viewH*0.50};
+}
+function screenToWorld(sx,sy){
+  return {x:(sx-viewW/2)/zoom + camX, y:(sy-viewH*0.50)/zoom + camY};
+}
+
+function drawChibi(ctx, p, gx, gy, t){
+  const ip=iso(gx,gy);
+  const bob=p._walk? Math.abs(Math.sin((p._wt||0)*Math.PI*2))*4 : 0;
+  const x=ip.x, y=ip.y-8-bob;
+  const facing = (p._fdx||0) - (p._fdy||0); // iso left if negative
+  const flip=facing<0;
+  // shadow
+  ctx.fillStyle='#0004';
+  ctx.beginPath(); ctx.ellipse(ip.x, ip.y+4, 10, 5, 0, 0, 7); ctx.fill();
+  ctx.save();
+  ctx.translate(x,y);
+  if(flip) ctx.scale(-1,1);
+  const col=p.color||'#e85d4c';
+  // legs
+  const step=p._walk? Math.sin((p._wt||0)*Math.PI*2)*4 : 0;
+  ctx.strokeStyle='#2a1a10'; ctx.lineWidth=2.2; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-3,8); ctx.lineTo(-3+step,14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(3,8); ctx.lineTo(3-step,14); ctx.stroke();
+  // body
+  ctx.fillStyle=col;
+  ctx.beginPath(); ctx.ellipse(0,4,8,8,0,0,7); ctx.fill();
+  ctx.fillStyle=shade(col,1.25);
+  ctx.beginPath(); ctx.ellipse(-2,2,4,4,0,0,7); ctx.fill();
+  // head
+  if(p.img){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(0,-8,9,0,7); ctx.clip();
+    if(p._imgEl && p._imgEl.complete) ctx.drawImage(p._imgEl,-9,-17,18,18);
+    else {ctx.fillStyle='#f3c39a'; ctx.fill()}
+    ctx.restore();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(0,-8,9,0,7); ctx.stroke();
+  }else{
+    ctx.fillStyle='#f3c39a';
+    ctx.beginPath(); ctx.arc(0,-8,9,0,7); ctx.fill();
+    ctx.fillStyle='#2a1a10';
+    ctx.beginPath(); ctx.arc(-3,-9,1.3,0,7); ctx.arc(3,-9,1.3,0,7); ctx.fill();
+    // simple hair by char
+    const kind=p.charId||'uncle';
+    if(kind==='lady'){ ctx.fillStyle='#3b2a1a'; ctx.beginPath(); ctx.arc(-8,-8,3,0,7); ctx.arc(8,-8,3,0,7); ctx.fill(); }
+    if(kind==='uncle'){ ctx.fillStyle='#cfcfcf'; ctx.beginPath(); ctx.arc(-6,-12,3,0,7); ctx.arc(6,-12,3,0,7); ctx.fill(); }
+    if(kind==='chef'){ ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(0,-16,7,4,0,0,7); ctx.fill(); }
+    if(kind==='aunt'){ ctx.fillStyle='#f3d27a'; ctx.beginPath(); ctx.arc(-7,-10,4,0,7); ctx.arc(7,-10,4,0,7); ctx.fill(); }
+    if(kind==='worker'){ ctx.fillStyle='#3d3d42'; ctx.beginPath(); ctx.ellipse(0,-14,8,4,0,0,7); ctx.fill(); }
+    if(kind==='student'){ ctx.fillStyle='#2c1a10'; ctx.beginPath(); ctx.arc(-1,-18,1.5,0,7); ctx.fill(); }
+  }
+  ctx.restore();
+  // god icon
+  if(p.god && GODS[p.god]){
+    ctx.font='13px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(GODS[p.god].icon, ip.x+12, ip.y-22);
+  }
+  if(p.bomb){ ctx.font='12px sans-serif'; ctx.fillText('💣', ip.x-12, ip.y-20); }
+  // name
+  ctx.font='bold 10px sans-serif'; ctx.textAlign='center';
+  ctx.fillStyle='#fff'; ctx.strokeStyle='#0008'; ctx.lineWidth=3;
+  ctx.strokeText(p.name, ip.x, ip.y+18);
+  ctx.fillText(p.name, ip.x, ip.y+18);
+}
+
+function drawGodFig(ctx,g){
+  const n=WORLD.nodes[g.tile]; if(!n) return;
+  const p=iso(n.x,n.y);
+  const G=GODS[g.id]; if(!G) return;
+  const bob=Math.sin((performance.now()/400)+n.id)*3;
+  ctx.font='20px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(G.icon, p.x, p.y-10+bob);
+  ctx.font='bold 9px sans-serif'; ctx.fillStyle='#fff'; ctx.strokeStyle='#0008'; ctx.lineWidth=3;
+  ctx.strokeText(G.name, p.x, p.y+8); ctx.fillText(G.name, p.x, p.y+8);
+}
+
+function drawHaz(ctx,n){
+  if(!S) return;
+  const st=S.nodes[n.id]; if(!st) return;
+  if(!(st.block||st.mine||st.bomb)) return;
+  const p=iso(n.x,n.y);
+  ctx.font='16px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(st.mine?'💥':st.bomb?'💣':'🚧', p.x, p.y-6);
+}
+
+let lastFrame=0, rafOn=false;
+function ensureLoop(){
+  if(rafOn) return; rafOn=true;
+  const loop=(ts)=>{
+    if(view!=='game'){rafOn=false; return}
+    renderMap(ts);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
+function fitCamToPlayer(p,snap){
+  if(!p||camFree) return;
+  const gx=p._gx!=null?p._gx: (WORLD.nodes[p.node]||{}).x||0;
+  const gy=p._gy!=null?p._gy: (WORLD.nodes[p.node]||{}).y||0;
+  const ip=iso(gx,gy);
+  camTx=ip.x; camTy=ip.y-10;
+  if(snap){camX=camTx; camY=camTy}
+}
+
+function renderMap(ts){
+  if(!CAN||!CTX||!WORLD) return;
+  // camera lerp
+  if(!camFree){
+    camX+=(camTx-camX)*0.12;
+    camY+=(camTy-camY)*0.12;
+  }
+  if(S&&cur()&&!camFree) fitCamToPlayer(cur(),false);
+
+  const ctx=CTX;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,CAN.width,CAN.height);
+  ctx.fillStyle='#7ec8e8';
+  ctx.fillRect(0,0,CAN.width,CAN.height);
+  // water horizon
+  ctx.fillStyle='#3aa0c8'; ctx.fillRect(0,0,CAN.width,CAN.height);
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.translate(viewW/2, viewH*0.50);
+  ctx.scale(zoom,zoom);
+  ctx.translate(-camX,-camY);
+
+  if(dirtyG||!cacheG) rebuildCache();
+  else if(dirtyB) rebuildBuildings();
+  if(cacheG) ctx.drawImage(cacheG, cacheG._ox, cacheG._oy);
+  if(cacheB) ctx.drawImage(cacheB, cacheG._ox, cacheG._oy);
+
+  if(S){
+    for(const n of WORLD.nodes) drawHaz(ctx,n);
+    for(const g of (S.gods||[])) drawGodFig(ctx,g);
+    // players by depth
+    const plist=S.players.filter(p=>!p.bankrupt).slice().sort((a,b)=>((a._gy||0)+(a._gx||0))-((b._gy||0)+(b._gx||0)));
+    for(const p of plist){
+      const gx=p._gx!=null?p._gx:WORLD.nodes[p.node].x;
+      const gy=p._gy!=null?p._gy:WORLD.nodes[p.node].y;
+      drawChibi(ctx,p,gx,gy,ts);
+    }
+  }
+  // fx
+  fxList=fxList.filter(f=>f.t<f.life);
+  for(const f of fxList){
+    f.t++;
+    if(f.type==='dust'){
+      ctx.globalAlpha=1-f.t/f.life;
+      ctx.fillStyle='#eee8';
+      ctx.beginPath(); ctx.arc(f.x, f.y-f.t*0.6, 6, 0, 7); ctx.fill();
+      ctx.globalAlpha=1;
+    }
+  }
+  drawMinimap();
+}
+
+function resizeGame(){
+  CAN=$('map'); if(!CAN) return;
+  const app=$('app');
+  viewW=app.clientWidth; viewH=app.clientHeight;
+  dpr=Math.min(2, window.devicePixelRatio||1);
+  CAN.width=Math.floor(viewW*dpr); CAN.height=Math.floor(viewH*dpr);
+  CAN.style.width=viewW+'px'; CAN.style.height=viewH+'px';
+  CTX=CAN.getContext('2d');
+  CTX.imageSmoothingEnabled=true;
+}
+
+function drawMinimap(){
+  const el=$('mm'); if(!el||!el.classList.contains('on')||!WORLD||!S) return;
+  const x=el.getContext('2d');
+  const w=el.width,h=el.height;
+  x.clearRect(0,0,w,h);
+  x.fillStyle='#0c3d34'; x.fillRect(0,0,w,h);
+  const sc=Math.min((w-8)/WORLD.W, (h-8)/WORLD.H);
+  const ox=4, oy=4;
+  x.fillStyle='#3aa0c8'; x.fillRect(ox,oy,WORLD.W*sc, 2*sc);
+  x.fillStyle='#4a8a3a'; x.fillRect(ox,oy,WORLD.W*sc,WORLD.H*sc);
+  x.fillStyle='#b8b0a4';
+  for(const n of WORLD.nodes){
+    x.fillRect(ox+n.x*sc, oy+n.y*sc, sc, sc);
+  }
+  for(const p of S.plots){
+    x.fillStyle=p.owner?(pById(p.owner)||{}).color||'#fff': (GROUPS[p.group].color);
+    const n=WORLD.nodes[p.nodeId];
+    x.fillRect(ox+n.x*sc+1, oy+n.y*sc+1, Math.max(2,sc-2), Math.max(2,sc-2));
+  }
+  for(const p of S.players){
+    if(p.bankrupt) continue;
+    const n=WORLD.nodes[p.node];
+    x.fillStyle=p.color||'#fff';
+    x.beginPath(); x.arc(ox+(p._gx!=null?p._gx:n.x)*sc+sc/2, oy+(p._gy!=null?p._gy:n.y)*sc+sc/2, 3,0,7); x.fill();
+    x.strokeStyle='#fff'; x.lineWidth=1; x.stroke();
+  }
+}
+
+/* camera touch */
+const ptrs=new Map();
+let lastPinch=0, lastPan=null;
+function bindCam(){
+  const el=$('map');
+  el.addEventListener('pointerdown',e=>{
+    el.setPointerCapture(e.pointerId);
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    lastPan={x:e.clientX,y:e.clientY};
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const arr=[...ptrs.values()];
+    if(arr.length===2){
+      const d=Math.hypot(arr[0].x-arr[1].x, arr[0].y-arr[1].y);
+      if(lastPinch){
+        const f=d/lastPinch;
+        zoom=clamp(zoom*f, 0.65, 1.85);
+      }
+      lastPinch=d; camFree=true; $('recenter').style.display='block';
+    }else if(arr.length===1 && lastPan){
+      const dx=e.clientX-lastPan.x, dy=e.clientY-lastPan.y;
+      if(Math.abs(dx)+Math.abs(dy)>3){
+        camFree=true; $('recenter').style.display='block';
+        camX-=dx/zoom; camY-=dy/zoom;
+      }
+      lastPan={x:e.clientX,y:e.clientY};
+    }
+  });
+  const up=e=>{
+    ptrs.delete(e.pointerId); lastPinch=0; lastPan=null;
+  };
+  el.addEventListener('pointerup',up);
+  el.addEventListener('pointercancel',up);
+}
+
+function recam(){ camFree=false; $('recenter').style.display='none'; if(S&&cur()) fitCamToPlayer(cur(),true); }
+
+function addDust(gx,gy){
+  const p=iso(gx,gy);
+  for(let i=0;i<6;i++) fxList.push({type:'dust',x:p.x+rnd(16)-8,y:p.y+rnd(8)-8,t:0,life:18+rnd(10)});
+}
+
+
+/* ---------- state / engine ---------- */
+let S=null, me={id:'me',name:'我',host:false}, mode='', portraits={};
+let peer=null, conns={}, closing=false, lastSeen=0, hb=0;
+let view='lobby', setupKind='ai', selectedChar='uncle', editingCustom=null, crImg='';
+let speedy=false;
+let walkWait=null, imgCache={};
+
+function delay(ms){return sleep(FAST?0: (speedy?Math.min(ms,90):ms))}
+function isAuto(p){return !p||p.isAI||p.dropped||FAST||(mode==='ai'&&p.id!==me.id)||(mode==='host'&&p.isAI)}
+
 function mkPlayer(o){
+  const start=WORLD?WORLD.start:0;
   return {
     id:o.id,name:o.name,charId:o.charId||'uncle',custom:o.custom||null,color:o.color||'#e85d4c',
     pers:o.pers||'money',img:o.img||null,lines:o.lines||null,isAI:!!o.isAI,human:o.human!==false&&!o.isAI,
-    money:20000,dep:0,loan:0,pos:0,dir:1,pts:40,items:['dice','block','mine'],
+    money:20000,dep:0,loan:0,node:start,prev:-1,pts:40,items:['dice','block','mine'],
     stocks:{food:0,ship:0,tech:0,tour:0},
     jail:0,hospital:0,stay:0,turtle:0,dream:0,sleep:0,ally:null,allyN:0,
     god:null,godN:0,bomb:0,diceMax:1,bankrupt:false,expr:'normal',anim:'',
-    dropped:false
+    dropped:false, _gx:null,_gy:null,_walk:false,_wt:0,_fdx:0,_fdy:0
   };
 }
 function netWorth(p,state){
   state=state||S;
   if(!p||p.bankrupt) return 0;
   let v=p.money+p.dep-p.loan;
-  for(const t of state.tiles) if(t.owner===p.id) v+=landValue(t);
-  for(const st of state.stocks) v+= (p.stocks[st.id]||0)*st.price;
+  for(const t of state.plots) if(t.owner===p.id) v+=landValue(t);
+  for(const st of state.stocks) v+=(p.stocks[st.id]||0)*st.price;
   return Math.round(v);
 }
 function cur(state){state=state||S;return state.players[state.turn]}
@@ -649,239 +1262,82 @@ function alive(state){return (state||S).players.filter(p=>!p.bankrupt)}
 function pById(id,state){return (state||S).players.find(p=>p.id===id)}
 function linesOf(p){return (p.lines)||LINES[p.pers]||LINES.money}
 function say(p,key,fallback){
-  if(!p) return;
+  if(!p) return '';
   const L=linesOf(p);
   const text=L[key]||fallback||'';
   S.bubble={pid:p.id,text,ttl:3};
   p.expr= key==='pay'||key==='bad'||key==='br' ? (key==='br'?'cry':key==='pay'?'angry':'nervous')
-        : key==='recv'||key==='good'||key==='buy' ? (key==='recv'?'smug':key==='buy'?'happy':'happy') : 'normal';
+        : key==='recv'||key==='good'||key==='buy' ? (key==='recv'?'smug':'happy') : 'normal';
   p.anim= key==='pay'?'shake':key==='br'?'fall':(key==='good'||key==='buy'||key==='recv')?'bounce':'';
   log(`${p.name}：「${text}」`);
+  return text;
 }
-function log(msg){
-  S.log.unshift(msg);
-  if(S.log.length>40) S.log.length=40;
-}
-function randItem(){
-  const pool=SHOP_ORDER.filter(id=>!AUTO_ITEMS.has(id)||rnd(3)===0);
-  return pick(pool);
-}
+function log(msg){ S.log.unshift(msg); if(S.log.length>50) S.log.length=50; }
+function randItem(){ const pool=SHOP_ORDER.filter(id=>!AUTO_ITEMS.has(id)||rnd(3)===0); return pick(pool); }
 function giveItem(p,id,silent){
   if(!id||!ITEMS[id]) return;
   if(p.items.length>=8) p.items.shift();
   p.items.push(id);
   if(!silent) log(`${p.name} 獲得「${ITEMS[id].name}」`);
 }
-function takeItem(p,id){
-  const i=p.items.indexOf(id);
-  if(i>=0){p.items.splice(i,1);return true}
-  return false;
-}
+function takeItem(p,id){ const i=p.items.indexOf(id); if(i>=0){p.items.splice(i,1);return true} return false; }
 
 function freshState(players,opts){
+  if(!WORLD) WORLD=buildWorld();
+  const nodes=WORLD.nodes.map(n=>({id:n.id,kind:n.kind,name:n.name,plotId:n.plotId,block:0,mine:0,bomb:0}));
+  const plots=WORLD.plots.map(p=>({...p,lv:0,owner:null,seal:0,inflate:0}));
   return {
-    code:opts.code||'',
-    win:opts.win||'rounds',
-    maxRound:opts.maxRound||16,
+    code:opts.code||'', win:opts.win||'rounds', maxRound:opts.maxRound||16,
     round:1, turn:0, phase:'main', busy:false, over:false, winner:null,
-    pot:0, lastDice:0, dice:[],
-    tiles:newTiles(),
-    stocks:STOCKS0.map(s=>({...s,lock:0,lockDir:0})),
-    gods:[], // {id,tile}
-    players, log:['晴空城開市，大家準備搶地！'],
-    bubble:null, pending:null, news:''
+    cal:{y:1,m:1,d:1}, pot:0, lastDice:0, dice:[],
+    nodes, plots, stocks:STOCKS0.map(s=>({...s,lock:0,lockDir:0})),
+    gods:[], players, log:['晴空城開市，日曆翻到 1 年 1 月 1 日。'],
+    bubble:null, pending:null, news:'天氣晴朗，適合收租。'
   };
 }
-
-/* ---------- engine ---------- */
-function tickPlayerStart(p){
-  if(p.bankrupt) return 'skip';
-  if(p.dep>0){const inc=Math.round(p.dep*0.05);p.dep+=inc;p.money+=0;log(`${p.name} 存款利息 ${fmt(inc)} 已滾入本金`)}
-  if(p.loan>0){const fee=Math.max(200,Math.round(p.loan*0.1)); mustPay(p,fee,{reason:'貸款利息',fine:true})}
-  if(p.allyN>0){p.allyN--; if(p.allyN<=0){log(`${p.name} 與 ${(pById(p.ally)||{}).name||'某人'} 的同盟結束`);p.ally=null}}
-  if(p.god){
-    p.godN--;
-    if(p.godN<=0){
-      const flip=GOD_FLIP[p.god];
-      log(`${p.name} 身上的「${GODS[p.god].name}」離開了`);
-      if(flip) spawnGod(flip);
-      p.god=null;
-      if(p._wasReaper){ /* handled below */ }
-    }
-  }
-  if(p.god==='reaper' && p.godN<=0){
-    // already removed above; trigger reap if it was reaper - check via leaving
-  }
-  // handle reaper expiry before clearing: do it properly
+function calStr(c){ c=c||(S&&S.cal)||{y:1,m:1,d:1}; return `晴空曆 ${c.y}年${c.m}月${c.d}日`; }
+function addDay(){
+  const c=S.cal; c.d++;
+  let ev=[];
+  if(c.d>30){ c.d=1; c.m++; ev.push('month'); }
+  if(c.m>12){ c.m=1; c.y++; ev.push('year'); }
+  if(c.d===15) ev.push('tax');
+  if(rnd(5)===0) ev.push('news');
+  return ev;
 }
 
-function startTurn(){
-  if(!S||S.over) return;
-  S.pending=null; S.phase='main'; S.dice=[]; S.lastDice=0;
-  const p=cur();
-  if(!p||p.bankrupt){nextTurn();return}
-  p.expr='normal'; p.anim=''; p.diceMax=1;
-  // interest once per personal turn
-  if(p.dep>0){const inc=Math.round(p.dep*0.05);p.dep+=inc;log(`${p.name} 的存款生出利息 ${fmt(inc)}`)}
-  if(p.loan>0 && !p.bankrupt){const fee=Math.max(200,Math.round(p.loan*0.1));mustPay(p,fee,{reason:'貸款利息',fine:true})}
-  if(p.bankrupt){nextTurn();return}
-  if(p.allyN>0){p.allyN--; if(p.allyN<=0){log(`${p.name} 的同盟結束`);p.ally=null}}
-
-  // god duration
-  if(p.god){
-    const gid=p.god;
-    p.godN--;
-    if(p.godN<=0){
-      if(gid==='reaper'){
-        log(`收魂使向 ${p.name} 索命！`);
-        say(p,'bad');
-        mustPay(p,Math.round(p.money*0.3),{reason:'收魂',fine:true});
-        sendHospital(p,3,{noPardon:false,from:'reaper'});
-      }else{
-        log(`${p.name} 身上的「${GODS[gid].name}」離開了`);
-        const flip=GOD_FLIP[gid]; if(flip) spawnGod(flip);
-      }
-      p.god=null; p.godN=0;
-    }
-  }
-
-  // tile buffs already ticked globally at round start
-
-  if(p.sleep>0){
-    p.sleep--; log(`${p.name} 還在午睡（剩 ${p.sleep} 回合）`);
-    return endTurn(true);
-  }
-  if(p.hospital>0){
-    if(hasGodProtect(p)){p.hospital=0;log(`${GODS[p.god].name} 護著 ${p.name}，提前出院！`);}
-    else{
-      S.pending={type:'hospital',pid:p.id};
-      paint(); maybeAI(); return;
-    }
-  }
-  if(p.jail>0){
-    if(hasGodProtect(p)){p.jail=0;log(`${GODS[p.god].name} 幫 ${p.name} 逃過加班！`);}
-    else{
-      S.pending={type:'jail',pid:p.id};
-      paint(); maybeAI(); return;
-    }
-  }
-  if(p.stay>0){
-    p.stay--; log(`${p.name} 本回合原地立定`);
-    S.phase='after';
-    paint(); maybeAI(); return;
-  }
-  if(p.turtle>0) p.turtle--; // used when rolling
-  S.phase='main';
-  log(`輪到 ${p.name}`);
-  paint(); maybeAI();
-}
-
-function hasGodProtect(p){return p.god==='luck_s'||p.god==='luck_b'||p.god==='addon'||p.god==='gold_b'}
-function godExtendBad(p){return p.god==='wrecker'||p.god==='jinx_s'||p.god==='jinx_b'}
-
-function nextTurn(){
-  if(!S||S.over) return;
-  const living=alive();
-  if(living.length<=1){return finish('last')}
-  // find next
-  let t=S.turn, n=S.players.length, hops=0;
-  do{ t=(t+1)%n; hops++; if(t===0){ onNewRound(); } }
-  while(S.players[t].bankrupt && hops<=n+1);
-  S.turn=t;
-  if(S.over) return;
-  startTurn();
-}
-function onNewRound(){
-  S.round++;
-  // tick land buffs each full round
-  for(const t of S.tiles){
-    if(t.seal>0) t.seal--;
-    if(t.inflate>0) t.inflate--;
-  }
-  fluctuateStocks();
-  maybeSpawnGod();
-  wanderGods();
-  log(`—— 第 ${S.round} 回合 ——`);
-  if(S.win==='rounds' && S.round>S.maxRound){finish('rounds')}
-}
-function finish(why){
-  if(S.over) return;
-  S.over=true; S.phase='over'; S.pending=null;
-  const arr=S.players.map(p=>({p,w:netWorth(p)})).sort((a,b)=>b.w-a.w);
-  S.winner=arr[0].p.id;
-  S.rank=arr;
-  S.why=why;
-  const w=arr[0].p;
-  say(w,'good','贏啦！');
-  log(`遊戲結束！優勝者是 ${w.name}（身家 ${fmt(arr[0].w)}）`);
-  sfx('win');
-  paint();
-  showResult();
-}
-
-function passGo(p){
-  let sal=3000;
-  if(p.god==='gold_b') sal*=2;
-  if(p.god==='poor_b') sal=Math.round(sal*0.5);
-  p.money+=sal; p.pts+=15;
-  log(`${p.name} 經過發薪日，領了 ${fmt(sal)} 和 15 點`);
-  sfx('coin');
-}
-
-function canBuy(p,tile){
-  if(!p||!tile||p.bankrupt||p.dream>0||p.sleep>0) return false;
-  if(p.god==='jinx_s'||p.god==='jinx_b') return false;
-  if(!(tile.t==='land'||tile.t==='trans'||tile.t==='util')) return false;
-  if(tile.owner) return false;
-  let price=buyPrice(p,tile);
-  return p.money>=price;
-}
-function buyPrice(p,tile){
-  let price=tile.price;
-  if(p.god==='luck_s') price=Math.round(price*0.5);
-  if(p.god==='luck_b') price=0;
-  return price;
-}
-function doBuy(p,tile){
-  const price=buyPrice(p,tile);
-  if(p.money<price) return false;
-  p.money-=price; tile.owner=p.id;
-  if(p.god==='luck_s'||p.god==='luck_b'){tile.lv=Math.min(5,(tile.lv||0)+1)}
-  say(p,'buy'); sfx('coin');
-  log(`${p.name} 買下 ${tile.name}（${fmt(price)}）`);
-  return true;
-}
-function upgradeCost(tile){return Math.round((tile.price||0)*UPG[Math.min(5,(tile.lv||0)+1)]||tile.price*0.5)}
-function canUp(p,tile){
-  if(!p||!tile||tile.owner!==p.id) return false;
-  if(p.god==='jinx_s'||p.god==='jinx_b'||p.dream>0) return false;
-  if(!(tile.t==='land')) return false;
-  if((tile.lv||0)>=5) return false;
-  return p.money>=upgradeCost(tile);
-}
-function doUp(p,tile,free){
-  if((tile.lv||0)>=5) return;
-  if(!free){const c=upgradeCost(tile); if(p.money<c) return; p.money-=c}
-  tile.lv=(tile.lv||0)+1;
-  log(`${p.name} 把 ${tile.name} 加蓋成「${LVNAME[tile.lv]}」`);
-  sfx('coin');
-}
-
-function actualToll(p,tile){
-  if(!tile.owner || tile.owner===p.id) return 0;
-  const o=pById(tile.owner);
+function actualToll(p,plot){
+  if(!plot.owner || plot.owner===p.id) return 0;
+  const o=pById(plot.owner);
   if(!o||o.bankrupt||o.dream>0||o.sleep>0||o.hospital>0||o.jail>0) return 0;
   if(p.ally && p.ally===o.id && p.allyN>0) return 0;
-  if(tile.seal>0) return 0;
-  // combined monopoly if allied and same group
-  let t={...tile};
-  let r=tollBase(tile,S);
-  if(tile.inflate>0) r*=2;
+  if(plot.seal>0) return 0;
+  let r=tollBase(plot,S);
+  if(plot.inflate>0) r*=2;
   if(p.god==='gold_s') r=Math.round(r*0.5);
   if(p.god==='gold_b') r=0;
   if(p.god==='poor_s') r=Math.round(r*1.5);
   if(p.god==='poor_b') r=Math.round(r*2);
   return Math.round(r);
+}
+function buyPrice(p,plot){
+  let price=plot.price;
+  if(p.god==='luck_s') price=Math.round(price*0.5);
+  if(p.god==='luck_b') price=0;
+  return price;
+}
+function canBuy(p,plot){
+  if(!p||!plot||p.bankrupt||p.dream>0||p.sleep>0) return false;
+  if(p.god==='jinx_s'||p.god==='jinx_b') return false;
+  if(plot.owner) return false;
+  return p.money>=buyPrice(p,plot);
+}
+function canUp(p,plot){
+  if(!p||!plot||plot.owner!==p.id) return false;
+  if(p.god==='jinx_s'||p.god==='jinx_b'||p.dream>0) return false;
+  if((plot.lv||0)>=5) return false;
+  if(plot.group==='tr'||plot.group==='ut') return false;
+  return p.money>=upgradeCost(plot);
 }
 
 function mustPay(p,amount,opt){
@@ -895,18 +1351,10 @@ function mustPay(p,amount,opt){
     if(p.god==='poor_b') amt=Math.round(amt*2);
   }
   if(amt<=0) return 0;
-  // freetoll auto
-  if((amt>=2000 || amt>=p.money) && p.items.includes('freetoll') && !opt.noFree){
-    takeItem(p,'freetoll');
-    log(`${p.name} 打出免除帳單卡，這筆 ${fmt(amt)} 不用付了！`);
-    say(p,'good');
-    return 0;
+  if((amt>=2000||amt>=p.money)&&p.items.includes('freetoll')&&!opt.noFree){
+    takeItem(p,'freetoll'); log(`${p.name} 打出免除帳單卡，這筆 ${fmt(amt)} 不用付了！`); say(p,'good'); return 0;
   }
-  // 嫁禍
-  if(p.items.includes('passthe') && !opt.noPass && opt.fromPid!==undefined){
-    // handled as auto to richest other if AI or always auto to avoid softlock unless human and pending
-  }
-  if(p.items.includes('passthe') && !opt.noPass && !opt.passed){
+  if(p.items.includes('passthe')&&!opt.noPass&&!opt.passed){
     const others=alive().filter(x=>x.id!==p.id);
     if(others.length){
       takeItem(p,'passthe');
@@ -918,96 +1366,52 @@ function mustPay(p,amount,opt){
   if(p.money>=amt){p.money-=amt; return amt}
   liquidate(p,amt-p.money);
   if(p.money>=amt){p.money-=amt; return amt}
-  const paid=p.money; p.money=0;
-  bankrupt(p);
-  return paid;
+  const paid=p.money; p.money=0; bankrupt(p); return paid;
 }
 function liquidate(p,need){
-  // sell stocks
   for(const st of S.stocks){
-    if(need<=0||p.bankrupt) break;
-    const n=p.stocks[st.id]||0;
-    if(n>0){
-      const sell=n;
-      p.stocks[st.id]=0; const got=sell*st.price; p.money+=got; need-=got;
-      log(`${p.name} 賣出 ${st.name} ×${sell}，換得 ${fmt(got)}`);
-    }
+    if(need<=0) break;
+    const n=p.stocks[st.id]||0; if(!n) continue;
+    p.stocks[st.id]=0; const got=n*st.price; p.money+=got; need-=got;
+    log(`${p.name} 賣出 ${st.name} ×${n}，換得 ${fmt(got)}`);
   }
-  // downgrade houses
-  const lands=S.tiles.filter(t=>t.owner===p.id&&t.lv>0).sort((a,b)=>b.lv-a.lv);
+  const lands=S.plots.filter(t=>t.owner===p.id&&t.lv>0).sort((a,b)=>b.lv-a.lv);
   for(const t of lands){
     while(t.lv>0 && need>0){
       t.lv--; const got=Math.round(upgradeCost(t)*0.5)+Math.round(t.price*0.15);
-      p.money+=got; need-=got;
-      log(`${p.name} 拆除 ${t.name} 一層，拿回 ${fmt(got)}`);
+      p.money+=got; need-=got; log(`${p.name} 拆除 ${t.name} 一層，拿回 ${fmt(got)}`); dirtyB=true;
     }
   }
-  // sell properties at 50%
-  const props=S.tiles.filter(t=>t.owner===p.id).sort((a,b)=>landValue(a)-landValue(b));
+  const props=S.plots.filter(t=>t.owner===p.id).sort((a,b)=>landValue(a)-landValue(b));
   for(const t of props){
     if(need<=0) break;
     const got=Math.round(landValue(t)*0.5);
     t.owner=null; t.lv=0; p.money+=got; need-=got;
-    log(`${p.name} 賣出 ${t.name}，拿回 ${fmt(got)}`);
+    log(`${p.name} 賣出 ${t.name}，拿回 ${fmt(got)}`); dirtyB=true;
   }
-  // withdraw deposits
-  if(p.dep>0 && need>0){
-    const w=Math.min(p.dep,need); p.dep-=w; p.money+=w; need-=w;
-    log(`${p.name} 領出存款 ${fmt(w)}`);
-  }
+  if(p.dep>0 && need>0){ const w=Math.min(p.dep,need); p.dep-=w; p.money+=w; need-=w; }
 }
 function bankrupt(p){
   if(p.bankrupt) return;
   p.bankrupt=true; p.money=0; p.dep=0; p.items=[]; p.god=null; p.bomb=0;
-  say(p,'br'); sfx('bad');
-  log(`${p.name} 破產了！土地全部交還。`);
-  for(const t of S.tiles) if(t.owner===p.id){t.owner=null;t.lv=0}
+  say(p,'br'); sfx('bad'); log(`${p.name} 破產了！土地全部交還。`);
+  for(const t of S.plots) if(t.owner===p.id){t.owner=null;t.lv=0} dirtyB=true;
   p.stocks={food:0,ship:0,tech:0,tour:0};
-  const living=alive();
-  if(living.length<=1) finish('last');
+  if(alive().length<=1) finish('last');
 }
 
-function sendHospital(p,days,opt){
-  opt=opt||{};
-  if(hasGodProtect(p) && !opt.noPardon){log(`${GODS[p.god].name} 讓 ${p.name} 免於住院`);return}
-  if(tryDefend(p,'hospital',opt.fromPid)) return;
-  p.hospital=(p.hospital||0)+(godExtendBad(p)?days+2:days);
-  p.pos=10; p.diceMax=1;
-  log(`${p.name} 被送進醫院，要躺 ${p.hospital} 回合`);
-  say(p,'bad');
-}
-function sendJail(p,days,opt){
-  opt=opt||{};
-  if(hasGodProtect(p) && !opt.noPardon){log(`${GODS[p.god].name} 讓 ${p.name} 免於加班`);return}
-  if(tryDefend(p,'jail',opt.fromPid)) return;
-  p.jail=(p.jail||0)+(godExtendBad(p)?days+2:days);
-  p.pos=30;
-  log(`${p.name} 被送進加班室，要加 ${p.jail} 回合班`);
-  say(p,'bad');
-}
+function hasGodProtect(p){return p.god==='luck_s'||p.god==='luck_b'||p.god==='addon'||p.god==='gold_b'}
+function godExtendBad(p){return p.god==='wrecker'||p.god==='jinx_s'||p.god==='jinx_b'}
 function tryDefend(p,kind,fromPid){
-  if(p.items.includes('pardon')){
-    takeItem(p,'pardon');
-    log(`${p.name} 打出消災解厄卡，化解了！`);
-    say(p,'good');
-    return true;
-  }
+  if(p.items.includes('pardon')){ takeItem(p,'pardon'); log(`${p.name} 打出消災解厄卡，化解了！`); say(p,'good'); return true; }
   if(fromPid && p.items.includes('revenge')){
-    takeItem(p,'revenge');
-    const atk=pById(fromPid);
-    log(`${p.name} 打出以牙還牙卡！`);
-    if(atk){
-      if(kind==='jail') sendJail(atk,3,{fromPid:p.id,noPass:true});
-      if(kind==='dream') applyDream(atk,3,{fromPid:p.id});
-      if(kind==='hospital') sendHospital(atk,3,{fromPid:p.id});
-    }
-    // self still suffers unless also pardon - original revenge is additional. I'll let both suffer unless pardon.
+    takeItem(p,'revenge'); const atk=pById(fromPid); log(`${p.name} 打出以牙還牙卡！`);
+    if(atk){ if(kind==='jail') sendJail(atk,3,{fromPid:p.id,noPass:true}); if(kind==='dream') applyDream(atk,3,{fromPid:p.id}); if(kind==='hospital') sendHospital(atk,3,{fromPid:p.id}); }
   }
   if(fromPid && p.items.includes('passthe') && (kind==='jail'||kind==='dream'||kind==='hospital')){
     const others=alive().filter(x=>x.id!==p.id && x.id!==fromPid);
     if(others.length){
-      takeItem(p,'passthe');
-      const t=others.slice().sort((a,b)=>b.money-a.money)[0];
+      takeItem(p,'passthe'); const t=others.slice().sort((a,b)=>b.money-a.money)[0];
       log(`${p.name} 把災禍轉給 ${t.name}！`);
       if(kind==='jail') sendJail(t,3,{fromPid:p.id,noPass:true});
       if(kind==='dream') applyDream(t,3,{fromPid:p.id});
@@ -1017,36 +1421,42 @@ function tryDefend(p,kind,fromPid){
   }
   return false;
 }
-function applyDream(p,days,opt){
+function sendHospital(p,days,opt){
   opt=opt||{};
-  if(tryDefend(p,'dream',opt.fromPid)) return;
-  p.dream=days;
-  log(`${p.name} 開始夢遊 ${days} 回合，不能交易也不能收租`);
+  if(hasGodProtect(p)&&!opt.noPardon){log(`${GODS[p.god].name} 讓 ${p.name} 免於住院`);return}
+  if(tryDefend(p,'hospital',opt.fromPid)) return;
+  p.hospital=(p.hospital||0)+(godExtendBad(p)?days+2:days);
+  const dest=WORLD.nodes.find(n=>n.kind==='hospital');
+  if(dest){ p.prev=p.node; p.node=dest.id; snapPos(p); }
+  log(`${p.name} 被送進陽光醫院，要躺 ${p.hospital} 天`); say(p,'bad');
 }
-function applySleepOthers(user){
-  for(const p of alive()){
-    if(p.id===user.id) continue;
-    if(p.hospital>0||p.jail>0) continue;
-    p.sleep=3;
-  }
-  log(`${user.name} 讓其他人集體午睡 3 回合！`);
+function sendJail(p,days,opt){
+  opt=opt||{};
+  if(hasGodProtect(p)&&!opt.noPardon){log(`${GODS[p.god].name} 讓 ${p.name} 免於加班`);return}
+  if(tryDefend(p,'jail',opt.fromPid)) return;
+  p.jail=(p.jail||0)+(godExtendBad(p)?days+2:days);
+  const dest=WORLD.nodes.find(n=>n.kind==='jail');
+  if(dest){ p.prev=p.node; p.node=dest.id; snapPos(p); }
+  log(`${p.name} 被送進加班總署，要加 ${p.jail} 天班`); say(p,'bad');
 }
+function applyDream(p,days,opt){ opt=opt||{}; if(!p) return; if(tryDefend(p,'dream',opt.fromPid)) return; p.dream=days; log(`${p.name} 開始夢遊 ${days} 天`); }
+function applySleepOthers(user){ for(const p of alive()){ if(p.id===user.id) continue; if(p.hospital||p.jail) continue; p.sleep=3; } log(`${user.name} 讓其他人集體午睡 3 天！`); }
+function snapPos(p){ const n=WORLD.nodes[p.node]; p._gx=n.x; p._gy=n.y; p._walk=false; fitCamToPlayer(p,false); }
 
 function spawnGod(type,tile){
   if(S.gods.length>=3) S.gods.shift();
   let pos=tile;
   if(pos==null){
-    const spots=[];
-    for(let i=1;i<40;i++) if(![10,30].includes(i) && !S.gods.some(g=>g.tile===i)) spots.push(i);
+    const spots=S.nodes.filter(n=>!S.gods.some(g=>g.tile===n.id)).map(n=>n.id);
     if(!spots.length) return;
     pos=pick(spots);
   }
   S.gods.push({id:type,tile:pos});
-  log(`「${GODS[type].name}」出現在 ${TILES[pos].name}`);
+  log(`「${GODS[type].name}」出現在 ${WORLD.nodes[pos].name}`);
 }
 function maybeSpawnGod(){
   if(S.gods.length>=2) return;
-  if(rnd(100)<55){
+  if(rnd(100)<50){
     const pool='gold_s,poor_s,luck_s,jinx_s,addon,wrecker'.split(',');
     if(rnd(12)===0) pool.push('reaper');
     spawnGod(pick(pool));
@@ -1054,45 +1464,199 @@ function maybeSpawnGod(){
 }
 function wanderGods(){
   for(const g of S.gods){
-    if(rnd(2)) g.tile=(g.tile+pick([1,1,2,-1,39]))%40;
+    if(rnd(2)){ const n=WORLD.nodes[g.tile]; if(n.nbrs.length) g.tile=pick(n.nbrs); }
   }
 }
 function attachGod(p,gid){
   if(p.god==='reaper' && gid!=='reaper'){log(`收魂使還在，新的靈靠不近 ${p.name}`);return}
-  // leaving previous
   if(p.god) log(`${p.name} 身上的「${GODS[p.god].name}」被擠走了`);
   p.god=gid; p.godN=7;
-  const G=GODS[gid];
-  log(`${G.icon} ${G.name} 附到 ${p.name} 身上！`);
-  say(p,G.good?'good':'bad');
-  if(gid==='gold_s'){
-    for(const o of alive()){ if(o.id===p.id) continue; const k=100+rnd(900); const got=mustPay(o,k,{reason:'金元福星',fine:false}); p.money+=got; }
-  }else if(gid==='gold_b'){
-    const k=1000+rnd(9000); p.money+=k; log(`${p.name} 獲得意外之財 ${fmt(k)}`);
-  }else if(gid==='poor_s'){
-    for(const o of alive()){ if(o.id===p.id) continue; const k=100+rnd(900); const got=mustPay(p,k,{reason:'破財',fine:true}); o.money+=got; }
-  }else if(gid==='poor_b'){
-    mustPay(p,1000+rnd(9000),{reason:'大破財',fine:true});
-  }else if(gid==='luck_s'){ giveItem(p,randItem()); }
+  const G=GODS[gid]; log(`${G.icon} ${G.name} 附到 ${p.name} 身上！`); say(p,G.good?'good':'bad');
+  if(gid==='gold_s'){ for(const o of alive()){ if(o.id===p.id) continue; const k=100+rnd(900); p.money+=mustPay(o,k,{reason:'金元福星'}); } }
+  else if(gid==='gold_b'){ const k=1000+rnd(9000); p.money+=k; log(`${p.name} 獲得意外之財 ${fmt(k)}`); }
+  else if(gid==='poor_s'){ for(const o of alive()){ if(o.id===p.id) continue; const k=100+rnd(900); o.money+=mustPay(p,k,{reason:'破財',fine:true}); } }
+  else if(gid==='poor_b') mustPay(p,1000+rnd(9000),{reason:'大破財',fine:true});
+  else if(gid==='luck_s') giveItem(p,randItem());
   else if(gid==='luck_b'){ giveItem(p,randItem()); giveItem(p,randItem()); }
   else if(gid==='jinx_s'){ if(p.items.length){ const it=p.items.splice(rnd(p.items.length),1)[0]; log(`${p.name} 掉了「${ITEMS[it].name}」`); } }
-  else if(gid==='jinx_b'){ const n=Math.ceil(p.items.length/2); for(let i=0;i<n;i++){ if(p.items.length) p.items.shift(); } log(`${p.name} 掉了一半道具`); }
+  else if(gid==='jinx_b'){ const n=Math.ceil(p.items.length/2); for(let i=0;i<n;i++) if(p.items.length) p.items.shift(); log(`${p.name} 掉了一半道具`); }
+}
+function pickGodOn(nid,p){
+  const i=S.gods.findIndex(g=>g.tile===nid);
+  if(i>=0){ const g=S.gods.splice(i,1)[0]; attachGod(p,g.id); return true; }
+  return false;
 }
 
 function fluctuateStocks(){
   for(const st of S.stocks){
     if(st.lock>0){
-      st.lock--;
-      const ch=st.lockDir>0 ? (8+rnd(8)) : -(8+rnd(8));
+      st.lock--; const ch=st.lockDir>0?(8+rnd(8)):-(8+rnd(8));
       st.price=clamp(Math.round(st.price*(1+ch/100)),20,400);
       if(st.lock<=0) st.lockDir=0;
     }else{
-      let ch=rnd(17)-8;
-      if(rnd(18)===0) ch=(rnd(2)?1:-1)*(12+rnd(10));
+      let ch=rnd(17)-8; if(rnd(18)===0) ch=(rnd(2)?1:-1)*(12+rnd(10));
       st.price=clamp(Math.round(st.price*(1+ch/100)),20,400);
     }
   }
-  S.news='今日股價：'+S.stocks.map(s=>s.name+s.price).join('　');
+}
+function payDividends(){
+  for(const p of alive()){
+    let d=0; for(const st of S.stocks){ d+=Math.round((p.stocks[st.id]||0)*st.price*0.08); }
+    if(d>0){ p.money+=d; log(`${p.name} 領到股息 ${fmt(d)}`); }
+  }
+}
+function cityNews(){
+  const kinds=[
+    ()=>{ const g=pick('a,b,c,d,e,f,g,h'.split(',')); S.plots.filter(p=>p.group===g).forEach(p=>p.inflate=Math.max(p.inflate,3)); S.news=`${GROUPS[g].name} 遊客變多，過路費暫漲 3 天。`; },
+    ()=>{ const st=pick(S.stocks); st.price=clamp(Math.round(st.price*1.12),20,400); S.news=`市場看好「${st.name}」，股價上揚。`; },
+    ()=>{ const st=pick(S.stocks); st.price=clamp(Math.round(st.price*0.9),20,400); S.news=`「${st.name}」傳出利空，股價下滑。`; },
+    ()=>{ S.news='市政清潔日，街頭看起來特別亮麗。'; }
+  ];
+  pick(kinds)();
+  log(S.news);
+}
+
+async function startTurn(){
+  if(!S||S.over) return;
+  S.pending=null; S.phase='main'; S.dice=[]; S.lastDice=0;
+  const p=cur();
+  if(!p||p.bankrupt){ nextTurn(); return; }
+  p.expr='normal'; p.anim=''; p.diceMax=1;
+  snapPos(p); fitCamToPlayer(p,false); recamIfFollow();
+  paintHUD();
+
+  // calendar advances at each player turn start? 大富翁4: each player's turn is one day for that player, or one day for the city per full round?
+  // Typically the date advances every turn (each player's move is a day). I'll advance per turn.
+  const ev=addDay();
+  $('cal').textContent=calStr();
+  if(p.dep>0){ const inc=Math.round(p.dep*0.05); p.dep+=inc; }
+  if(p.loan>0 && !p.bankrupt){ mustPay(p, Math.max(200,Math.round(p.loan*0.1)), {reason:'貸款利息',fine:true}); }
+  if(p.bankrupt){ nextTurn(); return; }
+  if(p.allyN>0){ p.allyN--; if(p.allyN<=0){p.ally=null; log(`${p.name} 的同盟結束`)} }
+
+  if(p.god){
+    const gid=p.god; p.godN--;
+    if(p.godN<=0){
+      if(gid==='reaper'){ log(`收魂使向 ${p.name} 索命！`); say(p,'bad'); mustPay(p,Math.round(p.money*0.3),{fine:true}); sendHospital(p,3,{from:'reaper'}); }
+      else { log(`${p.name} 身上的「${GODS[gid].name}」離開了`); const flip=GOD_FLIP[gid]; if(flip) spawnGod(flip); }
+      p.god=null; p.godN=0;
+    }
+  }
+
+  if(ev.includes('month')){
+    payDividends();
+    await popup({title:'月初結算', body:`今天是 ${calStr()}。持有股票的人領到股息。`, pid:p.id, expr:'happy'});
+  }
+  if(ev.includes('tax')){
+    const tax=Math.max(300, Math.round(p.money*0.05));
+    mustPay(p,tax,{reason:'市政稅',fine:true});
+    await popup({title:'市政稅日', body:`今天是每月 15 日。${p.name} 繳納市政稅 ${fmt(tax)}。`, pid:p.id, expr:'nervous'});
+  }
+  if(ev.includes('news')){
+    cityNews();
+    await popup({title:'城市新聞', body:S.news, pid:p.id});
+  }
+  if(S.over) return;
+
+  if(p.sleep>0){ p.sleep--; log(`${p.name} 還在午睡（剩 ${p.sleep}）`); await popup({title:'午睡中', body:`${p.name} 還在午睡，無法行動。`, pid:p.id}); return endTurn(true); }
+  if(p.hospital>0){
+    if(hasGodProtect(p)){ p.hospital=0; log(`${GODS[p.god].name} 護著 ${p.name}，提前出院！`); }
+    else{
+      S.pending={type:'hospital',pid:p.id};
+      paintHUD(); maybeAI(); sync(); return;
+    }
+  }
+  if(p.jail>0){
+    if(hasGodProtect(p)){ p.jail=0; log(`${GODS[p.god].name} 幫 ${p.name} 逃過加班！`); }
+    else{
+      S.pending={type:'jail',pid:p.id};
+      paintHUD(); maybeAI(); sync(); return;
+    }
+  }
+  if(p.stay>0){ p.stay--; log(`${p.name} 今天原地立定`); S.phase='after'; paintHUD(); maybeAI(); sync(); return; }
+  log(`輪到 ${p.name}　${calStr()}`);
+  S.phase='main'; paintHUD(); maybeAI(); sync();
+}
+function recamIfFollow(){ if(!camFree && S && cur()) fitCamToPlayer(cur(),false); }
+
+function nextTurn(){
+  if(!S||S.over) return;
+  if(alive().length<=1){ return finish('last'); }
+  let t=S.turn, n=S.players.length, hops=0;
+  do{ t=(t+1)%n; hops++; if(t===0){ onNewRound(); } }
+  while(S.players[t].bankrupt && hops<=n+1);
+  S.turn=t;
+  if(S.over) return;
+  startTurn();
+}
+function onNewRound(){
+  S.round++;
+  for(const p of S.plots){ if(p.seal>0) p.seal--; if(p.inflate>0) p.inflate--; }
+  fluctuateStocks();
+  maybeSpawnGod(); wanderGods();
+  log(`—— 第 ${S.round} 回合 ——`);
+  if(S.win==='rounds' && S.round>S.maxRound) finish('rounds');
+}
+function finish(why){
+  if(S.over) return;
+  S.over=true; S.phase='over'; S.pending=null;
+  const arr=S.players.map(p=>({p,w:netWorth(p)})).sort((a,b)=>b.w-a.w);
+  S.winner=arr[0].p.id; S.rank=arr; S.why=why;
+  say(arr[0].p,'good','贏啦！'); sfx('win');
+  log(`遊戲結束！優勝者是 ${arr[0].p.name}（身家 ${fmt(arr[0].w)}）`);
+  paintHUD(); showResult();
+}
+
+function passStart(p){
+  let sal=3000;
+  if(p.god==='gold_b') sal*=2;
+  if(p.god==='poor_b') sal=Math.round(sal*0.5);
+  p.money+=sal; p.pts+=15;
+  log(`${p.name} 經過發薪廣場，領了 ${fmt(sal)} 和 15 點`);
+  sfx('coin'); flyMoney(fmt(sal), true);
+}
+
+function flyMoney(text, good){
+  const el=document.createElement('div');
+  el.className='coin'; el.textContent=(good?'+':'')+text;
+  el.style.left='50%'; el.style.top='46%'; el.style.color=good?'#e8b02a':'#e85d4c';
+  $('fly').appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+
+function optionsAt(p){
+  const n=WORLD.nodes[p.node];
+  return n.nbrs.filter(id=>id!==p.prev);
+}
+function straightOf(p, opts){
+  const curN=WORLD.nodes[p.node], prevN=p.prev>=0?WORLD.nodes[p.prev]:null;
+  if(!prevN) return opts[0];
+  const vx=curN.x-prevN.x, vy=curN.y-prevN.y;
+  let best=opts[0], bd=-999;
+  for(const id of opts){
+    const o=WORLD.nodes[id];
+    const dot=(o.x-curN.x)*vx+(o.y-curN.y)*vy;
+    if(dot>bd){bd=dot; best=id}
+  }
+  return bd>0?best:null;
+}
+
+async function animateWalk(p, fromId, toId){
+  const a=WORLD.nodes[fromId], b=WORLD.nodes[toId];
+  p._walk=true; p._fdx=b.x-a.x; p._fdy=b.y-a.y;
+  const ms=FAST?0:(speedy?70:200);
+  const t0=performance.now();
+  if(ms===0){ p._gx=b.x; p._gy=b.y; p._walk=false; return; }
+  await new Promise(res=>{
+    const step=()=>{
+      const t=clamp((performance.now()-t0)/ms,0,1);
+      p._gx=a.x+(b.x-a.x)*t; p._gy=a.y+(b.y-a.y)*t; p._wt=t;
+      fitCamToPlayer(p,false);
+      if(t>=1){ p._gx=b.x; p._gy=b.y; p._walk=false; res(); }
+      else requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
 }
 
 async function doRoll(p, forced, nDice){
@@ -1102,507 +1666,542 @@ async function doRoll(p, forced, nDice){
   if(p.turtle>0) nd=1;
   S.busy=true; S.phase='moving';
   let dice;
-  if(forced!=null){
-    dice=Array.isArray(forced)?forced:[forced];
-  }else{
-    dice=Array.from({length:nd},()=>1+rnd(6));
-  }
+  if(forced!=null) dice=Array.isArray(forced)?forced:[forced];
+  else dice=Array.from({length:nd},()=>1+rnd(6));
   S.dice=dice; S.lastDice=dice.reduce((a,b)=>a+b,0);
   if(p.turtle>0) S.lastDice=1;
-  sfx('dice'); paint();
-  await sleep(FAST?0:450);
-  await walk(p,S.lastDice);
+  sfx('dice'); rollCube(S.dice[0]||S.lastDice); paintHUD();
+  await delay(speedy||FAST?200:700);
+  await walkSteps(p, S.lastDice);
   S.busy=false;
-  await resolveLand(p);
+  if(!S.over) await resolveLand(p);
 }
 
-async function walk(p,steps){
-  const stepDir=p.dir||1;
+function rollCube(n){
+  const cube=$('cube'); if(!cube) return;
+  const map={1:[0,0],2:[0,-90],3:[0,180],4:[0,90],5:[-90,0],6:[90,0]};
+  const [rx,ry]=map[n]||[0,0];
+  cube.style.setProperty('--rx',rx+'deg');
+  cube.style.setProperty('--ry',ry+'deg');
+  cube.classList.remove('roll'); void cube.offsetWidth; cube.classList.add('roll');
+  setTimeout(()=>{ cube.classList.remove('roll'); cube.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`; },700);
+}
+
+async function walkSteps(p, steps){
+  p._stopped=false;
   for(let i=0;i<steps;i++){
-    if(p.bomb>0){
-      p.bomb--;
-      if(p.bomb<=0){ explodeBomb(p); return; }
+    if(p.bomb>0){ p.bomb--; if(p.bomb<=0){ explodeBomb(p); return; } }
+    const opts=optionsAt(p);
+    let next;
+    if(opts.length===0){ // dead end, turn around
+      next=p.prev>=0?p.prev:p.node;
+    }else if(opts.length===1){ next=opts[0]; }
+    else{
+      const straight=straightOf(p,opts);
+      next=await chooseDir(p, opts, straight);
+      if(next==null) next=straight||opts[0];
     }
-    const next=(p.pos+stepDir+40)%40;
-    const tile=S.tiles[next];
-    // transfer bomb if passing a player
-    if(p.bomb>0){
-      const hit=S.players.find(o=>!o.bankrupt&&o.id!==p.id&&o.pos===next);
-      if(hit){ hit.bomb=p.bomb; p.bomb=0; log(`倒數爆彈從 ${p.name} 身上彈到 ${hit.name}！（剩 ${hit.bomb} 步）`); }
-    }
-    if(tile.mine){
-      tile.mine=0; p.pos=next;
-      if(next===0) passGo(p);
+    // mines / blocks on the NEXT cell
+    const nxt=S.nodes[next];
+    if(nxt.mine){
+      await animateWalk(p,p.node,next);
+      p.prev=p.node; p.node=next; nxt.mine=0;
+      if(WORLD.nodes[next].kind==='start') passStart(p);
       log(`${p.name} 踩到地裂地雷！`); sfx('boom');
-      mustPay(p,800,{reason:'地雷',fine:true});
-      sendHospital(p,3,{});
-      paint(); await sleep(FAST?0:200);
-      return;
+      mustPay(p,800,{fine:true}); sendHospital(p,3,{}); p._stopped=true; return;
     }
-    if(tile.block){
-      tile.block=0; p.pos=next;
-      if(next===0) passGo(p);
-      log(`${p.name} 被施工路障攔住了！`);
-      paint(); await sleep(FAST?0:160);
-      return;
+    if(nxt.block){
+      await animateWalk(p,p.node,next);
+      p.prev=p.node; p.node=next; nxt.block=0;
+      if(WORLD.nodes[next].kind==='start') passStart(p);
+      log(`${p.name} 被施工路障攔住了！`); p._stopped=true;
+      pickGodOn(p.node,p); return;
     }
-    if(tile.bomb){
-      tile.bomb=0; p.bomb=15;
-      log(`${p.name} 撿到倒數爆彈，還有 15 步就爆炸！`);
+    if(nxt.bomb){ nxt.bomb=0; p.bomb=15; log(`${p.name} 撿到倒數爆彈，還有 15 步！`); }
+    // transfer bomb if someone is on next
+    if(p.bomb>0){
+      const hit=S.players.find(o=>!o.bankrupt&&o.id!==p.id&&o.node===next);
+      if(hit){ hit.bomb=p.bomb; p.bomb=0; log(`倒數爆彈彈到 ${hit.name}！`); }
     }
-    p.pos=next;
-    if(next===0) passGo(p);
-    // hop tokens
-    paint();
+    await animateWalk(p,p.node,next);
+    p.prev=p.node; p.node=next;
+    if(WORLD.nodes[next].kind==='start') passStart(p);
+    pickGodOn(p.node,p);
+    const passing=i<steps-1;
+    if(passing && WORLD.nodes[next].kind==='bank' && !isAuto(p)){
+      // toast only
+      log(`${p.name} 經過港灣銀行（可用下方按鈕辦手續）`);
+    }
     sfx('walk');
-    await sleep(FAST?0:90);
+    if(p.hospital||p.jail) return;
   }
+}
+
+function chooseDir(p, opts, straight){
+  if(isAuto(p)) return Promise.resolve(aiPickDir(p,opts,straight));
+  if(mode==='guest' && p.id!==me.id){
+    // wait pending from host state — shouldn't be called on guest engine
+    return Promise.resolve(straight||opts[0]);
+  }
+  return new Promise(res=>{
+    S.pending={type:'fork',pid:p.id,opts,straight};
+    S._forkRes=res;
+    showForks(opts);
+    paintHUD(); sync();
+    maybeAI(); // no-op if not auto
+  });
+}
+function forkLabel(fromId,toId){
+  const a=WORLD.nodes[fromId], b=WORLD.nodes[toId];
+  const dx=b.x-a.x, dy=b.y-a.y;
+  const dir=dy<0?'北':dy>0?'南':dx>0?'東':'西';
+  let cur=toId, prev=fromId, name='';
+  for(let i=0;i<8;i++){
+    const n=WORLD.nodes[cur];
+    if(n.kind!=='road'){ name=n.name; break; }
+    const nbrs=n.nbrs.filter(id=>id!==prev);
+    if(!nbrs.length) break;
+    prev=cur; cur=nbrs[0];
+  }
+  return name?('往'+dir+' · '+name):('往'+dir);
+}
+function showForks(opts){
+  const box=$('forks'); box.innerHTML='';
+  const from=cur()?cur().node:null;
+  for(const id of opts){
+    const n=WORLD.nodes[id];
+    const ip=iso(n.x,n.y);
+    let sp=worldToScreen(ip.x, ip.y-8);
+    if(from!=null){
+      const fn=WORLD.nodes[from], fp=worldToScreen(iso(fn.x,fn.y).x, iso(fn.x,fn.y).y);
+      const vx=sp.x-fp.x, vy=sp.y-fp.y, len=Math.hypot(vx,vy)||1;
+      sp={x:fp.x+vx/len*78, y:fp.y+vy/len*62};
+    }
+    const label=from!=null?forkLabel(from,id):(n.name||'這條路');
+    const b=document.createElement('button');
+    b.className='fork-btn';
+    b.textContent='➤ '+label;
+    b.style.left=clamp(sp.x,52,viewW-52)+'px';
+    b.style.top=clamp(sp.y,90,viewH-150)+'px';
+    b.onclick=()=>sendAct({t:'fork',nid:id});
+    box.appendChild(b);
+  }
+}
+function clearForks(){ $('forks').innerHTML=''; }
+
+function aiPickDir(p,opts,straight){
+  let best=straight||opts[0], sc=-1e9;
+  for(const id of opts){
+    let s=0;
+    const n=WORLD.nodes[id];
+    // look ahead along this edge a few steps (greedy local)
+    let cur=id, prev=p.node;
+    for(let k=0;k<5;k++){
+      const node=WORLD.nodes[cur];
+      const st=S.nodes[cur];
+      if(st.mine) s-=80;
+      if(st.block) s-=20;
+      if(node.kind==='plot'){
+        const pl=S.plots[node.plotId];
+        if(!pl.owner) s+= (p.money>=pl.price? 40+pl.price/200 : 5);
+        else if(pl.owner===p.id) s+=15+pl.lv*4;
+        else {
+          const fee=actualToll(p,pl);
+          s-= fee/80 + 10;
+        }
+      }
+      if(node.kind==='start') s+=25;
+      if(node.kind==='shop' && p.pts>=30) s+=12;
+      if(node.kind==='stock' && p.pers==='stock') s+=30;
+      if(node.kind==='bank' && (p.money>8000||p.loan>0)) s+=8;
+      if(node.kind==='hospital'||node.kind==='jail') s-=15;
+      if(S.gods.some(g=>g.tile===cur && GODS[g.id] && GODS[g.id].good)) s+=18;
+      if(S.gods.some(g=>g.tile===cur && GODS[g.id] && !GODS[g.id].good)) s-=18;
+      const nbrs=node.nbrs.filter(x=>x!==prev);
+      if(!nbrs.length) break;
+      prev=cur; cur=nbrs.length===1?nbrs[0]: (straightOf({node:cur,prev},nbrs)||nbrs[0]);
+    }
+    if(p.pers==='unlucky') s -= (WORLD.nodes[id].kind==='plot'?0:0);
+    if(p.pers==='airy') s+=rnd(20);
+    if(straight===id) s+=8;
+    if(s>sc){sc=s; best=id}
+  }
+  return best;
 }
 
 function explodeBomb(p){
   log(`倒數爆彈在 ${p.name} 身上炸開了！`); sfx('boom');
-  p.bomb=0;
-  mustPay(p,1200,{reason:'爆彈',fine:true});
-  const around=[p.pos,(p.pos+1)%40,(p.pos+39)%40];
-  for(const i of around){
-    const t=S.tiles[i];
-    if(t.lv>0){t.lv--; log(`${t.name} 被炸到，樓層下降`)}
+  p.bomb=0; mustPay(p,1200,{fine:true});
+  const n=WORLD.nodes[p.node];
+  for(const pl of S.plots){
+    if(Math.abs(pl.bx-n.x)+Math.abs(pl.by-n.y)<=2 && pl.lv>0){ pl.lv--; log(`${pl.name} 被炸到`); dirtyB=true; }
   }
   sendHospital(p,3,{});
 }
 
 async function resolveLand(p){
-  if(p.bankrupt||p.hospital>0&&p.pos!==10) { // if already sent to hospital mid-walk
-    if(p.hospital>0||p.jail>0){ S.phase='after'; paint(); return endAfterIfAI(p); }
+  if(S.over) return;
+  clearForks();
+  if(p.hospital||p.jail){ S.phase='after'; paintHUD(); return endAfterIfAI(p); }
+  const n=WORLD.nodes[p.node];
+  const st=S.nodes[p.node];
+  pickGodOn(p.node,p);
+  // angel / demon on current plot
+  const plot=n.kind==='plot'?S.plots[n.plotId]:null;
+  if(plot){
+    if(p.god==='addon'){ plot.lv=Math.min(5,(plot.lv||0)+1); dirtyB=true; log(`添磚喜靈把 ${plot.name} 加蓋了一層`); }
+    if(p.god==='wrecker' && (plot.lv||0)>0){ plot.lv--; dirtyB=true; log(`拆屋禍靈把 ${plot.name} 拆了一層`); }
   }
-  const tile=S.tiles[p.pos];
-  // pickup god
-  const gi=S.gods.findIndex(g=>g.tile===p.pos);
-  if(gi>=0){
-    const g=S.gods.splice(gi,1)[0];
-    attachGod(p,g.id);
+  if(n.kind==='start'){ S.phase='after'; paintHUD(); return endAfterIfAI(p); }
+  if(n.kind==='hospital'){ if(p.hospital<=0) sendHospital(p,2,{}); S.phase='after'; paintHUD(); return endAfterIfAI(p); }
+  if(n.kind==='jail'){ if(p.jail<=0) sendJail(p,2,{}); S.phase='after'; paintHUD(); return endAfterIfAI(p); }
+  if(n.kind==='bank'){ S.pending={type:'bank',pid:p.id,fromTile:true}; paintHUD(); maybeAI(); sync(); return; }
+  if(n.kind==='stock'){ S.pending={type:'stock',pid:p.id,fromTile:true}; paintHUD(); maybeAI(); sync(); return; }
+  if(n.kind==='shop'){ S.pending={type:'shop',pid:p.id}; paintHUD(); maybeAI(); sync(); return; }
+  if(n.kind==='points'){ const pts=10+rnd(15); p.pts+=pts; await popup({title:'集點站', body:`${p.name} 在集點站領到 ${pts} 點卡牌點。`, pid:p.id, expr:'happy'}); S.phase='after'; paintHUD(); return endAfterIfAI(p); }
+  if(n.kind==='lottery'){
+    const hit=rnd(100);
+    let msg, amt=0;
+    if(hit<8){ amt=8000; msg=`頭獎！${p.name} 中了 ${fmt(amt)}！`; say(p,'good'); }
+    else if(hit<30){ amt=1500; msg=`小獎 ${fmt(amt)}，還不錯。`; }
+    else { amt=-400; msg=`沒中，手續費 ${fmt(400)}。`; say(p,'bad'); }
+    if(amt>0) p.money+=amt; else mustPay(p,-amt,{fine:true});
+    flyMoney(fmt(Math.abs(amt)), amt>0);
+    await popup({title:'晴空樂透', body:msg, pid:p.id, expr:amt>0?'happy':'nervous'});
+    S.phase='after'; paintHUD(); return endAfterIfAI(p);
   }
-  // angel / demon
-  if(p.god==='addon' && tile.t==='land' && tile.owner){ tile.lv=Math.min(5,(tile.lv||0)+1); log(`添磚喜靈把 ${tile.name} 加蓋了一層`); }
-  if(p.god==='wrecker' && tile.t==='land' && (tile.lv||0)>0){ tile.lv--; log(`拆屋禍靈把 ${tile.name} 拆了一層`); }
-
-  if(tile.t==='start'){ /* already paid if passed/landed via walk */ S.phase='after'; paint(); return endAfterIfAI(p); }
-  if(tile.t==='tax'){
-    const fee=tile.fee||500;
-    S.pot+=mustPay(p,fee,{reason:'稅',fine:true});
-    say(p,'bad'); S.phase='after'; paint(); return endAfterIfAI(p);
+  if(n.kind==='park'){
+    const k=rnd(3);
+    if(k===0){ const it=randItem(); giveItem(p,it); await popup({title:'拾光公園', body:`樹蔭下撿到「${ITEMS[it].name}」。`, pid:p.id, expr:'happy'}); }
+    else if(k===1){ p.money+=800; flyMoney(fmt(800),true); await popup({title:'拾光公園', body:'公園義演發了紅包 $800。', pid:p.id, expr:'happy'}); }
+    else { if(plot); const mine=S.plots.find(pl=>pl.owner===p.id && (pl.lv||0)<5 && pl.group!=='tr'&&pl.group!=='ut');
+      if(mine){ mine.lv++; dirtyB=true; addDust(mine.bx,mine.by); await popup({title:'拾光公園', body:`園丁義務幫忙，${mine.name} 免費加蓋一層！`, pid:p.id, expr:'happy'}); }
+      else { p.pts+=12; await popup({title:'拾光公園', body:'在草坪上野餐，心情變好，卡牌點 +12。', pid:p.id}); }
+    }
+    S.phase='after'; paintHUD(); return endAfterIfAI(p);
   }
-  if(tile.t==='hospital'){
-    if(p.hospital<=0) sendHospital(p,2,{});
-    S.phase='after'; paint(); return endAfterIfAI(p);
+  if(n.kind==='news'){
+    cityNews();
+    await popup({title:'市政公告', body:S.news, pid:p.id});
+    S.phase='after'; paintHUD(); return endAfterIfAI(p);
   }
-  if(tile.t==='overtime'){
-    if(p.jail<=0) sendJail(p,2,{});
-    S.phase='after'; paint(); return endAfterIfAI(p);
+  if(n.kind==='fate'||n.kind==='chance'){
+    const r=await drawCard(p, n.kind==='fate'?FATE:CHANCE);
+    if(S.over||S.pending||r==='landed') return;
+    S.phase='after'; paintHUD(); return endAfterIfAI(p);
   }
-  if(tile.t==='plaza'){
-    const got=S.pot>0?S.pot:(200+rnd(400));
-    p.money+=got; S.pot=0; log(`${p.name} 在市集廣場領到 ${fmt(got)}`); say(p,'good'); sfx('coin');
-    S.phase='after'; paint(); return endAfterIfAI(p);
-  }
-  if(tile.t==='shop'){
-    S.pending={type:'shop',pid:p.id};
-    paint(); maybeAI(); return;
-  }
-  if(tile.t==='stockt'){
-    S.pending={type:'stock',pid:p.id,fromTile:true};
-    paint(); maybeAI(); return;
-  }
-  if(tile.t==='fate'||tile.t==='chance'){
-    const landed=await drawCard(p, tile.t==='fate'?FATE:CHANCE);
-    if(S.over||S.pending||landed==='landed') return;
-    S.phase='after'; paint(); return endAfterIfAI(p);
-  }
-  if(tile.t==='land'||tile.t==='trans'||tile.t==='util'){
-    if(!tile.owner){
-      if(canBuy(p,tile)){
-        S.pending={type:'buy',pid:p.id,tile:tile.id};
-        paint(); maybeAI(); return;
-      }else{
-        log(`${p.name} 買不起或不能買 ${tile.name}`);
-        S.phase='after'; paint(); return endAfterIfAI(p);
-      }
-    }else if(tile.owner!==p.id){
-      const fee=actualToll(p,tile);
+  if(n.kind==='plot' && plot){
+    if(!plot.owner){
+      if(canBuy(p,plot)){ S.pending={type:'buy',pid:p.id,plot:plot.id}; paintHUD(); maybeAI(); sync(); return; }
+      log(`${p.name} 買不起 ${plot.name}`);
+      S.phase='after'; paintHUD(); return endAfterIfAI(p);
+    }else if(plot.owner!==p.id){
+      const fee=actualToll(p,plot);
       if(fee>0){
-        const o=pById(tile.owner);
+        const o=pById(plot.owner);
         const paid=mustPay(p,fee,{reason:'過路費'});
         o.money+=paid;
         log(`${p.name} 付給 ${o.name} 過路費 ${fmt(paid)}`);
-        say(p,'pay'); say(o,'recv'); sfx(paid?'coin':'bad');
-      }else log(`${p.name} 停在 ${tile.name}，這次不用付過路費`);
-      // offer buyout if has card? later via items in after phase
-      S.phase='after'; paint(); return endAfterIfAI(p);
-    }else{
-      if(canUp(p,tile)){
-        S.pending={type:'upgrade',pid:p.id,tile:tile.id};
-        paint(); maybeAI(); return;
+        const line=say(p,'pay'); say(o,'recv');
+        sfx(paid?'coin':'bad'); flyMoney('-'+fmt(paid), false);
+        await popup({title:'過路費', body:`${p.name} 停在 ${plot.name}，付給 ${o.name} ${fmt(paid)}。\n${p.name}：「${linesOf(p).pay}」`, pid:p.id, expr:p.expr, portrait:p});
+      }else {
+        await popup({title:plot.name, body:`${p.name} 停在 ${plot.name}，這次不用付過路費。`, pid:p.id});
       }
-      S.phase='after'; paint(); return endAfterIfAI(p);
+      S.phase='after'; paintHUD(); return endAfterIfAI(p);
+    }else{
+      if(canUp(p,plot)){ S.pending={type:'upgrade',pid:p.id,plot:plot.id}; paintHUD(); maybeAI(); sync(); return; }
+      S.phase='after'; paintHUD(); return endAfterIfAI(p);
     }
   }
-  S.phase='after'; paint(); return endAfterIfAI(p);
+  S.phase='after'; paintHUD(); return endAfterIfAI(p);
 }
 
 async function drawCard(p,deck){
   const c=pick(deck);
-  let txt=c.txt;
-  let money=0;
-  if(c.money){ const a=c.money[0],b=c.money[1]; const lo=Math.min(a,b),hi=Math.max(a,b); money=lo+rnd(hi-lo+1); txt=txt.replace('{n}',fmt(Math.abs(money))); }
+  let txt=c.txt, money=0;
+  if(c.money){ const lo=Math.min(c.money[0],c.money[1]), hi=Math.max(c.money[0],c.money[1]); money=lo+rnd(hi-lo+1); txt=txt.replace('{n}',fmt(Math.abs(money))); }
   if(c.pts){ const n=c.pts[0]+rnd(c.pts[1]-c.pts[0]+1); p.pts+=n; txt=txt.replace('{n}',n); }
   if(c.item){ const it=randItem(); giveItem(p,it,true); txt=txt.replace('{item}',ITEMS[it].name); }
-  if(c.steps){ const n=c.steps[0]+rnd((c.steps[1]-c.steps[0])+1); txt=txt.replace('{n}',Math.abs(n)); log(`命運／機會：${txt}`); say(p,c.good?'good':'bad');
-    const flip=n<0; if(flip) p.dir=-(p.dir||1);
-    S.busy=true; await walk(p, Math.abs(n));
-    if(flip) p.dir=-(p.dir||1);
-    S.busy=false; await resolveLand(p); return 'landed'; }
-  log(`命運／機會：${txt}`);
-  say(p,c.good?'good':'bad');
-  sfx(c.good?'good':'bad');
+  if(c.steps){
+    const n=c.steps[0]+rnd((c.steps[1]-c.steps[0])+1); txt=txt.replace('{n}',Math.abs(n));
+    say(p,c.good?'good':'bad');
+    await popup({title:c.good?'好運':'狀況', body:txt, pid:p.id, expr:c.good?'happy':'nervous'});
+    if(n<0){ // turn around then walk
+      const fwd=optionsAt(p); if(fwd.length) p.prev=fwd[0];
+    }
+    S.busy=true; await walkSteps(p, Math.abs(n)); S.busy=false;
+    await resolveLand(p); return 'landed';
+  }
+  say(p,c.good?'good':'bad'); sfx(c.good?'good':'bad');
   if(money>0){
     let m=money;
     if(p.god==='gold_s'||p.god==='gold_b'||p.god==='addon') m*=2;
     if(p.god==='poor_s') m=Math.round(m*0.5);
     if(p.god==='poor_b'||p.god==='wrecker') m=0;
-    p.money+=m;
+    p.money+=m; flyMoney(fmt(m),true);
   }
-  if(money<0){ mustPay(p,-money,{reason:'事件',fine:true}); }
-  if(c.go==='start'){ p.pos=0; passGo(p); }
+  if(money<0){ mustPay(p,-money,{fine:true}); flyMoney(fmt(-money),false); }
+  if(c.go==='start'){ const dest=WORLD.start; p.prev=p.node; p.node=dest; snapPos(p); passStart(p); }
   if(c.go==='hospital') sendHospital(p,3,{});
   if(c.go==='overtime') sendJail(p,3,{});
-  if(c.god==='good'){ attachGod(p, pick(['gold_s','luck_s','addon'])); }
-  if(c.god==='bad'){ attachGod(p, pick(['poor_s','jinx_s','wrecker'])); }
+  if(c.god==='good') attachGod(p, pick(['gold_s','luck_s','addon']));
+  if(c.god==='bad') attachGod(p, pick(['poor_s','jinx_s','wrecker']));
   if(c.stock){ const st=pick(S.stocks); st.price=clamp(Math.round(st.price*1.12),20,400); log(`${st.name} 被市場看好，價格來到 ${st.price}`); }
+  await popup({title:c.good?'好運降臨':'狀況外', body:txt, pid:p.id, expr:c.good?'happy':'nervous', portrait:p});
 }
-
-// Fix negative steps: I'll implement a walkBack in doCard later if needed. For chance back, temporarily set dir.
 
 function endAfterIfAI(p){
   if(S.over) return;
-  S.phase='after';
-  paint();
-  if(isAuto(p)){ // AI may use one item then end
-    setTimeout(()=>{ if(!S||S.over||cur().id!==p.id) return; aiAfter(p); }, FAST?0:280);
-  }
+  S.phase='after'; paintHUD(); sync();
+  if(isAuto(p)) timerAI(()=>aiAfter(p));
 }
-function isAuto(p){return !p||p.isAI||p.dropped||FAST||(mode==='ai'&&p.id!==me.id)||(mode==='host'&&p.id!==me.id&&!conns[p.id]&&p.isAI)}
-
-function endTurn(silent){
-  if(!S||S.over) return;
-  if(S.busy) return;
-  S.pending=null; S.phase='end';
-  const p=cur();
-  if(p){p.expr='normal';p.anim='';p.diceMax=1}
+function endTurn(){
+  if(!S||S.over||S.busy) return;
+  S.pending=null; S.phase='end'; clearForks();
+  const p=cur(); if(p){p.expr='normal';p.anim='';p.diceMax=1}
   nextTurn();
 }
 
-/* ---- item use ---- */
-function useItem(p,id,extra){
-  extra=extra||{};
+/* items (adapted to nodes/plots) */
+function useItem(p,id){
   if(!p||p.bankrupt||p.dream>0||p.sleep>0) return false;
-  if(S.pending && S.pending.type!=='itemwait') {
-    // allow during main/after if no other pending
-    if(!['main','after'].includes(S.phase) && S.pending) return false;
-  }
   if(!['main','after'].includes(S.phase)) return false;
   if(!p.items.includes(id)) return false;
-  const it=ITEMS[id];
-  if(!it||it.use==='auto') return false;
-  // consume later when confirmed
-  return beginItem(p,it,extra);
+  const it=ITEMS[id]; if(!it||it.use==='auto') return false;
+  return beginItem(p,it);
 }
-
-function beginItem(p,it,extra){
+function beginItem(p,it){
   const u=it.use;
-  if(u==='now'){ takeItem(p,it.id); applyNow(p,it); paint(); return true; }
-  if(u==='here'){ takeItem(p,it.id); applyHere(p,it); paint(); return true; }
-  if(u==='dice'){
-    S.pending={type:'pickdice',pid:p.id,item:it.id};
-    paint(); maybeAI(); return true;
-  }
-  if(u==='multidice'){
-    takeItem(p,it.id);
-    const max=it.id==='dice3'?3:2;
-    S.pending={type:'ndice',pid:p.id,max};
-    paint(); maybeAI(); return true;
-  }
-  if(u==='player'||u==='playerSelf'){
-    S.pending={type:'pickplayer',pid:p.id,item:it.id,allowSelf:u==='playerSelf'};
-    paint(); maybeAI(); return true;
-  }
-  if(u==='group'){
-    S.pending={type:'pickgroup',pid:p.id,item:it.id};
-    paint(); maybeAI(); return true;
-  }
-  if(u==='stock'){
-    S.pending={type:'pickstock',pid:p.id,item:it.id};
-    paint(); maybeAI(); return true;
-  }
-  if(u==='empty'||u==='tile'||u==='tilehaz'||u==='myland'||u==='myland2'){
-    S.pending={type:'picktile',pid:p.id,item:it.id,mode:u};
-    paint(); maybeAI(); return true;
-  }
+  if(u==='now'){ takeItem(p,it.id); applyNow(p,it); paintHUD(); sync(); return true; }
+  if(u==='here'){ takeItem(p,it.id); applyHere(p,it); paintHUD(); sync(); return true; }
+  if(u==='dice'){ S.pending={type:'pickdice',pid:p.id,item:it.id}; paintHUD(); maybeAI(); return true; }
+  if(u==='multidice'){ takeItem(p,it.id); S.pending={type:'ndice',pid:p.id,max:it.id==='dice3'?3:2}; paintHUD(); maybeAI(); return true; }
+  if(u==='player'||u==='playerSelf'){ S.pending={type:'pickplayer',pid:p.id,item:it.id,allowSelf:u==='playerSelf'}; paintHUD(); maybeAI(); return true; }
+  if(u==='group'){ S.pending={type:'pickgroup',pid:p.id,item:it.id}; paintHUD(); maybeAI(); return true; }
+  if(u==='stock'){ S.pending={type:'pickstock',pid:p.id,item:it.id}; paintHUD(); maybeAI(); return true; }
+  if(u==='empty'||u==='tile'||u==='tilehaz'||u==='myland'||u==='myland2'){ S.pending={type:'picktile',pid:p.id,item:it.id,mode:u}; paintHUD(); maybeAI(); return true; }
   return false;
 }
-
 function applyNow(p,it){
   log(`${p.name} 使用「${it.name}」`);
-  if(it.id==='eqall'){
-    const ps=alive(); const sum=ps.reduce((s,x)=>s+x.money,0); const each=Math.floor(sum/ps.length);
-    ps.forEach(x=>x.money=each); log(`所有人現金變成 ${fmt(each)}`); say(p,'good');
-  }else if(it.id==='sleep'){ applySleepOthers(p); }
+  if(it.id==='eqall'){ const ps=alive(); const each=Math.floor(ps.reduce((s,x)=>s+x.money,0)/ps.length); ps.forEach(x=>x.money=each); log(`所有人現金變成 ${fmt(each)}`); say(p,'good'); }
+  else if(it.id==='sleep') applySleepOthers(p);
   else if(it.id==='summon'){
     if(!S.gods.length){log('附近沒有靈體可以請');return}
     let best=S.gods[0], bd=99;
-    for(const g of S.gods){const d=Math.min((g.tile-p.pos+40)%40,(p.pos-g.tile+40)%40); if(d<bd){bd=d;best=g}}
-    S.gods=S.gods.filter(g=>g!==best);
-    attachGod(p,best.id);
+    const pn=WORLD.nodes[p.node];
+    for(const g of S.gods){ const gn=WORLD.nodes[g.tile]; const d=Math.abs(gn.x-pn.x)+Math.abs(gn.y-pn.y); if(d<bd){bd=d;best=g} }
+    S.gods=S.gods.filter(g=>g!==best); attachGod(p,best.id);
   }else if(it.id==='banish'){
     if(p.bomb>0){p.bomb=0;log(`${p.name} 送走了倒數爆彈`);say(p,'good');return}
     if(p.god && p.god!=='reaper' && !GODS[p.god].good){log(`${p.name} 送走了「${GODS[p.god].name}」`);p.god=null;p.godN=0;say(p,'good');}
     else log('沒有可送走的壞靈或爆彈');
   }else if(it.id==='cleaner'){
-    const dir=p.dir||1;
-    for(let k=1;k<=8;k++){
-      const i=(p.pos+dir*k+40)%40; const t=S.tiles[i];
-      t.block=0;t.mine=0;t.bomb=0;
-      S.gods=S.gods.filter(g=>g.tile!==i);
+    let cur=p.node, prev=p.prev, c=0;
+    for(let k=0;k<8;k++){
+      const n=WORLD.nodes[cur]; const st=S.nodes[cur];
+      st.block=0; st.mine=0; st.bomb=0;
+      S.gods=S.gods.filter(g=>g.tile!==cur);
+      const nbrs=n.nbrs.filter(id=>id!==prev);
+      if(!nbrs.length) break;
+      prev=cur; cur=straightOf({node:cur,prev},nbrs)||nbrs[0]; c++;
     }
-    log(`${p.name} 的清道娃娃掃過前方 8 格`);
+    log(`${p.name} 的清道娃娃掃過前方道路`);
   }
 }
-
 function applyHere(p,it){
-  const tile=S.tiles[p.pos];
+  const plot=plotOfNode(p.node);
   log(`${p.name} 使用「${it.name}」`);
   if(it.id==='buyout'){
-    if(!tile.owner||tile.owner===p.id||!(tile.t==='land'||tile.t==='trans'||tile.t==='util')){log('這裡不能收購');return}
-    const price=landValue(tile);
+    if(!plot||!plot.owner||plot.owner===p.id){log('這裡不能收購');return}
+    const price=landValue(plot);
     if(p.money<price){log('現金不夠，收購失敗'); giveItem(p,'buyout',true); return}
-    const o=pById(tile.owner);
-    p.money-=price; if(o&&!o.bankrupt) o.money+=price;
-    tile.owner=p.id;
-    log(`${p.name} 強制收購了 ${tile.name}，付給 ${(o||{}).name||'原地主'} ${fmt(price)}`);
-    say(p,'buy');
+    const o=pById(plot.owner); p.money-=price; if(o&&!o.bankrupt) o.money+=price;
+    plot.owner=p.id; dirtyB=true; log(`${p.name} 強制收購了 ${plot.name}`); say(p,'buy');
   }else if(it.id==='renovate'){
-    if(tile.owner!==p.id||tile.t!=='land'){log('只能翻新自己的地');return}
-    if((tile.lv||0)>=5){log('已經是最高層');return}
-    tile.lv++; log(`${tile.name} 加蓋成「${LVNAME[tile.lv]}」`);
+    if(!plot||plot.owner!==p.id||plot.group==='tr'||plot.group==='ut'){log('只能翻新自己的地');return}
+    if((plot.lv||0)>=5) return;
+    plot.lv++; dirtyB=true; addDust(plot.bx,plot.by); log(`${plot.name} 加蓋成「${LVNAME[plot.lv]}」`);
   }else if(it.id==='auction'){
-    if(!(tile.t==='land'||tile.t==='trans'||tile.t==='util')||!tile.owner){log('這裡不能拍賣');return}
-    runAuction(p,tile);
+    if(!plot||!plot.owner){log('這裡不能拍賣');return}
+    runAuction(p,plot);
   }
 }
-
-function runAuction(user,tile){
-  // quick silent auction among others
-  const base=Math.round(landValue(tile)*0.6);
+function runAuction(user,plot){
+  const base=Math.round(landValue(plot)*0.6);
   let best={pid:null,bid:base};
-  for(const p of alive()){
-    if(p.id===user.id) continue;
-    const max=Math.min(p.money, landValue(tile)+500);
-    if(max>best.bid+50 && (p.isAI||p.dropped||isAuto(p) || p.id!==me.id)){
+  for(const pl of alive()){
+    if(pl.id===user.id) continue;
+    const max=Math.min(pl.money, landValue(plot)+500);
+    if(max>best.bid+50 && isAuto(pl)){
       const bid=Math.min(max, best.bid+200+rnd(400));
-      if(bid>best.bid) best={pid:p.id,bid};
+      if(bid>best.bid) best={pid:pl.id,bid};
     }
   }
-  // human bid via pending if a human is in game and not user - skip in FAST/autotest
   if(!FAST){
-    const humans=alive().filter(p=>!isAuto(p)&&p.id!==user.id);
-    if(humans.length){
-      S.pending={type:'auction',pid:humans[0].id, tile:tile.id, user:user.id, best, base};
-      paint(); return;
-    }
+    const humans=alive().filter(pl=>!isAuto(pl)&&pl.id!==user.id);
+    if(humans.length){ S.pending={type:'auction',pid:humans[0].id, plot:plot.id, user:user.id, best, base}; paintHUD(); return; }
   }
-  settleAuction(user,tile,best);
+  settleAuction(user,plot,best);
 }
-function settleAuction(user,tile,best){
-  if(!best.pid){log(`${tile.name} 流標，暫時沒人要`);return}
-  const w=pById(best.pid);
-  if(!w||w.money<best.bid){log('得標者付不出錢，流標');return}
-  const prev=pById(tile.owner);
-  w.money-=best.bid; user.money+=best.bid;
-  tile.owner=w.id;
-  log(`${w.name} 以 ${fmt(best.bid)} 得標 ${tile.name}，款項給 ${user.name}`);
+function settleAuction(user,plot,best){
+  if(!best||!best.pid){log(`${plot.name} 流標`);return}
+  const w=pById(best.pid); if(!w||w.money<best.bid){log('流標');return}
+  w.money-=best.bid; user.money+=best.bid; plot.owner=w.id; dirtyB=true;
+  log(`${w.name} 以 ${fmt(best.bid)} 得標 ${plot.name}，款項給 ${user.name}`);
 }
-
 function applyItemTarget(p,it,target){
-  takeItem(p,it.id);
-  log(`${p.name} 使用「${it.name}」`);
-  if(it.id==='eqone'){
-    const o=pById(target); if(!o) return;
-    const each=Math.floor((p.money+o.money)/2); p.money=each; o.money=each;
-    log(`${p.name} 與 ${o.name} 現金各為 ${fmt(each)}`);
-  }else if(it.id==='turn'){
-    const o=pById(target); if(o){o.dir=-(o.dir||1);log(`${o.name} 轉向了，改往${o.dir===1?'順':'逆'}時針走`)}
-  }else if(it.id==='stay'){
-    const o=pById(target); if(o){o.stay=(o.stay||0)+1;log(`${o.name} 下一回合將原地立定`)}
-  }else if(it.id==='turtle'){
-    const o=pById(target); if(o){ if(tryDefend(o,'turtle',p.id)) return; o.turtle=3; log(`${o.name} 進入龜步狀態 3 回合`); }
-  }else if(it.id==='steal'){
-    const o=pById(target);
-    if(!o||!o.items.length){log('對方沒有可搶的道具');return}
-    const it2=o.items.splice(rnd(o.items.length),1)[0];
-    giveItem(p,it2,true); log(`${p.name} 從 ${o.name} 搶到「${ITEMS[it2].name}」`);
-  }else if(it.id==='dream'){ applyDream(pById(target),3,{fromPid:p.id}); }
-  else if(it.id==='frame'){ sendJail(pById(target),3,{fromPid:p.id}); }
-  else if(it.id==='tax'){
-    const o=pById(target); if(!o) return;
-    const amt=Math.round(o.money*0.2);
-    const paid=mustPay(o,amt,{reason:'追稅',fine:true,fromPid:p.id});
-    p.money+=paid; log(`${p.name} 向 ${o.name} 追稅 ${fmt(paid)}`); say(p,'recv');
-  }else if(it.id==='ally'){
-    const o=pById(target); if(!o||o.id===p.id) return;
-    p.ally=o.id; o.ally=p.id; p.allyN=7; o.allyN=7;
-    log(`${p.name} 與 ${o.name} 結成同盟 7 回合`);
-  }
-  paint();
+  takeItem(p,it.id); log(`${p.name} 使用「${it.name}」`);
+  if(it.id==='eqone'){ const o=pById(target); if(!o) return; const each=Math.floor((p.money+o.money)/2); p.money=each; o.money=each; }
+  else if(it.id==='turn'){ const o=pById(target); if(o){ const fwd=optionsAt(o); if(fwd.length) o.prev=fwd[0]; log(`${o.name} 轉向了`); } }
+  else if(it.id==='stay'){ const o=pById(target); if(o){o.stay=(o.stay||0)+1; log(`${o.name} 下一回合將原地立定`)} }
+  else if(it.id==='turtle'){ const o=pById(target); if(o){ if(tryDefend(o,'turtle',p.id)) return; o.turtle=3; log(`${o.name} 進入龜步 3 天`); } }
+  else if(it.id==='steal'){ const o=pById(target); if(!o||!o.items.length){log('對方沒有可搶的道具');return} const it2=o.items.splice(rnd(o.items.length),1)[0]; giveItem(p,it2,true); }
+  else if(it.id==='dream') applyDream(pById(target),3,{fromPid:p.id});
+  else if(it.id==='frame') sendJail(pById(target),3,{fromPid:p.id});
+  else if(it.id==='tax'){ const o=pById(target); if(!o) return; const paid=mustPay(o,Math.round(o.money*0.2),{fine:true,fromPid:p.id}); p.money+=paid; say(p,'recv'); }
+  else if(it.id==='ally'){ const o=pById(target); if(!o||o.id===p.id) return; p.ally=o.id; o.ally=p.id; p.allyN=7; o.allyN=7; }
+  paintHUD();
 }
-
 function applyGroup(p,it,g){
   takeItem(p,it.id);
-  const tiles=S.tiles.filter(t=>t.group===g);
+  const tiles=S.plots.filter(t=>t.group===g);
   log(`${p.name} 對「${GROUPS[g].name}」使用「${it.name}」`);
-  if(it.id==='bless'){ tiles.forEach(t=>{ if(t.t==='land') t.lv=Math.min(5,(t.lv||0)+1)}); }
-  if(it.id==='disaster'){ tiles.forEach(t=>{ if(t.t==='land') t.lv=0}); }
+  if(it.id==='bless'){ tiles.forEach(t=>{ if(t.group!=='tr'&&t.group!=='ut') t.lv=Math.min(5,(t.lv||0)+1)}); dirtyB=true; }
+  if(it.id==='disaster'){ tiles.forEach(t=>{ t.lv=0}); dirtyB=true; }
   if(it.id==='inflate'){ tiles.forEach(t=>{ if(t.seal>0){t.seal=0;t.inflate=0} else t.inflate=5}); }
   if(it.id==='seal'){ tiles.forEach(t=>{ if(t.inflate>0){t.inflate=0;t.seal=0} else t.seal=5}); }
-  paint();
+  paintHUD();
 }
 function applyStockCard(p,it,sid){
   takeItem(p,it.id);
   const st=S.stocks.find(s=>s.id===sid); if(!st) return;
-  log(`${p.name} 對 ${st.name} 使用「${it.name}」`);
-  if(it.id==='red'){
-    if(st.lockDir<0){st.lock=0;st.lockDir=0;log('紅盤與黑盤抵消了');}
-    else{st.lock=3;st.lockDir=1;st.price=clamp(Math.round(st.price*1.1),20,400)}
-  }else{
-    if(st.lockDir>0){st.lock=0;st.lockDir=0;log('黑盤與紅盤抵消了');}
-    else{st.lock=3;st.lockDir=-1;st.price=clamp(Math.round(st.price*0.9),20,400)}
-  }
-  paint();
+  if(it.id==='red'){ if(st.lockDir<0){st.lock=0;st.lockDir=0;log('紅盤與黑盤抵消了');} else {st.lock=3;st.lockDir=1;st.price=clamp(Math.round(st.price*1.1),20,400)} }
+  else { if(st.lockDir>0){st.lock=0;st.lockDir=0;log('黑盤與紅盤抵消了');} else {st.lock=3;st.lockDir=-1;st.price=clamp(Math.round(st.price*0.9),20,400)} }
+  paintHUD();
 }
 function applyTileItem(p,it,tid){
-  const tile=S.tiles[tid]; if(!tile) return;
-  if(it.use==='empty' && (tile.block||tile.mine||tile.bomb||S.gods.some(g=>g.tile===tid))) {log('這一格放不下');return}
+  // tid is node id or plot id depending on mode
   takeItem(p,it.id);
-  log(`${p.name} 在 ${tile.name} 使用「${it.name}」`);
-  if(it.id==='block') tile.block=1;
-  else if(it.id==='mine') tile.mine=1;
-  else if(it.id==='bomb') tile.bomb=1;
-  else if(it.id==='monster'){ if(tile.t==='land'){tile.lv=0;log(`${tile.name} 被拆到空地`)}}
-  else if(it.id==='demolish'){
-    if(tile.block||tile.mine||tile.bomb){tile.block=0;tile.mine=0;tile.bomb=0;log('障礙被拆除了')}
-    else if((tile.lv||0)>0){tile.lv--;log(`${tile.name} 被拆掉一層`)}
+  log(`${p.name} 使用「${it.name}」`);
+  if(it.id==='block'||it.id==='mine'||it.id==='bomb'){
+    const st=S.nodes[tid]; if(!st){giveItem(p,it.id,true);return}
+    if(st.block||st.mine||st.bomb){log('這一格放不下'); giveItem(p,it.id,true);return}
+    if(it.id==='block') st.block=1; else if(it.id==='mine') st.mine=1; else st.bomb=1;
+  }else if(it.id==='monster'){
+    const pl=S.plots[tid]; if(pl){pl.lv=0; dirtyB=true; log(`${pl.name} 被拆到空地`); addDust(pl.bx,pl.by);}
+  }else if(it.id==='demolish'){
+    const st=S.nodes[tid];
+    if(st && (st.block||st.mine||st.bomb)){st.block=0;st.mine=0;st.bomb=0; log('障礙被拆除了')}
+    else { const pl=S.plots[tid]; if(pl&&pl.lv>0){pl.lv--; dirtyB=true; log(`${pl.name} 被拆掉一層`)} }
   }else if(it.id==='swaphouse'){
-    const here=S.tiles[p.pos];
-    if(!here||!sameTier(here,tile)){log('只能對調同級地的樓層');giveItem(p,it.id,true);return}
-    const a=here.lv||0; here.lv=tile.lv||0; tile.lv=a;
-    log(`${here.name} 與 ${tile.name} 樓層對調`);
+    const here=plotOfNode(p.node); const pl=S.plots[tid];
+    if(!here||!pl||!sameTier(here,pl)){log('只能對調同級地的樓層'); giveItem(p,it.id,true);return}
+    const a=here.lv; here.lv=pl.lv; pl.lv=a; dirtyB=true;
   }else if(it.id==='swapland'){
-    const here=S.tiles[p.pos];
-    if(!here||here.owner!==p.id && tile.owner!==p.id){ /* need one of yours */
-    }
-    if(!sameTier(here,tile)){log('只能對調同級地');giveItem(p,it.id,true);return}
-    if(here.owner!==p.id && tile.owner!==p.id){log('其中一塊必須是你的地');giveItem(p,it.id,true);return}
-    const o=here.owner; here.owner=tile.owner; tile.owner=o;
-    log(`${here.name} 與 ${tile.name} 地契對調`);
+    const here=plotOfNode(p.node); const pl=S.plots[tid];
+    if(!here||!pl||!sameTier(here,pl) || (here.owner!==p.id&&pl.owner!==p.id)){log('對調失敗'); giveItem(p,it.id,true);return}
+    const o=here.owner; here.owner=pl.owner; pl.owner=o; dirtyB=true;
   }else if(it.id==='build'){
-    if(tile.owner!==p.id||tile.t!=='land'){log('只能給自己的地加蓋');giveItem(p,it.id,true);return}
-    if((tile.lv||0)>=5) return;
-    tile.lv++; log(`${tile.name} 加蓋成「${LVNAME[tile.lv]}」`);
+    const pl=S.plots[tid];
+    if(!pl||pl.owner!==p.id||pl.group==='tr'||pl.group==='ut'||(pl.lv||0)>=5){ giveItem(p,it.id,true); return; }
+    pl.lv++; dirtyB=true; addDust(pl.bx,pl.by);
   }
-  paint();
+  paintHUD();
 }
-function sameTier(a,b){
-  if(!a||!b||!a.price||!b.price) return false;
-  const ta=Math.floor(a.price/1500), tb=Math.floor(b.price/1500);
-  return ta===tb || a.group===b.group;
-}
-
-/* shop / bank / stock actions */
-function buyShop(p,id){
-  const it=ITEMS[id]; if(!it) return;
-  if(p.pts<it.pts){log('卡牌點不夠');return}
-  if(p.items.length>=8){log('背包滿了，先用掉再買');return}
-  p.pts-=it.pts; giveItem(p,id); sfx('coin');
-}
+function sameTier(a,b){ if(!a||!b) return false; return Math.floor(a.price/1500)===Math.floor(b.price/1500) || a.group===b.group; }
+function buyShop(p,id){ const it=ITEMS[id]; if(!it) return; if(p.pts<it.pts||p.items.length>=8) return; p.pts-=it.pts; giveItem(p,id); sfx('coin'); }
 function bankAct(p,kind,amt){
   amt=Math.max(0,Math.round(+amt||0));
-  if(kind==='dep'){ amt=Math.min(amt,p.money); p.money-=amt; p.dep+=amt; log(`${p.name} 存入 ${fmt(amt)}`); }
-  if(kind==='wd'){ amt=Math.min(amt,p.dep); p.dep-=amt; p.money+=amt; log(`${p.name} 領出 ${fmt(amt)}`); }
-  if(kind==='loan'){ const max=Math.max(0,10000-p.loan); amt=Math.min(amt,max); p.loan+=amt; p.money+=amt; log(`${p.name} 貸款 ${fmt(amt)}`); }
-  if(kind==='repay'){ amt=Math.min(amt,p.loan,p.money); p.money-=amt; p.loan-=amt; log(`${p.name} 還款 ${fmt(amt)}`); }
+  if(kind==='dep'){ amt=Math.min(amt,p.money); p.money-=amt; p.dep+=amt; }
+  if(kind==='wd'){ amt=Math.min(amt,p.dep); p.dep-=amt; p.money+=amt; }
+  if(kind==='loan'){ amt=Math.min(amt,Math.max(0,10000-p.loan)); p.loan+=amt; p.money+=amt; }
+  if(kind==='repay'){ amt=Math.min(amt,p.loan,p.money); p.money-=amt; p.loan-=amt; }
 }
 function stockAct(p,sid,n,buy){
-  const st=S.stocks.find(s=>s.id===sid); if(!st||!n) return;
-  n=Math.round(n);
-  if(buy){
-    const cost=n*st.price;
-    if(p.money<cost) return;
-    p.money-=cost; p.stocks[sid]=(p.stocks[sid]||0)+n;
-    log(`${p.name} 買入 ${st.name} ×${n}`);
-  }else{
-    n=Math.min(n,p.stocks[sid]||0);
-    p.stocks[sid]-=n; p.money+=n*st.price;
-    log(`${p.name} 賣出 ${st.name} ×${n}`);
-  }
+  const st=S.stocks.find(s=>s.id===sid); if(!st||!n) return; n=Math.round(n);
+  if(buy){ const cost=n*st.price; if(p.money<cost) return; p.money-=cost; p.stocks[sid]=(p.stocks[sid]||0)+n; }
+  else { n=Math.min(n,p.stocks[sid]||0); p.stocks[sid]-=n; p.money+=n*st.price; }
 }
 
-/* ---------- action dispatcher ---------- */
+
+/* ---------- dispatcher ---------- */
 function handleAct(pid,a){
   if(!S||S.over||!a) return;
   const p=pById(pid); if(!p||p.bankrupt) return;
   const pend=S.pending;
   if(pend && pend.pid!==pid && a.t!=='ping') return;
-  if(S.busy && a.t!=='ping') return;
+  if(S.busy && a.t!=='fork' && a.t!=='ping') return;
 
   if(a.t==='roll'){ doRoll(p,a.forced,a.nd); return; }
-  if(a.t==='buy'){ const t=S.tiles[pend&&pend.tile]; if(t) doBuy(p,t); S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
-  if(a.t==='skipbuy'){ S.pending=null; S.phase='after'; log(`${p.name} 放棄購買`); paint(); endAfterIfAI(p); sync(); return; }
-  if(a.t==='up'){ const t=S.tiles[pend&&pend.tile]; if(t) doUp(p,t); S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
-  if(a.t==='skipup'){ S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
-  if(a.t==='shopbuy'){ buyShop(p,a.id); paint(); sync(); return; }
-  if(a.t==='shopdone'){ S.pending=null; S.phase='after'; paint(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='fork'){
+    if(pend&&pend.type==='fork'){
+      const nid=+a.nid; if(!pend.opts.includes(nid)) return;
+      S.pending=null; clearForks();
+      if(S._forkRes){ const r=S._forkRes; S._forkRes=null; r(nid); }
+    }
+    return;
+  }
+  if(a.t==='buy'){ const pl=S.plots[pend&&pend.plot]; if(pl){ doBuy(p,pl); } S.pending=null; S.phase='after'; paintHUD(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='skipbuy'){ S.pending=null; S.phase='after'; log(`${p.name} 放棄購買`); paintHUD(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='up'){ const pl=S.plots[pend&&pend.plot]; if(pl) doUp(p,pl); S.pending=null; S.phase='after'; paintHUD(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='skipup'){ S.pending=null; S.phase='after'; paintHUD(); endAfterIfAI(p); sync(); return; }
+  if(a.t==='shopbuy'){ buyShop(p,a.id); paintHUD(); sync(); return; }
+  if(a.t==='shopdone'){ S.pending=null; S.phase='after'; paintHUD(); endAfterIfAI(p); sync(); return; }
   if(a.t==='hospital'){
-    if(a.pay){ if(mustPay(p,800,{reason:'出院',fine:true}), p.hospital=0, p.money>=0) { /* paid or bankrupt */ } p.hospital=0; S.pending=null; S.phase='main'; paint(); maybeAI(); sync(); return; }
-    p.hospital--; log(`${p.name} 繼續住院（剩 ${p.hospital}）`); S.pending=null; endTurn(true); sync(); return;
+    if(a.pay){ mustPay(p,800,{fine:true}); p.hospital=0; S.pending=null; S.phase='main'; paintHUD(); maybeAI(); sync(); return; }
+    p.hospital--; log(`${p.name} 繼續住院（剩 ${p.hospital}）`); S.pending=null; endTurn(); sync(); return;
   }
   if(a.t==='jail'){
-    if(a.pay){ mustPay(p,800,{reason:'請假',fine:true}); p.jail=0; S.pending=null; S.phase='main'; paint(); maybeAI(); sync(); return; }
-    p.jail--; log(`${p.name} 繼續加班（剩 ${p.jail}）`); S.pending=null; endTurn(true); sync(); return;
+    if(a.pay){ mustPay(p,800,{fine:true}); p.jail=0; S.pending=null; S.phase='main'; paintHUD(); maybeAI(); sync(); return; }
+    p.jail--; log(`${p.name} 繼續加班（剩 ${p.jail}）`); S.pending=null; endTurn(); sync(); return;
   }
   if(a.t==='item'){ useItem(p,a.id); sync(); return; }
-  if(a.t==='pickdice'){
-    const n=clamp(+a.n||1,1,6); takeItem(p,'dice'); S.pending=null; doRoll(p,[n],1); return;
-  }
-  if(a.t==='ndice'){
-    const n=clamp(+a.n||1,1,pend.max||2); p.diceMax=n; S.pending=null; S.phase='main';
-    log(`${p.name} 這回合要用 ${n} 顆骰子`); paint(); maybeAI(); sync(); return;
-  }
-  if(a.t==='pickplayer'){
-    const it=ITEMS[pend.item]; S.pending=null; applyItemTarget(p,it,a.id); S.phase=S.phase||'main'; sync(); return;
-  }
+  if(a.t==='pickdice'){ const n=clamp(+a.n||1,1,6); takeItem(p,'dice'); S.pending=null; doRoll(p,[n],1); return; }
+  if(a.t==='ndice'){ const n=clamp(+a.n||1,1,pend.max||2); p.diceMax=n; S.pending=null; S.phase='main'; paintHUD(); maybeAI(); sync(); return; }
+  if(a.t==='pickplayer'){ const it=ITEMS[pend.item]; S.pending=null; applyItemTarget(p,it,a.id); sync(); return; }
   if(a.t==='pickgroup'){ const it=ITEMS[pend.item]; S.pending=null; applyGroup(p,it,a.g); sync(); return; }
   if(a.t==='pickstock'){ const it=ITEMS[pend.item]; S.pending=null; applyStockCard(p,it,a.sid); sync(); return; }
   if(a.t==='picktile'){ const it=ITEMS[pend.item]; S.pending=null; applyTileItem(p,it,+a.tid); sync(); return; }
   if(a.t==='auction'){
-    const tile=S.tiles[pend.tile]; const user=pById(pend.user);
+    const plot=S.plots[pend.plot]; const user=pById(pend.user);
     let best=pend.best||{pid:null,bid:pend.base||0};
     if(a.bid && a.bid>best.bid && p.money>=a.bid) best={pid:p.id,bid:a.bid};
-    S.pending=null; settleAuction(user,tile,best); S.phase='after'; paint(); endAfterIfAI(user); sync(); return;
+    S.pending=null; settleAuction(user,plot,best); S.phase='after'; paintHUD(); endAfterIfAI(user); sync(); return;
   }
-  if(a.t==='bank'){ bankAct(p,a.kind,a.amt); paint(); sync(); return; }
-  if(a.t==='stock'){ stockAct(p,a.sid,a.n,!!a.buy); paint(); sync(); return; }
-  if(a.t==='closestock'||a.t==='closebank'){ if(pend&&(pend.type==='stock'||pend.type==='bank')){S.pending=null; if(pend.fromTile){S.phase='after'; paint(); endAfterIfAI(p);} else {S.phase=S.phase||'main'; paint(); maybeAI();} sync();} return; }
-  if(a.t==='openbank'){ if(['main','after'].includes(S.phase)&&!S.pending){ S.pending={type:'bank',pid:p.id}; paint(); maybeAI(); } return; }
-  if(a.t==='openstock'){ if(['main','after'].includes(S.phase)&&!S.pending){ S.pending={type:'stock',pid:p.id}; paint(); maybeAI(); } return; }
-  if(a.t==='end'){ if(S.phase==='after'||S.phase==='main'&&p.stay>0){ endTurn(); sync(); } return; }
+  if(a.t==='bank'){ bankAct(p,a.kind,a.amt); paintHUD(); sync(); return; }
+  if(a.t==='stock'){ stockAct(p,a.sid,a.n,!!a.buy); paintHUD(); sync(); return; }
+  if(a.t==='closestock'||a.t==='closebank'){
+    if(pend&&(pend.type==='stock'||pend.type==='bank')){
+      S.pending=null;
+      if(pend.fromTile){ S.phase='after'; paintHUD(); endAfterIfAI(p); }
+      else { paintHUD(); maybeAI(); }
+      sync();
+    }
+    return;
+  }
+  if(a.t==='openbank'){ if(['main','after'].includes(S.phase)&&!S.pending){ S.pending={type:'bank',pid:p.id}; paintHUD(); maybeAI(); } return; }
+  if(a.t==='openstock'){ if(['main','after'].includes(S.phase)&&!S.pending){ S.pending={type:'stock',pid:p.id}; paintHUD(); maybeAI(); } return; }
+  if(a.t==='info'){ S._infoFor=pid; openInfo(); return; }
+  if(a.t==='end'){ if(S.phase==='after'||(S.phase==='main'&&p.stay>0)){ endTurn(); sync(); } return; }
+  if(a.t==='dlgok'){ if(S._dlgRes){ const r=S._dlgRes; S._dlgRes=null; S.pending=null; hideDlg(); r('ok'); } return; }
+}
+function doBuy(p,plot){
+  const price=buyPrice(p,plot);
+  if(p.money<price) return false;
+  p.money-=price; plot.owner=p.id;
+  if(p.god==='luck_s'||p.god==='luck_b') plot.lv=Math.min(5,(plot.lv||0)+1);
+  dirtyB=true; addDust(plot.bx,plot.by);
+  say(p,'buy'); sfx('coin'); flyMoney('-'+fmt(price),false);
+  log(`${p.name} 買下 ${plot.name}（${fmt(price)}）`);
+  return true;
+}
+function doUp(p,plot,free){
+  if((plot.lv||0)>=5) return;
+  if(!free){ const c=upgradeCost(plot); if(p.money<c) return; p.money-=c; }
+  plot.lv=(plot.lv||0)+1; dirtyB=true; addDust(plot.bx,plot.by);
+  log(`${p.name} 把 ${plot.name} 加蓋成「${LVNAME[plot.lv]}」`); sfx('coin');
 }
 
 function sync(){ if(mode==='host') bcast(); }
@@ -1610,25 +2209,21 @@ function sync(){ if(mode==='host') bcast(); }
 /* ---------- AI ---------- */
 function maybeAI(){
   if(!S||S.over||S.busy) return;
-  if(S.pending){
-    const q=pById(S.pending.pid);
-    if(q&&isAuto(q)) timerAI(()=>aiPending(q,S.pending));
-    return;
-  }
+  if(S.pending){ const q=pById(S.pending.pid); if(q&&isAuto(q)) timerAI(()=>aiPending(q,S.pending)); return; }
   const p=cur(); if(!p) return;
   if(S.phase==='main' && isAuto(p)) timerAI(()=>aiMain(p));
   if(S.phase==='after' && isAuto(p)) timerAI(()=>aiAfter(p));
 }
-function timerAI(fn){ setTimeout(()=>{ try{ if(S&&!S.over) fn(); }catch(e){ console.error(e); if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e)); } }, FAST?0:260); }
+function timerAI(fn){ setTimeout(()=>{ try{ if(S&&!S.over) fn(); }catch(e){ console.error(e); if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.stack||e)); } }, FAST?0:(speedy?80:280)); }
 
-function shouldBuy(p,tile){
-  const price=buyPrice(p,tile);
+function shouldBuy(p,plot){
+  const price=buyPrice(p,plot);
   if(p.money<price) return false;
   const keep={money:600,pride:1800,unlucky:4000,stock:2500,airy:400,cheer:1200}[p.pers]||1500;
-  if(p.pers==='pride' && tile.price<1800 && rnd(3)!==0) return false;
+  if(p.pers==='pride' && plot.price<1800 && rnd(3)!==0) return false;
   if(p.pers==='stock' && rnd(4)===0) return false;
   if(p.pers==='airy') return rnd(5)!==0;
-  return p.money-price>=keep || p.money>price*2 || ownsSet(p.id,tile.group,S) || ownedCount(p.id,tile.group,S)>=1;
+  return p.money-price>=keep || p.money>price*2 || ownsSet(p.id,plot.group,S) || ownedCount(p.id,plot.group,S)>=1;
 }
 function aiMain(p){
   if(!S||S.over||S.pending||S.phase!=='main') return;
@@ -1642,290 +2237,205 @@ function aiMain(p){
   handleAct(p.id,{t:'roll'});
 }
 function aiAfter(p){
-  if(!S||S.over||cur().id!==p.id) return;
-  if(S.pending) return;
+  if(!S||S.over||cur().id!==p.id||S.pending) return;
   aiMaybeItem(p);
   if(S.pending) return;
   handleAct(p.id,{t:'end'});
 }
 function aiMaybeItem(p){
   if(p.dream>0||!p.items.length||rnd(3)===0) return;
-  // remote dice if useful
   if(p.items.includes('dice') && S.phase==='main'){
-    // try land on own or cheap unowned 1-6 ahead
-    let choice=0;
-    for(let d=6;d>=1;d--){
-      const t=S.tiles[(p.pos+(p.dir||1)*d+40)%40];
-      if(!t.owner && (t.t==='land'||t.t==='trans') && t.price<=p.money && t.price>=2000){choice=d;break}
-      if(t.owner===p.id && t.t==='land' && (t.lv||0)<5){choice=d;break}
-    }
-    if(choice){ handleAct(p.id,{t:'item',id:'dice'}); if(S.pending&&S.pending.type==='pickdice') handleAct(p.id,{t:'pickdice',n:choice}); return; }
+    // simple: sometimes use if a cheap plot is 1-6? hard on a graph; skip mostly
+    if(rnd(8)===0){ handleAct(p.id,{t:'item',id:'dice'}); if(S.pending&&S.pending.type==='pickdice') handleAct(p.id,{t:'pickdice',n:1+rnd(6)}); return; }
   }
-  if(p.items.includes('eqall') && p.money< alive().reduce((s,x)=>s+x.money,0)/alive().length*0.55){
-    handleAct(p.id,{t:'item',id:'eqall'}); return;
-  }
+  if(p.items.includes('eqall') && p.money< alive().reduce((s,x)=>s+x.money,0)/alive().length*0.55){ handleAct(p.id,{t:'item',id:'eqall'}); return; }
   const rich=alive().filter(o=>o.id!==p.id).sort((a,b)=>b.money-a.money)[0];
   if(rich && p.items.includes('tax') && rich.money>8000){ handleAct(p.id,{t:'item',id:'tax'}); if(S.pending&&S.pending.type==='pickplayer') handleAct(p.id,{t:'pickplayer',id:rich.id}); return; }
-  if(rich && p.items.includes('frame') && rnd(4)===0){ handleAct(p.id,{t:'item',id:'frame'}); if(S.pending&&S.pending.type==='pickplayer') handleAct(p.id,{t:'pickplayer',id:rich.id}); return; }
-  if(p.god && !GODS[p.god].good && p.god!=='reaper' && p.items.includes('banish')){ handleAct(p.id,{t:'item',id:'banish'}); return; }
+  if(p.god && GODS[p.god] && !GODS[p.god].good && p.god!=='reaper' && p.items.includes('banish')){ handleAct(p.id,{t:'item',id:'banish'}); return; }
 }
 function aiPending(p,pend){
   if(!pend||pend.pid!==p.id) return;
-  if(pend.type==='buy') handleAct(p.id,{t:shouldBuy(p,S.tiles[pend.tile])?'buy':'skipbuy'});
-  else if(pend.type==='upgrade') handleAct(p.id,{t:(p.money>upgradeCost(S.tiles[pend.tile])+1500 && p.pers!=='unlucky')?'up':'skipup'});
+  if(pend.type==='buy') handleAct(p.id,{t:shouldBuy(p,S.plots[pend.plot])?'buy':'skipbuy'});
+  else if(pend.type==='upgrade') handleAct(p.id,{t:(p.money>upgradeCost(S.plots[pend.plot])+1500 && p.pers!=='unlucky')?'up':'skipup'});
   else if(pend.type==='shop'){
-    const aff=SHOP_ORDER.find(id=>ITEMS[id].pts<=p.pts && p.items.length<8 && !AUTO_ITEMS.has(id) && (p.pts-ITEMS[id].pts>=0) && ITEMS[id].pts<=80);
-    if(aff && p.pts>=ITEMS[aff].pts) handleAct(p.id,{t:'shopbuy',id:aff});
+    const aff=SHOP_ORDER.find(id=>ITEMS[id].pts<=p.pts && p.items.length<8 && !AUTO_ITEMS.has(id) && ITEMS[id].pts<=80);
+    if(aff) handleAct(p.id,{t:'shopbuy',id:aff});
     handleAct(p.id,{t:'shopdone'});
   }else if(pend.type==='hospital') handleAct(p.id,{t:'hospital',pay:p.money>6000});
   else if(pend.type==='jail') handleAct(p.id,{t:'jail',pay:p.money>6000});
-  else if(pend.type==='pickdice'){
-    let n=1+rnd(6);
-    for(let d=6;d>=1;d--){const t=S.tiles[(p.pos+(p.dir||1)*d+40)%40]; if(!t.owner&&t.price&&p.money>=t.price){n=d;break}}
-    handleAct(p.id,{t:'pickdice',n});
-  }else if(pend.type==='ndice') handleAct(p.id,{t:'ndice',n:pend.max||2});
+  else if(pend.type==='pickdice') handleAct(p.id,{t:'pickdice',n:1+rnd(6)});
+  else if(pend.type==='ndice') handleAct(p.id,{t:'ndice',n:pend.max||2});
   else if(pend.type==='pickplayer'){
-    const others=alive().filter(o=>o.id!==p.id||pend.allowSelf);
-    const t=others.slice().sort((a,b)=>b.money-a.money)[0]||p;
+    const others=alive().filter(o=>pend.allowSelf||o.id!==p.id);
+    const t=(others.slice().sort((a,b)=>b.money-a.money)[0])||p;
     handleAct(p.id,{t:'pickplayer',id:t.id});
   }else if(pend.type==='pickgroup'){
-    const g=Object.keys(GROUPS).find(k=>k!=='tr'&&k!=='ut'&&S.tiles.some(t=>t.group===k&&t.owner&&t.owner!==p.id))||'a';
+    const g=Object.keys(GROUPS).find(k=>k!=='tr'&&k!=='ut'&&S.plots.some(t=>t.group===k&&t.owner&&t.owner!==p.id))||'a';
     handleAct(p.id,{t:'pickgroup',g});
-  }else if(pend.type==='pickstock') handleAct(p.id,{t:'pickstock',sid:(p.pers==='stock'?S.stocks[2]:S.stocks[0]).id});
+  }else if(pend.type==='pickstock') handleAct(p.id,{t:'pickstock',sid:S.stocks[0].id});
   else if(pend.type==='picktile'){
-    let tid= (p.pos+3)%40;
-    if(pend.mode==='empty'){ for(let i=1;i<40;i++){const t=S.tiles[(p.pos+i)%40]; if(!t.block&&!t.mine&&!t.bomb){tid=t.id;break}} }
-    if(pend.mode==='myland'||pend.mode==='myland2'){ const t=S.tiles.find(x=>x.owner===p.id); if(t) tid=t.id; }
-    if(pend.mode==='tile'||pend.mode==='tilehaz'){ const t=S.tiles.filter(x=>x.lv>0&&x.owner!==p.id).sort((a,b)=>b.lv-a.lv)[0]; if(t) tid=t.id; }
+    let tid=p.node;
+    if(pend.mode==='empty'){ const t=S.nodes.find(n=>!n.block&&!n.mine&&!n.bomb); if(t) tid=t.id; }
+    if(pend.mode==='myland'||pend.mode==='myland2'){ const t=S.plots.find(x=>x.owner===p.id); if(t) tid=t.id; }
+    if(pend.mode==='tile'||pend.mode==='tilehaz'){ const t=S.plots.filter(x=>x.lv>0&&x.owner!==p.id).sort((a,b)=>b.lv-a.lv)[0]; if(t) tid=t.id; }
     handleAct(p.id,{t:'picktile',tid});
   }else if(pend.type==='auction') handleAct(p.id,{t:'auction',bid:0});
   else if(pend.type==='stock'||pend.type==='bank') handleAct(p.id,{t:'closestock'});
-  else { S.pending=null; paint(); maybeAI(); }
+  else if(pend.type==='fork'){ const n=aiPickDir(p,pend.opts,pend.straight); handleAct(p.id,{t:'fork',nid:n}); }
+  else if(pend.type==='dlg'){ handleAct(p.id,{t:'dlgok'}); }
+  else { S.pending=null; paintHUD(); maybeAI(); }
 }
 
-/* ---------- render ---------- */
-function show(name){
-  view=name;
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+name));
+/* ---------- dialog / HUD ---------- */
+function popup(opts){
+  return new Promise(res=>{
+    if(FAST){ res('ok'); return; }
+    const pid=opts.pid;
+    const actor=pid?pById(pid):cur();
+    if(actor && isAuto(actor) && speedy){ setTimeout(()=>res('ok'), 80); return; }
+    if(actor && isAuto(actor)){ setTimeout(()=>res('ok'), 280); return; }
+    // only the human whose event it is (or local host) clicks
+    S.pending={type:'dlg',pid:(actor&&!isAuto(actor))?actor.id:(me.id)};
+    S._dlgRes=res;
+    openDlg(opts);
+    sync();
+  });
 }
-function tileGeom(i){
-  const C=14.8, SD=(100-2*C)/9;
-  if(i===0) return {l:100-C,t:100-C,w:C,h:C,side:'corner'};
-  if(i===10) return {l:0,t:100-C,w:C,h:C,side:'corner'};
-  if(i===20) return {l:0,t:0,w:C,h:C,side:'corner'};
-  if(i===30) return {l:100-C,t:0,w:C,h:C,side:'corner'};
-  if(i>=1&&i<=9) return {l:C+(9-i)*SD,t:100-C,w:SD,h:C,side:'bottom'};
-  if(i>=11&&i<=19) return {l:0,t:C+(19-i)*SD,w:C,h:SD,side:'left'};
-  if(i>=21&&i<=29) return {l:C+(i-21)*SD,t:0,w:SD,h:C,side:'top'};
-  return {l:100-C,t:C+(i-31)*SD,w:C,h:SD,side:'right'};
+function openDlg(opts){
+  const p=opts.portrait|| (opts.pid?pById(opts.pid):cur());
+  const expr=opts.expr||(p&&p.expr)||'normal';
+  $('dbox').innerHTML=`<div class="dhead">${p?portraitHTML(p,expr,64,p.anim):''}<div>
+    <h3>${esc(opts.title||'訊息')}</h3>
+    <div class="muted">${calStr()}</div></div></div>
+    <div class="dtext">${esc(opts.body||'').replace(/\n/g,'<br>')}</div>
+    <div class="dacts"><button class="btn" data-act="dlgok">確定</button></div>`;
+  $('dmask').classList.add('on');
 }
-function buildBoard(){
-  const b=$('board');
-  b.innerHTML='<div class="felt" id="felt"></div>';
-  for(let i=0;i<40;i++){
-    const g=tileGeom(i), src=TILES[i];
-    const d=document.createElement('div');
-    d.className='tile '+g.side+(src.t!=='land'&&src.t!=='trans'&&src.t!=='util'?' special':'')+' '+(src.t||'');
-    d.id='tl'+i;
-    d.style.cssText=`left:${g.l}%;top:${g.t}%;width:${g.w}%;height:${g.h}%;`;
-    const col=src.group&&GROUPS[src.group]?GROUPS[src.group].color:'';
-    const SHORT={'風力發電廠':'風電','渡輪碼頭':'渡輪','音樂廳路':'音樂廳','購物廣場':'購物場','百貨大樓':'百貨','科技園區':'科技園','機場航廈':'機場','豪華酒店':'酒店','慈善捐款':'捐款','摩天大樓':'摩天','公交總站':'公交','圖書館大道':'圖書館','體育館路':'體育館','市集廣場':'廣場','高鐵站':'高鐵','蓄水廠':'蓄水'};
-    const short=SHORT[src.name]||(src.name.length>4?src.name.replace(/大道|路|巷|街|日|廠$/,'') : src.name);
-    d.innerHTML=(col?`<div class="bar" style="background:${col}"></div>`:'')+`<div class="tn">${esc(short)}</div>`+(src.price?`<div class="pr">${src.price}</div>`:'')+`<div class="lv"></div>`;
-    b.appendChild(d);
-  }
-  const tok=document.createElement('div'); tok.id='toks'; b.appendChild(tok);
-  const hz=document.createElement('div'); hz.id='hazs'; b.appendChild(hz);
+function hideDlg(){ $('dmask').classList.remove('on'); }
+
+function preloadImg(p){
+  if(p.img && !imgCache[p.id]){
+    const im=new Image(); im.src=p.img; p._imgEl=im; imgCache[p.id]=im;
+  } else if(imgCache[p.id]) p._imgEl=imgCache[p.id];
 }
-function updateTiles(){
-  if(!S) return;
-  for(const t of S.tiles){
-    const el=$('tl'+t.id); if(!el) continue;
-    el.classList.toggle('on', cur()&&cur().pos===t.id);
-    const lv=el.querySelector('.lv');
-    if(lv){
-      let s='';
-      if(t.owner){ const op=pById(t.owner); s+=(op?'●':''); if(t.lv) s+='⌂'+t.lv; }
-      lv.textContent=s;
-      lv.style.color=t.owner?(pById(t.owner)||{}).color||'#333':'';
-    }
-  }
-  const hz=$('hazs'); if(!hz) return;
-  hz.innerHTML='';
-  for(const t of S.tiles){
-    if(t.block||t.mine||t.bomb||t.seal||t.inflate){
-      const g=tileGeom(t.id);
-      const ico=t.mine?'💥':t.bomb?'💣':t.block?'🚧':t.seal?'🔒':t.inflate?'🔥':'';
-      hz.insertAdjacentHTML('beforeend',`<div class="haz" style="left:${g.l+g.w/2-2}%;top:${g.t+g.h/2-2}%">${ico}</div>`);
-    }
-  }
-  for(const g of S.gods){
-    const geo=tileGeom(g.tile); const G=GODS[g.id];
-    hz.insertAdjacentHTML('beforeend',`<div class="godchip" style="left:${geo.l+geo.w/2-2}%;top:${geo.t+4}%">${G.icon}</div>`);
-  }
-}
-function paintTokens(){
-  if(!S) return;
-  let toks=$('toks'); if(!toks) return;
-  toks.innerHTML='';
-  const occ={};
-  for(const p of S.players){
-    if(p.bankrupt) continue;
-    const g=tileGeom(p.pos);
-    occ[p.pos]=(occ[p.pos]||0)+1;
-    const k=occ[p.pos]-1;
-    const ox=(k%2)*10-4, oy=Math.floor(k/2)*10-2;
-    const left=g.l+g.w*0.35+ox*(100/390);
-    const top=g.t+g.h*0.35+oy*(100/390);
-    const el=document.createElement('div');
-    el.className='tok hop';
-    el.style.left=left+'%'; el.style.top=top+'%';
-    el.style.background=p.color||'#eee';
-    el.innerHTML=p.img?`<img src="${p.img}" alt="">`:svgChar(p.charId||'uncle',p.expr||'normal',18);
-    toks.appendChild(el);
-  }
-}
-function paintFelt(){
-  const f=$('felt'); if(!f||!S) return;
-  const p=cur();
-  const dice=(S.dice||[]).map(n=>`<div class="die ${S.phase==='moving'?'shake':''}">${n}</div>`).join('') || (S.phase==='main'?'<div class="muted" style="color:#dff">準備擲骰</div>':'');
-  const god=p&&p.god?`<span title="${esc(GODS[p.god].desc)}">${GODS[p.god].icon}${GODS[p.god].name} ${p.godN}回合</span>`:'';
-  const bub=(S.bubble&&S.bubble.text&&p&&S.bubble.pid===p.id)?esc(S.bubble.text):esc((S.log&&S.log[0])||'');
-  f.innerHTML=`<div class="who">${p?portraitHTML(p,p.expr,44):''}<div><div class="nm">${p?esc(p.name):''}</div><div style="font-size:10px;opacity:.85">${god}</div></div></div>
-    <div id="bubble">${bub}</div><div id="dicebox">${dice}</div>`;
-}
-function paintDock(){
-  if(!S) return;
-  $('g-round').textContent=`第 ${S.round} 回合`+(S.win==='rounds'?`／${S.maxRound}`:'');
-  $('g-code').textContent=S.code?('房 '+S.code):'單機';
+
+function paintHUD(){
+  if(view!=='game'||!S) return;
+  $('cal').textContent=calStr();
+  $('cal-news').textContent=S.news||'';
   $('btn-mute').textContent=muted?'🔇':'🔊';
-  const pl=$('plist');
-  pl.innerHTML=S.players.map(p=>{
+  $('btn-fast').textContent=speedy||FAST?'🚀':'⏩';
+  $('players').innerHTML=S.players.map(p=>{
+    preloadImg(p);
     const on=cur()&&cur().id===p.id;
-    return `<div class="pchip ${on?'turn':''} ${p.bankrupt?'out':''}">${portraitHTML(p,p.expr,28)}
-      <div><b>${esc(p.name)}${p.isAI?'·電腦':''}${p.dropped?'·掉線':''}</b>
-      ${fmt(p.money)} · ${p.pts}點${p.god?(' '+GODS[p.god].icon):''}${p.bomb?'💣':''}</div></div>`;
+    const st=[p.god&&GODS[p.god]?GODS[p.god].icon:'', p.hospital?'🏥':'', p.jail?'📋':'', p.sleep?'😴':'', p.dream?'🌙':'', p.dropped?'📡':''].filter(Boolean).join(' ');
+    return `<div class="pbox ${on?'turn':''} ${p.bankrupt?'out':''}">${portraitHTML(p,p.expr,28)}
+      <div class="meta"><div class="nm">${esc(p.name)}${p.isAI?'':' '}</div>
+      <div class="cash">${fmt(p.money)}</div>
+      <div class="subc">存${fmt(p.dep)} · ${p.pts}點 ${st}</div></div></div>`;
   }).join('');
-  $('log').innerHTML=(S.log||[]).slice(0,3).map(x=>`<div>${esc(x)}</div>`).join('');
-  const p=pById(me.id)||cur();
   const mine=S.players.find(x=>x.id===me.id)||null;
-  const canAct=mine&&cur()&&cur().id===mine.id && !S.busy && !isAuto(cur());
-  const items=$('items');
+  const hand=$('hand');
   if(mine){
-    items.innerHTML=mine.items.map(id=>{
+    hand.innerHTML=mine.items.map(id=>{
       const it=ITEMS[id]; if(!it) return '';
       const auto=AUTO_ITEMS.has(id);
       return `<div class="item" data-item="${id}" title="${esc(it.desc)}">${it.icon} ${it.name}${auto?'·自動':''}</div>`;
-    }).join('')||'<span class="muted">背包空空</span>';
-  }else items.innerHTML='';
-  const bar=$('actbar');
-  const btns=[];
-  if(S.over){/* result view */}
-  else if(canAct && S.pending && S.pending.pid===mine.id){
-    // modal handles most; still show hint
-  }else if(canAct && S.phase==='main'){
-    btns.push(['擲骰！','roll', '']);
-    btns.push(['銀行','openbank','ghost']);
-    btns.push(['股市','openstock','ghost']);
-  }else if(canAct && S.phase==='after'){
-    btns.push(['結束回合','end','']);
-    btns.push(['銀行','openbank','ghost']);
-    btns.push(['股市','openstock','teal']);
-  }else{
-    btns.push([S.busy?'移動中…':'等待其他人','noop','ghost']);
-  }
-  bar.innerHTML=btns.map(([l,t,c])=>`<button class="btn ${c}" data-act="${t}" ${t==='noop'?'disabled':''}>${l}</button>`).join('');
+    }).join('')||'<span class="muted" style="color:#ffe9c4">背包空空</span>';
+  }else hand.innerHTML='';
+  const canAct=mine&&cur()&&cur().id===mine.id && !S.busy && !isAuto(cur());
+  const dice=$('dicebtn');
+  dice.disabled=!(canAct && S.phase==='main' && !S.pending);
   paintModal();
+  if(S.over) showResult();
 }
+
 function paintModal(){
-  const mask=$('mask'), modal=$('modal');
-  if(!S||!S.pending){mask.classList.remove('on');return}
+  const mask=$('dmask');
+  if(!S||!S.pending){ if(!S||!S._dlgRes) mask.classList.remove('on'); return; }
   const pend=S.pending;
+  if(pend.type==='dlg') return; // already opened
+  if(pend.type==='fork'){ mask.classList.remove('on'); return; }
   const mine=S.players.find(x=>x.id===me.id);
   const myTurn=mine&&pend.pid===mine.id && !isAuto(mine);
   if(!myTurn){ mask.classList.remove('on'); return; }
   const actor=pById(pend.pid);
-  let html=`<h3>${esc((actor||{}).name||'')} 的行動</h3>`;
-  const wait='';
+  let html=`<div class="dhead">${portraitHTML(actor,actor.expr,64)}<h3>${esc(actor.name)} 的行動</h3></div><div class="dtext">`;
   if(pend.type==='buy'){
-    const t=S.tiles[pend.tile];
-    html+=`<p>要花 ${fmt(buyPrice(actor,t))} 買下 <b>${esc(t.name)}</b> 嗎？</p>${wait}`;
-    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="skipbuy">放棄</button><button class="btn" data-act="buy">買下來</button></div>`;
+    const t=S.plots[pend.plot];
+    html+=`要花 ${fmt(buyPrice(actor,t))} 買下「${esc(t.name)}」（${GROUPS[t.group].name}）嗎？</div>
+      <div class="dacts"><button class="btn ghost" data-act="skipbuy">放棄</button><button class="btn" data-act="buy">買下來</button></div>`;
   }else if(pend.type==='upgrade'){
-    const t=S.tiles[pend.tile];
-    html+=`<p>要把 <b>${esc(t.name)}</b> 加蓋成「${LVNAME[(t.lv||0)+1]}」嗎？費用 ${fmt(upgradeCost(t))}</p>${wait}`;
-    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="skipup">不用</button><button class="btn" data-act="up">加蓋</button></div>`;
+    const t=S.plots[pend.plot];
+    html+=`要把「${esc(t.name)}」加蓋成「${LVNAME[(t.lv||0)+1]}」嗎？費用 ${fmt(upgradeCost(t))}</div>
+      <div class="dacts"><button class="btn ghost" data-act="skipup">不用</button><button class="btn" data-act="up">加蓋</button></div>`;
   }else if(pend.type==='shop'){
-    html+=`<p>卡牌點：<b>${actor.pts}</b>　選一個道具，或直接離開。</p>${wait}`;
-    if(myTurn){
-      html+=SHOP_ORDER.map(id=>{
-        const it=ITEMS[id];
-        const dis=actor.pts<it.pts||actor.items.length>=8;
-        return `<button class="listbtn" data-shop="${id}" ${dis?'disabled':''}>${it.icon} ${it.name}　${it.pts}點<br><span class="muted">${esc(it.desc)}</span></button>`;
-      }).join('')+`<button class="btn" data-act="shopdone">離開道具舖</button>`;
-    }
+    html+=`卡牌點：<b>${actor.pts}</b>。選一個道具，或直接離開。</div>`+SHOP_ORDER.map(id=>{
+      const it=ITEMS[id]; const dis=actor.pts<it.pts||actor.items.length>=8;
+      return `<button class="listbtn" style="display:block;width:100%;text-align:left;padding:8px;margin:4px 0;border:0;border-radius:8px;background:#fff;box-shadow:0 2px 0 #e8d5b0;font:inherit;font-weight:700" data-shop="${id}" ${dis?'disabled':''}>${it.icon} ${it.name}　${it.pts}點<br><span class="muted">${esc(it.desc)}</span></button>`;
+    }).join('')+`<div class="dacts"><button class="btn" data-act="shopdone">離開道具舖</button></div>`;
   }else if(pend.type==='hospital'){
-    html+=`<p>還要住院 ${actor.hospital} 回合。花 ${fmt(800)} 提前出院？</p>${wait}`;
-    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="hospital-wait">繼續躺</button><button class="btn" data-act="hospital-pay">付錢出院</button></div>`;
+    html+=`還要住院 ${actor.hospital} 天。花 ${fmt(800)} 提前出院？</div>
+      <div class="dacts"><button class="btn ghost" data-act="hospital-wait">繼續躺</button><button class="btn" data-act="hospital-pay">付錢出院</button></div>`;
   }else if(pend.type==='jail'){
-    html+=`<p>還要加班 ${actor.jail} 回合。花 ${fmt(800)} 請假離開？</p>${wait}`;
-    if(myTurn) html+=`<div class="row"><button class="btn ghost" data-act="jail-wait">繼續加</button><button class="btn" data-act="jail-pay">請假走人</button></div>`;
+    html+=`還要加班 ${actor.jail} 天。花 ${fmt(800)} 請假離開？</div>
+      <div class="dacts"><button class="btn ghost" data-act="jail-wait">繼續加</button><button class="btn" data-act="jail-pay">請假走人</button></div>`;
   }else if(pend.type==='pickdice'){
-    html+=`<p>指定步數器：要走幾步？</p>${wait}`;
-    if(myTurn) html+=`<div class="row">${[1,2,3,4,5,6].map(n=>`<button class="btn sm" data-dice="${n}">${n}</button>`).join('')}</div>`;
+    html+=`指定步數器：要走幾步？</div><div class="dacts">${[1,2,3,4,5,6].map(n=>`<button class="btn sm" data-dice="${n}">${n}</button>`).join('')}</div>`;
   }else if(pend.type==='ndice'){
-    html+=`<p>這回合要用幾顆骰子？（最多 ${pend.max}）</p>${wait}`;
-    if(myTurn) html+=`<div class="row">${Array.from({length:pend.max},(_,i)=>`<button class="btn sm" data-ndice="${i+1}">${i+1} 顆</button>`).join('')}</div>`;
+    html+=`這回合要用幾顆骰子？（最多 ${pend.max}）</div><div class="dacts">${Array.from({length:pend.max},(_,i)=>`<button class="btn sm" data-ndice="${i+1}">${i+1} 顆</button>`).join('')}</div>`;
   }else if(pend.type==='pickplayer'){
-    html+=`<p>指定一名玩家：</p>${wait}`;
-    if(myTurn){
-      const list=S.players.filter(o=>!o.bankrupt&&(pend.allowSelf||o.id!==actor.id));
-      html+=list.map(o=>`<button class="listbtn" data-pid="${o.id}">${o.name}　${fmt(o.money)}</button>`).join('');
-    }
+    const list=S.players.filter(o=>!o.bankrupt&&(pend.allowSelf||o.id!==actor.id));
+    html+=`指定一名玩家：</div>`+list.map(o=>`<button class="btn ghost" style="width:100%" data-pid="${o.id}">${esc(o.name)}　${fmt(o.money)}</button>`).join('');
   }else if(pend.type==='pickgroup'){
-    html+=`<p>指定一個區塊：</p>${wait}`;
-    if(myTurn) html+=Object.keys(GROUPS).filter(g=>g!=='tr'&&g!=='ut').map(g=>`<button class="listbtn" data-g="${g}"><span style="display:inline-block;width:12px;height:12px;background:${GROUPS[g].color};border-radius:3px"></span> ${GROUPS[g].name}</button>`).join('');
+    html+=`指定一個街區：</div>`+Object.keys(GROUPS).filter(g=>g!=='tr'&&g!=='ut').map(g=>`<button class="btn ghost" style="width:100%" data-g="${g}">${GROUPS[g].name}</button>`).join('');
   }else if(pend.type==='pickstock'){
-    html+=`<p>指定一支股票：</p>${wait}`;
-    if(myTurn) html+=S.stocks.map(s=>`<button class="listbtn" data-sid="${s.id}">${s.name}　現價 ${s.price}${s.lock?(s.lockDir>0?' 漲停':' 跌停'):''}</button>`).join('');
+    html+=`指定一支股票：</div>`+S.stocks.map(s=>`<button class="btn ghost" style="width:100%" data-sid="${s.id}">${s.name}　現價 ${s.price}</button>`).join('');
   }else if(pend.type==='picktile'){
-    html+=`<p>指定一格：</p>${wait}`;
-    if(myTurn){
-      html+=S.tiles.filter(t=>{
-        if(pend.mode==='empty') return !t.block&&!t.mine&&!t.bomb;
+    html+=`指定目標：</div>`;
+    if(pend.mode==='empty'||pend.mode==='tilehaz'){
+      html+=S.nodes.filter(n=>pend.mode==='empty'?!(n.block||n.mine||n.bomb):true).slice(0,40).map(n=>`<button class="btn ghost" style="width:100%" data-tid="${n.id}">${esc(WORLD.nodes[n.id].name)}</button>`).join('');
+    }else{
+      html+=S.plots.filter(t=>{
         if(pend.mode==='myland'||pend.mode==='myland2') return t.owner===actor.id;
-        if(pend.mode==='tile') return t.t==='land'||t.t==='trans'||t.t==='util';
         return true;
-      }).map(t=>`<button class="listbtn" data-tid="${t.id}">${t.name}${t.owner?(' · '+(pById(t.owner)||{}).name):''}${t.lv?(' · '+LVNAME[t.lv]):''}</button>`).join('');
+      }).map(t=>`<button class="btn ghost" style="width:100%" data-tid="${t.id}">${esc(t.name)}${t.owner?(' · '+(pById(t.owner)||{}).name):''}${t.lv?(' · '+LVNAME[t.lv]):''}</button>`).join('');
     }
   }else if(pend.type==='auction'){
-    html+=`<p>拍賣 ${esc(S.tiles[pend.tile].name)}，目前最高 ${fmt((pend.best&&pend.best.bid)||pend.base||0)}</p>${wait}`;
-    if(myTurn) html+=`<label class="f">你的出價</label><input id="bid-amt" type="number" value="${(pend.best&&pend.best.bid||0)+200}">
-      <div class="row"><button class="btn ghost" data-act="auction-pass">放棄</button><button class="btn" data-act="auction-bid">出價</button></div>`;
+    html+=`拍賣 ${esc(S.plots[pend.plot].name)}，目前最高 ${fmt((pend.best&&pend.best.bid)||pend.base||0)}</div>
+      <label class="f">你的出價</label><input id="bid-amt" type="number" value="${(pend.best&&pend.best.bid||0)+200}">
+      <div class="dacts"><button class="btn ghost" data-act="auction-pass">放棄</button><button class="btn" data-act="auction-bid">出價</button></div>`;
   }else if(pend.type==='bank'){
-    html+=`<p>現金 ${fmt(actor.money)}　存款 ${fmt(actor.dep)}　貸款 ${fmt(actor.loan)}</p>${wait}`;
-    if(myTurn) html+=`<label class="f">金額</label><input id="bank-amt" type="number" value="1000">
-      <div class="row"><button class="btn sm teal" data-bank="dep">存款</button><button class="btn sm" data-bank="wd">提款</button>
+    html+=`現金 ${fmt(actor.money)}　存款 ${fmt(actor.dep)}　貸款 ${fmt(actor.loan)}</div>
+      <label class="f">金額</label><input id="bank-amt" type="number" value="1000">
+      <div class="dacts"><button class="btn sm teal" data-bank="dep">存款</button><button class="btn sm" data-bank="wd">提款</button>
       <button class="btn sm gold" data-bank="loan">貸款</button><button class="btn sm ghost" data-bank="repay">還款</button></div>
-      <button class="btn" data-act="closebank">關銀行</button>`;
+      <div class="dacts"><button class="btn" data-act="closebank">關銀行</button></div>`;
   }else if(pend.type==='stock'){
-    html+=`<p>現金 ${fmt(actor.money)}</p>${S.news?`<p class="muted">${esc(S.news)}</p>`:''}${wait}`;
-    if(myTurn) html+=S.stocks.map(s=>`<div class="card" style="margin:6px 0"><b>${s.name}</b> 現價 ${s.price}　持有 ${actor.stocks[s.id]||0} 股${s.lock?(s.lockDir>0?' ·漲停':' ·跌停'):''}
+    html+=`現金 ${fmt(actor.money)}</div>`+S.stocks.map(s=>`<div class="card" style="margin:6px 0"><b>${s.name}</b> 現價 ${s.price}　持有 ${actor.stocks[s.id]||0} 股
       <div class="row"><button class="btn sm" data-sbu="${s.id}">買 5 股</button><button class="btn sm ghost" data-ssl="${s.id}">賣 5 股</button></div></div>`).join('')
-      +`<button class="btn" data-act="closestock">離開股市</button>`;
-  }else html+=wait;
-  modal.innerHTML=html;
+      +`<div class="dacts"><button class="btn" data-act="closestock">離開股市</button></div>`;
+  }else { mask.classList.remove('on'); return; }
+  $('dbox').innerHTML=html;
   mask.classList.add('on');
 }
 
-function paint(fromNet){
-  if(view!=='game'||!S) return;
-  if(!$('tl0')) buildBoard();
-  updateTiles(); paintTokens(); paintFelt(); paintDock();
-  if(S.over) showResult();
-  if(!fromNet && mode==='host') bcast();
+function openInfo(){
+  if(!S) return;
+  const p=cur();
+  const lands=S.plots.filter(t=>t.owner===(me.id)).map(t=>`${t.name}（${LVNAME[t.lv||0]}）`).join('、')||'尚無地產';
+  openDlg({title:'城市資訊', body:`${calStr()}\n第 ${S.round} 回合\n輪到：${p?p.name:''}\n\n你的地產：${lands}\n\n拖曳地圖可瀏覽，兩指縮放。右上角可開小地圖。`});
+  // info is local, close without engine
+  $('dmask').classList.add('on');
+  const btn=$('dbox').querySelector('[data-act="dlgok"]');
+  if(btn) btn.onclick=()=>hideDlg();
 }
 
+function show(name){
+  view=name;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+name));
+  if(name==='game'){ resizeGame(); ensureLoop(); }
+}
 function showResult(){
   if(!S||!S.over) return;
   show('result');
@@ -1935,7 +2445,6 @@ function showResult(){
   $('res-list').innerHTML=(S.rank||[]).map((r,i)=>`<div class="card" style="display:flex;align-items:center;gap:8px">${portraitHTML(r.p,i===0?'happy':r.p.bankrupt?'cry':'normal',48)}<div><b>${i+1}. ${esc(r.p.name)}</b><div class="muted">身家 ${fmt(r.w)}　現金 ${fmt(r.p.money)}</div></div></div>`).join('');
 }
 
-/* ---------- events / send ---------- */
 function sendAct(a){
   if(!S) return;
   if(mode==='guest'){
@@ -1956,8 +2465,13 @@ document.addEventListener('click',e=>{
     return;
   }
   const act=t.dataset.act;
+  if(act==='dlgok'){
+    if(S&&S.pending&&S.pending.type==='dlg') sendAct({t:'dlgok'});
+    else hideDlg();
+    return;
+  }
   if(act==='roll') sendAct({t:'roll'});
-  else if(act==='buy'||act==='skipbuy'||act==='up'||act==='skipup'||act==='shopdone'||act==='end'||act==='openbank'||act==='openstock'||act==='closebank'||act==='closestock') sendAct({t:act});
+  else if(act==='buy'||act==='skipbuy'||act==='up'||act==='skipup'||act==='shopdone'||act==='end'||act==='openbank'||act==='openstock'||act==='closebank'||act==='closestock'||act==='info') sendAct({t:act});
   else if(act==='hospital-pay') sendAct({t:'hospital',pay:true});
   else if(act==='hospital-wait') sendAct({t:'hospital',pay:false});
   else if(act==='jail-pay') sendAct({t:'jail',pay:true});
@@ -1975,28 +2489,23 @@ document.addEventListener('click',e=>{
   if(t.dataset.sbu) sendAct({t:'stock',sid:t.dataset.sbu,n:5,buy:true});
   if(t.dataset.ssl) sendAct({t:'stock',sid:t.dataset.ssl,n:5,buy:false});
 });
+$('dicebtn').addEventListener('click',()=>sendAct({t:'roll'}));
 
-$('btn-mute').onclick=()=>{muted=!muted; localStorage.setItem('fuweng-mute',muted?'1':'0'); $('btn-mute').textContent=muted?'🔇':'🔊'; sfx('click')};
-
-/* ---------- screens ---------- */
-function renderParade(){
-  $('parade').innerHTML=CHARS.map(c=>`<div class="av">${svgChar(c.id,'happy',56)}</div>`).join('');
-}
+/* ---------- screens / net / creator ---------- */
+function renderParade(){ $('parade').innerHTML=CHARS.map(c=>`<div class="av">${svgChar(c.id,'happy',56)}</div>`).join(''); }
 function renderCharGrid(){
   const customs=loadCustoms();
   const all=[...CHARS.map(c=>({kind:'b',c})),...customs.map(c=>({kind:'u',c}))];
   $('char-grid').innerHTML=all.map(x=>{
     const c=x.c, id=x.kind==='b'?c.id:('c:'+c.id);
     const p=x.kind==='b'?{charId:c.id,color:c.color}:{charId:'uncle',img:c.img,color:c.color,custom:c};
-    const on=selectedChar===id?'on':'';
-    return `<div class="ch ${on}" data-ch="${id}">${portraitHTML(p,'normal',64)}<b>${esc(c.name)}</b><small>${x.kind==='b'?c.tag:PERS[c.pers].name}</small></div>`;
+    return `<div class="ch ${selectedChar===id?'on':''}" data-ch="${id}">${portraitHTML(p,'normal',64)}<b>${esc(c.name)}</b><small>${x.kind==='b'?c.tag:PERS[c.pers].name}</small></div>`;
   }).join('')+`<div class="ch" data-ch="__new__"><div style="font-size:28px;line-height:64px">＋</div><b>自創角色</b><small>上傳照片</small></div>`;
 }
 $('char-grid').addEventListener('click',e=>{
   const el=e.target.closest('[data-ch]'); if(!el) return;
   if(el.dataset.ch==='__new__'){ openCreator(); return; }
-  selectedChar=el.dataset.ch;
-  renderCharGrid();
+  selectedChar=el.dataset.ch; renderCharGrid();
 });
 function currentCharPayload(name){
   if(selectedChar.startsWith('c:')){
@@ -2007,20 +2516,14 @@ function currentCharPayload(name){
   const c=charById(selectedChar)||CHARS[0];
   return {name:name||c.name,charId:c.id,pers:c.pers,color:c.color,lines:LINES[c.pers],img:null};
 }
-
 function openSetup(kind){
-  setupKind=kind;
-  show('setup');
+  setupKind=kind; show('setup');
   $('setup-sub').textContent=kind==='join'?'輸入暱稱、選角色，接著填房號':kind==='host'?'你是房主，選完角色後會得到房號':'選角色，空位將由電腦補上';
   $('host-opts').style.display=kind==='host'||kind==='ai'?'block':'none';
   $('join-box').style.display=kind==='join'?'block':'none';
-  $('room-wait').style.display='none';
-  $('setup-go').style.display='';
-  const nick=localStorage.getItem('fuweng-nick')||'';
-  $('nick').value=nick;
-  selectedChar=selectedChar||'uncle';
-  renderCharGrid();
-  $('setup-msg').textContent='';
+  $('room-wait').style.display='none'; $('setup-go').style.display='';
+  $('nick').value=localStorage.getItem('fuweng-nick')||'';
+  selectedChar=selectedChar||'uncle'; renderCharGrid(); $('setup-msg').textContent='';
 }
 $('btn-ai').onclick=()=>{sfx('click');openSetup('ai')};
 $('btn-host').onclick=()=>{sfx('click');openSetup('host')};
@@ -2038,31 +2541,17 @@ $('setup-go').onclick=async()=>{
   localStorage.setItem('fuweng-nick',name);
   const payload=currentCharPayload(name);
   me.name=name;
-  if(setupKind==='ai'){
-    const n=+$('seatN').value||3;
-    const win=$('winMode').value, maxRound=+$('roundN').value||16;
-    startLocal(payload,n,win,maxRound);
-    return;
-  }
-  if(setupKind==='host'){
-    await startHost(payload);
-    return;
-  }
+  if(setupKind==='ai'){ startLocal(payload, +$('seatN').value||3, $('winMode').value, +$('roundN').value||16); return; }
+  if(setupKind==='host'){ await startHost(payload); return; }
   if(setupKind==='join'){
     const code=($('join-code').value||'').trim().toUpperCase();
-    if(!code || code.length<4){ $('setup-msg').textContent='請輸入房號'; return; }
+    if(!code||code.length<4){ $('setup-msg').textContent='請輸入房號'; return; }
     await startGuest(payload,code);
   }
 };
 
-const PEER_CFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}};
-function ensurePid(){
-  let id=sessionStorage.getItem('fuweng-pid');
-  if(!id){id='P'+uid(); sessionStorage.setItem('fuweng-pid',id)}
-  return id;
-}
-
 function startLocal(payload,n,win,maxRound){
+  if(!WORLD) WORLD=buildWorld();
   mode='ai'; me.host=true; me.id='me';
   const players=[mkPlayer({...payload,id:'me',isAI:FAST,human:!FAST})];
   const used=new Set([payload.charId]);
@@ -2071,23 +2560,20 @@ function startLocal(payload,n,win,maxRound){
     used.add(c.id);
     players.push(mkPlayer({id:'AI'+i,name:c.name,charId:c.id,pers:c.pers,color:c.color,lines:LINES[c.pers],isAI:true,human:false}));
   }
-  S=freshState(players,{win,maxRound,code:''});
-  show('game'); buildBoard(); startTurn();
+  // spread start slightly: all start at plaza, prev different so first step fans out? same start is fine
+  S=freshState(players,{win,maxRound,code:''}); window.S=S; window.WORLD=WORLD;
+  players.forEach(snapPos);
+  show('game'); resizeGame(); dirtyG=true; dirtyB=true;
+  zoom=1; camFree=false;
+  fitCamToPlayer(players[0],true);
+  ensureLoop(); startTurn();
 }
 
-async function loadPeer(){
-  return window.Peer?Promise.resolve():new Promise((ok,no)=>{
-    const s=document.createElement('script');
-    s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-    s.onload=ok; s.onerror=()=>no(new Error('無法載入連線模組，請確認網路'));
-    document.head.appendChild(s);
-  });
-}
+const PEER_CFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}};
+function ensurePid(){ let id=sessionStorage.getItem('fuweng-pid'); if(!id){id='P'+uid(); sessionStorage.setItem('fuweng-pid',id)} return id; }
+function loadPeer(){ return window.Peer?Promise.resolve():new Promise((ok,no)=>{ const s=document.createElement('script'); s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'; s.onload=ok; s.onerror=()=>no(new Error('無法載入連線模組，請確認網路')); document.head.appendChild(s); }); }
 function bindConn(conn,asHost){
-  conn.on('data',m=>{
-    lastSeen=Date.now();
-    if(asHost) hostMsg(conn,m); else guestMsg(m);
-  });
+  conn.on('data',m=>{ lastSeen=Date.now(); if(asHost) hostMsg(conn,m); else guestMsg(m); });
   conn.on('close',()=>{ if(asHost) hostDrop(conn.peer); else hostLost(); });
   conn.on('error',()=>{ if(asHost) hostDrop(conn.peer); });
 }
@@ -2095,26 +2581,19 @@ async function startHost(payload){
   $('setup-msg').textContent='建立中…';
   try{await loadPeer()}catch(e){return $('setup-msg').textContent=e.message}
   leaveRoom(true); closing=false;
+  if(!WORLD) WORLD=buildWorld();
   const code=Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[rnd(32)]).join('');
   mode='host'; me.host=true; me.id='H';
   const p0=mkPlayer({...payload,id:'H',isAI:false,human:true});
   portraits[p0.id]=p0.img||'';
-  S=freshState([p0],{code,win:$('winMode').value,maxRound:+$('roundN').value||16});
+  S=freshState([p0],{code,win:$('winMode').value,maxRound:+$('roundN').value||16}); window.S=S; window.WORLD=WORLD;
   S.phase='lobby';
   peer=new Peer('fuweng-'+code,PEER_CFG);
   peer.on('error',e=>$('setup-msg').textContent='連線錯誤：'+e.type);
-  peer.on('open',()=>{
-    $('setup-msg').textContent='';
-    $('room-wait').style.display='block';
-    $('room-code').textContent=code;
-    $('setup-go').style.display='none';
-    $('btn-start').style.display='block';
-    renderWait();
-  });
+  peer.on('open',()=>{ $('setup-msg').textContent=''; $('room-wait').style.display='block'; $('room-code').textContent=code; $('setup-go').style.display='none'; $('btn-start').style.display='block'; renderWait(); });
   peer.on('connection',conn=>{
     const hook=()=>{ if(conn._bound) return; conn._bound=true; bindConn(conn,true); };
-    conn.on('open',hook);
-    if(conn.open) hook();
+    conn.on('open',hook); if(conn.open) hook();
   });
 }
 function renderWait(){
@@ -2125,48 +2604,32 @@ function hostMsg(conn,m){
   if(!m||!m.t) return;
   if(m.t==='ping'){ try{conn.send({t:'pong'})}catch(e){} return; }
   if(m.t==='join'){
-    // reconnect?
     const exist=S.players.find(p=>p.id===m.pid || (p.dropped&&p.name===m.name));
-    if(exist && (S.phase!=='lobby')){
+    if(exist && S.phase!=='lobby'){
       exist.dropped=false; exist.isAI=false; exist.human=true; exist.id=m.pid;
-      if(m.img) {exist.img=m.img; portraits[exist.id]=m.img}
-      conns[m.pid]=conn;
-      try{conn.send({t:'portraits',portraits});}catch(e){}
+      if(m.img){ exist.img=m.img; portraits[exist.id]=m.img; }
+      conns[m.pid]=conn; conn._pid=m.pid;
+      try{conn.send({t:'portraits',portraits})}catch(e){}
       bcast(); return;
     }
     if(S.phase!=='lobby'){ try{conn.send({t:'reject',why:'遊戲已開始'})}catch(e){} return; }
     if(S.players.length>=4){ try{conn.send({t:'reject',why:'房間已滿'})}catch(e){} return; }
     const p=mkPlayer({id:m.pid,name:m.name,charId:m.charId,pers:m.pers,color:m.color,img:m.img,lines:m.lines,isAI:false,human:true});
-    portraits[p.id]=p.img||'';
-    S.players.push(p);
-    conns[m.pid]=conn; conn._pid=m.pid;
+    portraits[p.id]=p.img||''; S.players.push(p); conns[m.pid]=conn; conn._pid=m.pid;
     try{conn.send({t:'portraits',portraits})}catch(e){}
-    renderWait(); bcast();
-    return;
+    renderWait(); bcast(); return;
   }
-  if(m.t==='act'){ handleAct(m.pid||findPidByConn(conn), m.a); }
-}
-function findPidByConn(conn){
-  for(const [k,c] of Object.entries(conns)) if(c===conn){
-    const p=S&&S.players.find(x=>x.id===k); if(p) return p.id;
-  }
-  // conn.peer is guest's peer id, not our pid; store mapping
-  return conn._pid;
+  if(m.t==='act') handleAct(m.pid||conn._pid, m.a);
 }
 function hostDrop(peerId){
   if(!S) return;
   let pid=null;
   for(const [k,c] of Object.entries(conns)) if(c && (c.peer===peerId||k===peerId||c._pid===peerId)) pid=c._pid||k;
-  if(!pid) return;
-  delete conns[pid];
-  const p=pById(pid);
-  if(!p) return;
-  if(S.phase==='lobby'){
-    S.players=S.players.filter(x=>x.id!==pid); renderWait(); bcast(); return;
-  }
-  p.dropped=true; p.isAI=true;
-  log(`${p.name} 斷線了，暫時由電腦代打`);
-  paint(); maybeAI(); bcast();
+  if(!pid) return; delete conns[pid];
+  const p=pById(pid); if(!p) return;
+  if(S.phase==='lobby'){ S.players=S.players.filter(x=>x.id!==pid); renderWait(); bcast(); return; }
+  p.dropped=true; p.isAI=true; log(`${p.name} 斷線了，暫時由電腦代打`);
+  paintHUD(); maybeAI(); bcast();
 }
 $('btn-start').onclick=()=>{
   if(!S) return;
@@ -2181,23 +2644,23 @@ $('btn-start').onclick=()=>{
   }
   if(S.players.length<2){ $('setup-msg').textContent='至少要兩人才能開始'; return; }
   S.win=$('winMode').value; S.maxRound=+$('roundN').value||16;
-  show('game'); buildBoard(); startTurn(); bcast();
+  S.players.forEach(snapPos);
+  show('game'); resizeGame(); dirtyG=true; dirtyB=true; zoom=1; camFree=false;
+  fitCamToPlayer(S.players[0],true); ensureLoop(); startTurn(); bcast();
 };
-
 async function startGuest(payload,code){
   $('setup-msg').textContent='加入中…';
   try{await loadPeer()}catch(e){return $('setup-msg').textContent=e.message}
   leaveRoom(true); closing=false; mode='guest'; me.host=false; me.id=ensurePid();
   S=null;
   peer=new Peer(PEER_CFG);
-  peer.on('error',e=>$('setup-msg').textContent=e.type==='peer-unavailable'?'找不到房間，請確認房號':'連線錯誤：'+(e.type||e.message||e));
+  peer.on('error',e=>$('setup-msg').textContent=e.type==='peer-unavailable'?'找不到房間，請確認房號':'連線錯誤：'+(e.type||e));
   peer.on('open',()=>{
     $('setup-msg').textContent='已連上伺服器，正在進入房間…';
     const conn=peer.connect('fuweng-'+code,{reliable:true});
     window._hostconn=conn;
     conn.on('open',()=>{
-      lastSeen=Date.now();
-      $('setup-msg').textContent='正在向房主報到…';
+      lastSeen=Date.now(); $('setup-msg').textContent='正在向房主報到…';
       conn.send({t:'join',pid:me.id,name:payload.name,charId:payload.charId,pers:payload.pers,color:payload.color,img:payload.img,lines:payload.lines});
       hb=setInterval(()=>{try{conn.send({t:'ping'})}catch(e){} if(Date.now()-lastSeen>12000) hostLost();},2000);
     });
@@ -2212,27 +2675,31 @@ function guestMsg(m){
   if(m.t==='reject'){ $('setup-msg').textContent=m.why||'無法加入'; return; }
   if(m.t==='portraits'){ portraits=Object.assign(portraits,m.portraits||{}); return; }
   if(m.t==='state'){
-    const prev=S&&S.players?S.players.map(p=>p.pos):null;
     hydrate(m.S);
     if(S.phase==='lobby'){ renderWait(); $('room-wait').style.display='block'; $('room-code').textContent=S.code; $('setup-go').style.display='none'; $('setup-msg').textContent='已進入房間，等待房主開始'; return; }
-    if(view!=='game'){ show('game'); buildBoard(); }
-    paint(true);
+    if(view!=='game'){ show('game'); resizeGame(); dirtyG=true; dirtyB=true; ensureLoop(); }
+    dirtyB=true;
+    S.players.forEach(p=>{ if(p._gx==null) snapPos(p); preloadImg(p); });
+    paintHUD();
+    if(S.pending&&S.pending.type==='fork'&&S.pending.pid===me.id) showForks(S.pending.opts);
+    else if(!(S.pending&&S.pending.type==='fork')) clearForks();
     if(S.over) showResult();
   }
 }
 function hydrate(s){
   for(const p of s.players){
-    if(p.img==='@'+(p.id) || (p.img&&p.img.length<8 && portraits[p.id])) p.img=portraits[p.id]||p.img;
+    if(typeof p.img==='string' && p.img.startsWith('@')) p.img=portraits[p.id]||'';
     if(p.custom&&typeof p.custom.img==='string'&&p.custom.img.startsWith('@')) p.custom.img=portraits[p.id];
   }
-  S=s;
+  S=s; window.S=S; window.WORLD=WORLD;
 }
 function slimState(){
   const s=deep(S);
+  // drop ephemeral
   for(const p of s.players){
     if(p.img&&p.img.length>40){ portraits[p.id]=p.img; p.img='@'+p.id; }
     if(p.custom&&p.custom.img&&p.custom.img.length>40){ portraits[p.id]=p.custom.img; p.custom.img='@'+p.id; }
-    if(p.lines) { /* keep, small */ }
+    delete p._imgEl;
   }
   return s;
 }
@@ -2241,35 +2708,25 @@ function bcast(){
   const msg={t:'state',S:slimState()};
   for(const c of Object.values(conns)) try{c.send(msg)}catch(e){}
 }
-function hostLost(){
-  if(closing) return; closing=true; clearInterval(hb);
-  alert('與主機的連線中斷了'); leaveRoom(); show('lobby');
-}
+function hostLost(){ if(closing) return; closing=true; clearInterval(hb); alert('與主機的連線中斷了'); leaveRoom(); show('lobby'); }
 function leaveRoom(silent){
   closing=true; clearInterval(hb);
   try{ if(window._hostconn) window._hostconn.close(); }catch(e){}
   window._hostconn=null;
   try{ Object.values(conns).forEach(c=>c.close()); }catch(e){}
-  conns={};
-  try{ if(peer) peer.destroy(); }catch(e){}
-  peer=null; if(!silent){ S=null; }
-  closing=false;
+  conns={}; try{ if(peer) peer.destroy(); }catch(e){}
+  peer=null; if(!silent) S=null; closing=false;
 }
 
-/* ---------- character creator ---------- */
 function openCreator(edit){
-  show('creator');
-  editingCustom=edit||null;
-  const c=edit;
-  crImg=c&&c.img||'';
+  show('creator'); editingCustom=edit||null;
+  const c=edit; crImg=c&&c.img||'';
   $('cr-name').value=c&&c.name||'';
   $('cr-color').value=c&&c.color||'#e85d4c';
   $('cr-pers').innerHTML=Object.values(PERS).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   $('cr-pers').value=c&&c.pers||'money';
   fillLinesFromPers($('cr-pers').value, c&&c.lines);
-  renderCrPrev();
-  $('cr-msg').textContent='';
-  renderCrList();
+  renderCrPrev(); $('cr-msg').textContent=''; renderCrList();
 }
 function fillLinesFromPers(pers, lines){
   const L=lines||LINES[pers]||LINES.money;
@@ -2277,7 +2734,6 @@ function fillLinesFromPers(pers, lines){
   $('cr-br').value=L.br||''; $('cr-good').value=L.good||''; $('cr-bad').value=L.bad||'';
 }
 function renderCrPrev(){
-  const name=$('cr-name').value||'新角色';
   const color=$('cr-color').value;
   $('cr-prev').style.boxShadow=`0 8px 0 ${color}55,0 12px 20px #0002`;
   $('cr-prev').innerHTML=crImg?`<img src="${crImg}" alt="">`:`<div style="display:grid;place-items:center;height:100%;color:#8a7360">尚未選圖</div>`;
@@ -2290,23 +2746,19 @@ $('cr-file').onchange=async ev=>{
   catch(e){ $('cr-msg').textContent=e.message||'圖片讀取失敗'; }
   ev.target.value='';
 };
-$('cr-pers').onchange=()=>{ fillLinesFromPers($('cr-pers').value); };
+$('cr-pers').onchange=()=>fillLinesFromPers($('cr-pers').value);
 $('cr-name').oninput=renderCrPrev; $('cr-color').oninput=renderCrPrev;
 $('cr-back').onclick=()=>show('lobby');
 $('cr-save').onclick=()=>{
   const name=($('cr-name').value||'').trim();
   if(!name) return $('cr-msg').textContent='請先幫角色取名';
-  if(!crImg) return $('cr-msg').textContent='請先選一張照片（相機或相簿都可以）';
+  if(!crImg) return $('cr-msg').textContent='請先選一張照片';
   const lines={buy:$('cr-buy').value,pay:$('cr-pay').value,recv:$('cr-recv').value,br:$('cr-br').value,good:$('cr-good').value,bad:$('cr-bad').value};
   const arr=loadCustoms();
   const obj={id:editingCustom?editingCustom.id:uid(),name,color:$('cr-color').value,pers:$('cr-pers').value,img:crImg,lines};
-  const i=arr.findIndex(x=>x.id===obj.id);
-  if(i>=0) arr[i]=obj; else arr.push(obj);
-  saveCustoms(arr);
-  $('cr-msg').textContent='已儲存，可在準備畫面選用';
-  editingCustom=obj; renderCrList();
-  selectedChar='c:'+obj.id;
-  sfx('good');
+  const i=arr.findIndex(x=>x.id===obj.id); if(i>=0) arr[i]=obj; else arr.push(obj);
+  saveCustoms(arr); $('cr-msg').textContent='已儲存，可在準備畫面選用';
+  editingCustom=obj; renderCrList(); selectedChar='c:'+obj.id; sfx('good');
 };
 function renderCrList(){
   const arr=loadCustoms();
@@ -2320,47 +2772,45 @@ function renderCrList(){
 $('cr-list').addEventListener('click',e=>{
   const ed=e.target.closest('[data-ed]'); const del=e.target.closest('[data-del]');
   if(ed){ const c=loadCustoms().find(x=>x.id===ed.dataset.ed); if(c) openCreator(c); }
-  if(del){
-    if(!confirm('確定刪除這個角色？')) return;
-    saveCustoms(loadCustoms().filter(x=>x.id!==del.dataset.del));
-    renderCrList();
-  }
+  if(del){ if(!confirm('確定刪除這個角色？')) return; saveCustoms(loadCustoms().filter(x=>x.id!==del.dataset.del)); renderCrList(); }
 });
+
+$('btn-mute').onclick=()=>{ muted=!muted; localStorage.setItem('fuweng-mute',muted?'1':'0'); $('btn-mute').textContent=muted?'🔇':'🔊'; sfx('click'); };
+$('btn-fast').onclick=()=>{ speedy=!speedy; $('btn-fast').textContent=speedy?'🚀':'⏩'; };
+$('btn-mm').onclick=()=>{ $('mm').classList.toggle('on'); };
+$('recenter').onclick=()=>recam();
+window.addEventListener('resize',()=>{ if(view==='game') resizeGame(); });
 
 /* ---------- boot ---------- */
 function boot(){
+  try{ WORLD=buildWorld(); window.WORLD=WORLD; }catch(e){ console.error(e); $('lobby-msg').textContent='地圖建立失敗：'+e.message; }
   renderParade();
   $('btn-mute').textContent=muted?'🔇':'🔊';
+  bindCam();
+  window.__iso=iso; window.__cur=()=>cur(); window.__snap=snapPos; window.__fit=(p,s)=>fitCamToPlayer(p,s);
+  window.__showForks=showForks; window.__opts=optionsAt; window.__openDlg=openDlg; window.__clearForks=clearForks;
+  window.__cam=(o)=>{ if(o.zoom!=null) zoom=o.zoom; if(o.free!=null) camFree=o.free; if(o.x!=null){camX=camTx=o.x;camY=camTy=o.y;} dirtyG=true; dirtyB=true; };
   const q=new URLSearchParams(location.search);
+  if(q.get('fast')==='1') speedy=true;
   if(q.get('autotest')==='1'){
-    FAST=true; muted=true; window.__TEST_ERRS=[];
-    const n=+(q.get('n')||4);
-    const win=q.get('win')||'rounds'; const maxRound=+(q.get('rounds')||8);
-    const payload={name:'測試員',charId:'uncle',pers:'money',color:'#2a9d8f',lines:LINES.money};
-    startLocal(payload,n,win,maxRound);
-    // all AI already if FAST sets isAI on me
+    FAST=true; muted=true; speedy=true; window.__TEST_ERRS=[];
+    const n=+(q.get('n')||4), win=q.get('win')||'rounds', maxRound=+(q.get('rounds')||8);
+    startLocal({name:'測試員',charId:'uncle',pers:'money',color:'#2a9d8f',lines:LINES.money}, n, win, maxRound);
     const t0=Date.now();
     const iv=setInterval(()=>{
       if(!S) return;
       if(S.pending && isAuto(pById(S.pending.pid))) maybeAI();
       else if(!S.pending && !S.busy && cur() && isAuto(cur()) && (S.phase==='main'||S.phase==='after')) maybeAI();
-      if(S.over || Date.now()-t0>90000){
+      if(S.over || Date.now()-t0>120000){
         clearInterval(iv);
         window.__TEST_RESULT__={ok:!!S.over && !(window.__TEST_ERRS||[]).length, winner:(pById(S.winner)||{}).name, rounds:S.round, errors:window.__TEST_ERRS||[], over:S.over, ms:Date.now()-t0};
         document.title=(window.__TEST_RESULT__.ok?'OK':'FAIL')+' '+document.title;
       }
     },50);
   }
-  if(q.get('shot')==='1'){
-    // open game with a lively mid-setup for screenshot after a couple FAST turns? we'll start normal look lobby - actually start a game then take mid state
-    muted=true;
-  }
 }
-
-window.__startTest=function(){ /* used by tests */ };
-window.addEventListener('unhandledrejection',e=>{ if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.reason)); });
+window.addEventListener('unhandledrejection',e=>{ if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.reason&&e.reason.stack||e.reason)); });
 window.addEventListener('error',e=>{ if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.message)); });
-
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); if(navigator.onLine) setTimeout(()=>loadPeer().catch(()=>{}),3000); });
 }
