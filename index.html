@@ -185,6 +185,12 @@ label.f{display:block;font-size:12px;color:#8a7360;margin:8px 0 4px;font-weight:
       </select>
       <label class="f">回合數（固定回合時）</label>
       <select id="roundN"><option>12</option><option selected>16</option><option>20</option><option>24</option></select>
+      <label class="f">開局卡牌點</label>
+      <select id="startPts">
+        <option value="0" selected>0 點（接近原作）</option>
+        <option value="40">40 點（較輕鬆，附贈三張起步道具）</option>
+        <option value="100">100 點</option>
+      </select>
     </div>
     <div class="row" style="margin-top:10px">
       <button class="btn ghost" id="setup-back">返回</button>
@@ -230,9 +236,10 @@ label.f{display:block;font-size:12px;color:#8a7360;margin:8px 0 4px;font-weight:
         <li>晴空城是一座有分岔的城市，不是繞圈的棋盤。角色沿著馬路一步一步走。</li>
         <li>走到路口若有分岔，點畫面上的箭頭選方向。電腦會依個性自己選。</li>
         <li>經過發薪廣場可領薪水與卡牌點。停在沒主的地可以買，蓋樓後別人停下來要付過路費。整條街都是你的，租金會更高。</li>
-        <li>可以隨時用下方按鈕進出銀行、股市。道具舖能用卡牌點買道具。</li>
+        <li>可以隨時用下方按鈕進出銀行、股市。道具舖能用卡牌點買道具，也可以換小電驢或小轎車，讓你一次多擲幾顆骰子；路上的爆炸物會把車炸壞。</li>
         <li>路上會遇到機會、命運、樂透、公園奇遇，也會碰到到處閒逛的靈體；擦身或走上去就會附身幾天。</li>
-        <li>每走一回合，日曆過一天。月初發股息，月中要繳市政稅，不時還有城市新聞。</li>
+        <li>停在陽光醫院或加班總署時，可花卡牌點請出街頭的麻煩人物，讓他們在路上替你搗蛋。再走進他們的據點就會收工回去。</li>
+        <li>每走一回合，日曆過一天。月初發存款利息與股息，每月 15 日開樂透並發放公司營餘，不時還有城市新聞。</li>
         <li>用兩指縮放、單指拖曳可看地圖；右下角可打開小地圖或回到角色。</li>
         <li>現金不夠就得賣股、拆屋或賣地。最後活著或回合結束時身家最高的人獲勝。</li>
         <li>連線時建立房間的人是主機，請不要關畫面。朋友掉線會暫時由電腦代打。</li>
@@ -458,12 +465,21 @@ const ITEMS={
   block:{id:'block',name:'施工路障',icon:'🚧',pts:20,desc:'放在空格上，下一個經過的人會被攔下來。',use:'empty'},
   mine:{id:'mine',name:'地裂地雷',icon:'💥',pts:25,desc:'放在格上，有人踩到就爆炸，送進醫院。',use:'empty'},
   bomb:{id:'bomb',name:'倒數爆彈',icon:'💣',pts:30,desc:'放在格上，附到人身上後依步數倒數，歸零就炸。',use:'empty'},
-  dice2:{id:'dice2',name:'雙骰風火輪',icon:'🎲',pts:45,desc:'本回合可選使用 1 或 2 顆骰子。',use:'multidice'},
-  dice3:{id:'dice3',name:'三骰衝刺靴',icon:'👟',pts:70,desc:'本回合可選使用 1～3 顆骰子。',use:'multidice'},
+  dice2:{id:'dice2',name:'雙骰風火輪',icon:'🎲',pts:45,desc:'僅本回合可選 1 或 2 顆骰子，不會變成你的座駕。',use:'multidice'},
+  dice3:{id:'dice3',name:'三骰衝刺靴',icon:'👟',pts:70,desc:'僅本回合可選 1～3 顆骰子，不會變成你的座駕。',use:'multidice'},
+  bike:{id:'bike',name:'微風小電驢',icon:'🛵',pts:100,desc:'買下後改騎小電驢，每回合最多擲 2 顆骰子。踩到爆炸物會壞掉。',use:'vehicle'},
+  car:{id:'car',name:'晴空小轎車',icon:'🚗',pts:150,desc:'買下後改開小轎車，每回合最多擲 3 顆骰子。爆炸物會把車炸爛。',use:'vehicle'},
   build:{id:'build',name:'加蓋工人',icon:'👷',pts:20,desc:'指定自己的一處地產加蓋一層。',use:'myland2'},
   cleaner:{id:'cleaner',name:'清道娃娃',icon:'🧸',pts:35,desc:'清掉你前方 8 格的路障、地雷、爆彈與尚未附身的靈體。',use:'now'}
 };
-const SHOP_ORDER='dice,block,mine,bomb,dice2,dice3,build,cleaner,eqall,eqone,buyout,swapland,swaphouse,renovate,auction,bless,disaster,monster,demolish,turn,stay,turtle,steal,dream,sleep,frame,passthe,revenge,pardon,freetoll,red,black,tax,inflate,seal,ally,summon,banish'.split(',');
+const SHOP_ORDER='dice,block,mine,bomb,bike,car,dice2,dice3,build,cleaner,eqall,eqone,buyout,swapland,swaphouse,renovate,auction,bless,disaster,monster,demolish,turn,stay,turtle,steal,dream,sleep,frame,passthe,revenge,pardon,freetoll,red,black,tax,inflate,seal,ally,summon,banish'.split(',');
+const VILLAINS={
+  bandit:{id:'bandit',name:'鐵盒大盜',icon:'🥷',from:'jail',pts:300,color:'#5a3030',desc:'走過港灣銀行時，會把別人的存款搶一份交給雇主；路上撞到對手就抽走一張道具。再走進加班總署就收工回去。爆炸物會把他送進醫院並解雇。'},
+  thief:{id:'thief',name:'口袋飛賊',icon:'🦊',from:'jail',pts:300,color:'#5a3a78',desc:'撞到對手就偷走一半卡牌點；路上的寶箱、禮物、路障、地雷、爆彈也會摸給雇主。再走進加班總署就收工。爆炸物會把他送進醫院並解雇。'},
+  thug:{id:'thug',name:'街頭惡煞',icon:'👊',from:'hospital',pts:300,color:'#c45c2a',desc:'走過別人的地時，向地主敲一筆相當於地價的錢（這筆不會給雇主）。再走進陽光醫院就收工。爆炸物會把他送回醫院並解雇。'},
+  spy:{id:'spy',name:'影子密探',icon:'🕶️',from:'hospital',pts:300,color:'#2c3a5a',desc:'走過別人的地時，把該收的過路費轉給雇主；經過公司會掏走營餘。再走進陽光醫院就收工。爆炸物會把他送回醫院並解雇。'}
+};
+
 const AUTO_ITEMS=new Set(['passthe','revenge','pardon','freetoll']);
 const GODS={
   gold_s:{id:'gold_s',name:'小金元福星',icon:'🪙',good:true,desc:'附身時向其他人各收一筆小錢，過路費減半，持續 7 回合。期滿變大。'},
@@ -1561,6 +1577,75 @@ function screenToWorld(sx,sy){
   return {x:(sx-viewW/2)/zoom + camX, y:(sy-viewH*0.50)/zoom + camY};
 }
 
+function drawRide(ctx, ride, wt){
+  const shake=Math.sin((wt||0)*Math.PI*2)*0.6;
+  ctx.save(); ctx.translate(0,shake);
+  if(ride===2){
+    ctx.fillStyle='#2a2a2a';
+    ctx.beginPath(); ctx.ellipse(-7,13,3.3,2.1,0,0,7); ctx.ellipse(8,13,3.3,2.1,0,0,7); ctx.fill();
+    ctx.fillStyle='#3cbcbf';
+    ctx.beginPath(); ctx.moveTo(-9,12); ctx.lineTo(10,10); ctx.lineTo(9,7); ctx.lineTo(-8,9); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#2a8a8c'; ctx.fillRect(-2,7,7,3);
+    ctx.strokeStyle='#333'; ctx.lineWidth=1.6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(7,8); ctx.lineTo(7,1); ctx.lineTo(3,0); ctx.stroke();
+  }else{
+    ctx.fillStyle='#2a2a2a';
+    ctx.beginPath(); ctx.ellipse(-8,13,3.5,2.2,0,0,7); ctx.ellipse(8,13,3.5,2.2,0,0,7); ctx.fill();
+    ctx.fillStyle='#e8b02a';
+    ctx.beginPath(); ctx.moveTo(-12,11); ctx.lineTo(-7,5); ctx.lineTo(6,5); ctx.lineTo(13,11); ctx.lineTo(12,14); ctx.lineTo(-11,14); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=shade('#e8b02a',1.2);
+    ctx.beginPath(); ctx.moveTo(-6,6); ctx.lineTo(5,6); ctx.lineTo(7,10); ctx.lineTo(-7,10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(180,220,240,0.75)'; ctx.fillRect(-3,2,8,5);
+  }
+  ctx.restore();
+}
+function drawVillain(ctx, v, ts){
+  const gx=v._gx!=null?v._gx:(WORLD.nodes[v.node]||{}).x||0;
+  const gy=v._gy!=null?v._gy:(WORLD.nodes[v.node]||{}).y||0;
+  const ip=iso(gx,gy);
+  const bob=v._walk? Math.abs(Math.sin((v._wt||0)*Math.PI*2))*3 : Math.sin((ts||0)/350)*1.2;
+  const x=ip.x, y=ip.y-8-bob;
+  const facing=(v._fdx||0)-(v._fdy||0);
+  ctx.fillStyle='#0004';
+  ctx.beginPath(); ctx.ellipse(ip.x, ip.y+4, 9, 4.5, 0, 0, 7); ctx.fill();
+  ctx.save();
+  ctx.translate(x,y);
+  if(facing<0) ctx.scale(-1,1);
+  const col=v.color||'#444';
+  const step=v._walk? Math.sin((v._wt||0)*Math.PI*2)*3.5 : 0;
+  ctx.strokeStyle='#1a1010'; ctx.lineWidth=2; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-3,8); ctx.lineTo(-3+step,13); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(3,8); ctx.lineTo(3-step,13); ctx.stroke();
+  ctx.fillStyle=col;
+  ctx.beginPath(); ctx.ellipse(0,4,7.5,8,0,0,7); ctx.fill();
+  ctx.fillStyle='#f3c39a';
+  ctx.beginPath(); ctx.arc(0,-7,8,0,7); ctx.fill();
+  ctx.fillStyle='#2a1a10';
+  ctx.beginPath(); ctx.arc(-2.8,-8,1.2,0,7); ctx.arc(2.8,-8,1.2,0,7); ctx.fill();
+  if(v.typ==='bandit'){
+    ctx.fillStyle='#1a1a1a'; ctx.fillRect(-8,-9,16,3.5);
+    ctx.fillStyle='#c44738'; ctx.beginPath(); ctx.arc(8,2,3.5,0,7); ctx.fill();
+  }else if(v.typ==='thief'){
+    ctx.fillStyle='#3a2058'; ctx.beginPath(); ctx.ellipse(0,-13,7,3,0,0,7); ctx.fill();
+    ctx.fillRect(-6,-13,12,4);
+  }else if(v.typ==='thug'){
+    ctx.fillStyle='#2a1a10';
+    ctx.beginPath(); ctx.moveTo(-6,-14); ctx.lineTo(-2,-8); ctx.lineTo(0,-14); ctx.lineTo(3,-8); ctx.lineTo(7,-15); ctx.lineTo(2,-7); ctx.lineTo(-3,-7); ctx.closePath(); ctx.fill();
+  }else if(v.typ==='spy'){
+    ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.arc(-3,-8,2.4,0,7); ctx.arc(3,-8,2.4,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-0.6,-8); ctx.lineTo(0.6,-8); ctx.stroke();
+    ctx.fillStyle='#223'; ctx.fillRect(-5,1,10,3);
+  }
+  ctx.restore();
+  const d=VILLAINS[v.typ];
+  ctx.font='11px sans-serif'; ctx.textAlign='center';
+  if(d) ctx.fillText(d.icon, ip.x+11, ip.y-18);
+  ctx.font='bold 9px sans-serif';
+  ctx.fillStyle='#fff'; ctx.strokeStyle='#0008'; ctx.lineWidth=3;
+  ctx.strokeText(v.name, ip.x, ip.y+18);
+  ctx.fillText(v.name, ip.x, ip.y+18);
+}
 function drawChibi(ctx, p, gx, gy, t){
   const ip=iso(gx,gy);
   const bob=p._walk? Math.abs(Math.sin((p._wt||0)*Math.PI*2))*4 : 0;
@@ -1569,21 +1654,25 @@ function drawChibi(ctx, p, gx, gy, t){
   const flip=facing<0;
   // shadow
   ctx.fillStyle='#0004';
-  ctx.beginPath(); ctx.ellipse(ip.x, ip.y+4, 10, 5, 0, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(ip.x, ip.y+4, p.ride?13:10, 5, 0, 0, 7); ctx.fill();
   ctx.save();
-  ctx.translate(x,y);
+  ctx.translate(x,y - (p.ride?3:0));
   if(flip) ctx.scale(-1,1);
   const col=p.color||'#e85d4c';
+  const ride=p.ride||0;
+  if(ride>=2) drawRide(ctx, ride, p._walk?p._wt||0:0);
   // legs
-  const step=p._walk? Math.sin((p._wt||0)*Math.PI*2)*4 : 0;
-  ctx.strokeStyle='#2a1a10'; ctx.lineWidth=2.2; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(-3,8); ctx.lineTo(-3+step,14); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(3,8); ctx.lineTo(3-step,14); ctx.stroke();
+  const step=p._walk && !ride? Math.sin((p._wt||0)*Math.PI*2)*4 : 0;
+  if(!ride){
+    ctx.strokeStyle='#2a1a10'; ctx.lineWidth=2.2; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(-3,8); ctx.lineTo(-3+step,14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(3,8); ctx.lineTo(3-step,14); ctx.stroke();
+  }
   // body
   ctx.fillStyle=col;
-  ctx.beginPath(); ctx.ellipse(0,4,8,8,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0, ride?2:4, 8, 8, 0, 0, 7); ctx.fill();
   ctx.fillStyle=shade(col,1.25);
-  ctx.beginPath(); ctx.ellipse(-2,2,4,4,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-2, ride?0:2, 4, 4, 0, 0, 7); ctx.fill();
   // head
   if(p.img){
     ctx.save();
@@ -1653,6 +1742,7 @@ function ensureLoop(){
 
 function fitCamToPlayer(p,snap){
   if(!p||camFree) return;
+  if(S&&cur()&&p.id!==cur().id) return;
   const gx=p._gx!=null?p._gx: (WORLD.nodes[p.node]||{}).x||0;
   const gy=p._gy!=null?p._gy: (WORLD.nodes[p.node]||{}).y||0;
   const ip=iso(gx,gy);
@@ -1706,11 +1796,17 @@ function renderMap(ts){
     if(S.gift!=null && WORLD.nodes[S.gift]) drawDrop(ctx,WORLD.nodes[S.gift],'gift');
     for(const n of WORLD.nodes) drawHaz(ctx,n);
     for(const g of (S.gods||[])) drawGodFig(ctx,g);
-    const plist=S.players.filter(p=>!p.bankrupt).slice().sort((a,b)=>((a._gy||0)+(a._gx||0))-((b._gy||0)+(b._gx||0)));
-    for(const p of plist){
-      const gx=p._gx!=null?p._gx:WORLD.nodes[p.node].x;
-      const gy=p._gy!=null?p._gy:WORLD.nodes[p.node].y;
-      drawChibi(ctx,p,gx,gy,ts);
+    const plist=S.players.filter(p=>!p.bankrupt).map(p=>({k:'p',o:p,d:(p._gy||0)+(p._gx||0)}));
+    for(const v of (S.villains||[])) plist.push({k:'v',o:v,d:(v._gy||0)+(v._gx||0)});
+    plist.sort((a,b)=>a.d-b.d);
+    for(const it of plist){
+      if(it.k==='v') drawVillain(ctx,it.o,ts);
+      else {
+        const p=it.o;
+        const gx=p._gx!=null?p._gx:WORLD.nodes[p.node].x;
+        const gy=p._gy!=null?p._gy:WORLD.nodes[p.node].y;
+        drawChibi(ctx,p,gx,gy,ts);
+      }
     }
   }
   fxList=fxList.filter(f=>f.t<f.life);
@@ -1828,10 +1924,10 @@ function mkPlayer(o){
   return {
     id:o.id,name:o.name,charId:o.charId||'uncle',custom:o.custom||null,color:o.color||'#e85d4c',
     pers:o.pers||'money',img:o.img||null,lines:o.lines||null,isAI:!!o.isAI,human:o.human!==false&&!o.isAI,
-    money:20000,dep:0,loan:0,loanDue:null,finance:0,node:start,prev:-1,pts:40,items:['dice','block','mine'],
+    money:20000,dep:0,loan:0,loanDue:null,finance:0,node:start,prev:-1,pts:0,items:[],
     stocks:Object.fromEntries(STOCKS0.map(s=>[s.id,0])),
     jail:0,hospital:0,stay:0,turtle:0,dream:0,sleep:0,ally:null,allyN:0,
-    god:null,godN:0,bomb:0,diceMax:1,ride:0,insure:0,lodge:0,travel:0,lotto:[],lab:null,bankrupt:false,expr:'normal',anim:'',
+    god:null,godN:0,bomb:0,diceMax:1,ride:0,vehicle:null,insure:0,lodge:0,travel:0,lotto:[],lab:null,bankrupt:false,expr:'normal',anim:'',
     dropped:false, _gx:null,_gy:null,_walk:false,_wt:0,_fdx:0,_fdy:0
   };
 }
@@ -1879,10 +1975,19 @@ function freshState(players,opts){
     nodes, plots, stocks:STOCKS0.map(s=>({...s,lock:0,lockDir:0})),
     gods:[], players, log:['晴空城開市，日曆翻到 1 年 1 月 1 日。'],
     bubble:null, pending:null, news:'天氣晴朗，適合收租。',
-    co:{}, chair:{}, chest:null, gift:null, bankShut:0
+    co:{}, chair:{}, chest:null, gift:null, bankShut:0,
+    villains:[], startPts: opts.startPts!=null?+opts.startPts:0
   };
+  applyStartPts(st.players, st.startPts);
   spawnDrops(st);
   return st;
+}
+function applyStartPts(players, pts){
+  pts=Math.max(0, +pts||0);
+  for(const p of players||[]){
+    p.pts=pts;
+    p.items = pts>0 ? (p.items&&p.items.length?p.items:['dice','block','mine']) : [];
+  }
 }
 function calStr(c){ c=c||(S&&S.cal)||{y:1,m:1,d:1}; return `晴空曆 ${c.y}年${c.m}月${c.d}日`; }
 function addDay(){
@@ -1992,7 +2097,8 @@ function liquidate(p,need){
 }
 function bankrupt(p){
   if(p.bankrupt) return;
-  p.bankrupt=true; p.money=0; p.dep=0; p.items=[]; p.god=null; p.bomb=0; p.lotto=[]; p.ride=0; p.finance=0;
+  p.bankrupt=true; p.money=0; p.dep=0; p.items=[]; p.god=null; p.bomb=0; p.lotto=[]; p.ride=0; p.vehicle=null; p.finance=0;
+  if(S.villains) S.villains=S.villains.filter(v=>v.owner!==p.id);
   say(p,'br'); sfx('bad'); log(`${p.name} 破產了！土地全部交還。`);
   for(const t of S.plots) if(t.owner===p.id){t.owner=null;t.lv=0;t.biz=null} dirtyB=true;
   let dump=0;
@@ -2041,6 +2147,177 @@ function sendJail(p,days,opt){
   log(`${p.name} 被送進加班總署，要加 ${p.jail} 天班`); say(p,'bad');
 }
 function applyDream(p,days,opt){ opt=opt||{}; if(!p) return; if(tryDefend(p,'dream',opt.fromPid)) return; p.dream=days; log(`${p.name} 開始夢遊 ${days} 天`); }
+function vehicleName(p){
+  if(!p) return '座駕';
+  if(p.vehicle==='car'||p.ride===3) return '晴空小轎車';
+  if(p.vehicle==='bike'||p.ride===2) return '微風小電驢';
+  return '座駕';
+}
+function wreckVehicle(p,reason){
+  if(!p||!(p.ride||p.vehicle)) return false;
+  log(`${p.name} 的「${vehicleName(p)}」${reason||'壞掉了'}！`);
+  p.ride=0; p.vehicle=null; p.diceMax=1;
+  return true;
+}
+function hireableTypes(fromKind){
+  return Object.values(VILLAINS).filter(d=>d.from===fromKind && !(S.villains||[]).some(v=>v.typ===d.id));
+}
+function hireVillain(p, typ, hunt){
+  const d=VILLAINS[typ];
+  if(!d||!p||p.pts<d.pts) return null;
+  if((S.villains||[]).some(v=>v.typ===typ)) return null;
+  p.pts-=d.pts;
+  const home=WORLD.nodes.find(n=>n.kind===d.from) || WORLD.nodes[p.node];
+  const v={
+    id:'v-'+typ+'-'+p.id+'-'+(Date.now()%99999), typ, owner:p.id, name:d.name, color:d.color,
+    node:home.id, prev:-1, home:d.from, hunt:hunt||null,
+    _gx:home.x, _gy:home.y, _walk:false, _wt:0, _fdx:0, _fdy:0
+  };
+  S.villains=S.villains||[];
+  S.villains.push(v);
+  log(`${p.name} 花 ${d.pts} 點，請出了「${d.name}」！`);
+  say(p,'good');
+  return v;
+}
+function retireVillain(v, why){
+  if(!S||!v) return;
+  S.villains=(S.villains||[]).filter(x=>x.id!==v.id);
+  log(`「${v.name}」${why||'收工回去了'}`);
+}
+function villainOwner(v){ return v&&pById(v.owner); }
+async function villDlg(v, body){
+  const boss=villainOwner(v);
+  await popup({title:v.name, body, pid:boss?boss.id:(S&&cur()?cur().id:null), expr:'happy'});
+}
+function villainGoal(v){
+  if(v.hunt){ const t=pById(v.hunt); if(t&&!t.bankrupt) return t.node; }
+  if(v.typ==='bandit'){ const b=WORLD.nodes.find(n=>n.kind==='bank'); if(b) return b.id; }
+  if(v.typ==='thief'){ if(S.chest!=null) return S.chest; if(S.gift!=null) return S.gift; }
+  const foe=alive().filter(o=>o.id!==v.owner).sort((a,b)=>netWorth(b)-netWorth(a))[0];
+  return foe?foe.node:null;
+}
+function villainPickDir(v, opts, straight){
+  const goal=villainGoal(v);
+  if(goal==null||!opts.length) return straight||opts[0];
+  const g=WORLD.nodes[goal];
+  let best=straight||opts[0], sc=1e9;
+  for(const id of opts){
+    const n=WORLD.nodes[id];
+    let s=Math.abs(n.x-g.x)+Math.abs(n.y-g.y);
+    if(id===straight) s-=0.3;
+    if(s<sc){sc=s;best=id}
+  }
+  return best;
+}
+async function onVillainTile(v, nid, passing){
+  if(!S||!S.villains.some(x=>x.id===v.id)) return 'dead';
+  const n=WORLD.nodes[nid], st=S.nodes[nid];
+  const boss=villainOwner(v);
+  // return home
+  if(!passing && n && n.kind===v.home){
+    retireVillain(v, v.home==='jail'?'走回加班總署，收工去了':'走回陽光醫院，收工去了');
+    await villDlg(v, `${v.name} 走回自己的據點，不再幫 ${boss?boss.name:'雇主'} 辦事了。`);
+    return 'dead';
+  }
+  // hazards
+  if(st && (st.mine||st.bomb||st.block)){
+    if(v.typ==='thief'){
+      if(st.block){ st.block=0; if(boss) giveItem(boss,'block',true); log(`${v.name} 把路障摸給了 ${boss?boss.name:'雇主'}`); }
+      if(st.mine){ st.mine=0; if(boss) giveItem(boss,'mine',true); log(`${v.name} 把地雷摸給了 ${boss?boss.name:'雇主'}`); }
+      if(st.bomb){ st.bomb=0; if(boss) giveItem(boss,'bomb',true); log(`${v.name} 把爆彈摸給了 ${boss?boss.name:'雇主'}`); }
+      const drop=collectDrop(boss||{name:'？',pts:0,items:[]}, nid);
+      if(drop) await villDlg(v, `${v.name} 把路上的好東西都轉交給雇主了。`);
+    }else if(st.mine||st.bomb){
+      const kind=st.mine?'地雷':'爆彈';
+      st.mine=0; st.bomb=0;
+      retireVillain(v, `踩到${kind}，被送去醫院解雇了`);
+      await villDlg(v, `${v.name} 踩到${kind}，負傷退出這次委托。`);
+      return 'dead';
+    }else if(st.block){
+      st.block=0;
+      log(`${v.name} 被路障攔了一下，把路障推開了`);
+      return 'stop';
+    }
+  }
+  if(v.typ==='thief'){
+    const dropMsg=collectDrop(boss||{name:'？',pts:0,items:[]}, nid);
+    if(dropMsg) await villDlg(v, `${v.name} 把路邊的寶箱或禮物轉交給 ${boss?boss.name:'雇主'}。`);
+  }
+  if(n && n.kind==='bank' && v.typ==='bandit' && boss){
+    let got=0;
+    for(const o of alive()){
+      if(o.id===v.owner) continue;
+      const take=Math.round((o.dep||0)*0.5);
+      if(take>0){ o.dep-=take; got+=take; }
+    }
+    if(got>0){ boss.money+=got; await villDlg(v, `${v.name} 闖進港灣銀行，把別人的存款搶了 ${fmt(got)}，交給 ${boss.name}！`); }
+    else await villDlg(v, `${v.name} 闖進港灣銀行，可是保險箱幾乎是空的。`);
+  }
+  if(n && n.kind==='company' && v.typ==='spy' && boss){
+    const co=COSPEC[n.co]; const sid=co&&co.stock;
+    const pool=sid?((S.co||{})[sid]||0):0;
+    if(pool>0){ S.co[sid]=0; boss.money+=pool; await villDlg(v, `${v.name} 從「${n.name}」掏走營餘 ${fmt(pool)}，交給 ${boss.name}！`); }
+  }
+  const plot=n&&n.kind==='plot'?S.plots[n.plotId]:null;
+  if(plot && plot.owner && plot.owner!==v.owner){
+    const owner=pById(plot.owner);
+    if(v.typ==='thug' && owner && !owner.bankrupt){
+      const fee=plot.price||0;
+      const paid=mustPay(owner,fee,{reason:'惡煞敲詐',fine:false});
+      await villDlg(v, `${v.name} 在「${plot.name}」向 ${owner.name} 敲詐了 ${fmt(paid)}。（這筆錢沒有交給雇主）`);
+    }
+    if(v.typ==='spy' && owner && boss && !owner.bankrupt){
+      const fee=actualToll({id:v.owner,god:null,ally:null,ride:boss.ride}, plot);
+      if(fee>0){
+        const paid=mustPay(owner,fee,{reason:'密探轉帳'});
+        boss.money+=paid;
+        await villDlg(v, `${v.name} 把「${plot.name}」該收的 ${fmt(paid)} 轉給了 ${boss.name}，地主 ${owner.name} 摸不著頭腦。`);
+      }
+    }
+  }
+  // bump into players
+  const hits=alive().filter(o=>o.node===nid && o.id!==v.owner && !o.hospital && !o.jail && !o.sleep && !o.travel && !o.lodge);
+  for(const o of hits){
+    if(v.typ==='bandit'){
+      if(o.items.length){
+        const it=o.items.splice(rnd(o.items.length),1)[0];
+        if(boss) giveItem(boss,it,true);
+        await villDlg(v, `${v.name} 撞上 ${o.name}，抽走了「${ITEMS[it].name}」，交給 ${boss?boss.name:'雇主'}。`);
+      }
+    }else if(v.typ==='thief'){
+      const take=Math.floor((o.pts||0)/2);
+      if(take>0){ o.pts-=take; if(boss) boss.pts+=take; await villDlg(v, `${v.name} 從 ${o.name} 口袋裡摸走 ${take} 點，轉給 ${boss?boss.name:'雇主'}。`); }
+    }
+  }
+  return 'ok';
+}
+async function walkVillainSteps(v, steps){
+  for(let i=0;i<steps;i++){
+    if(!S||!S.villains.some(x=>x.id===v.id)) return;
+    const opts=optionsAt(v);
+    let next;
+    if(!opts.length){ next=v.prev>=0?v.prev:v.node; }
+    else if(opts.length===1) next=opts[0];
+    else next=villainPickDir(v, opts, straightOf(v,opts));
+    if(next==null) return;
+    await animateWalk(v, v.node, next);
+    v.prev=v.node; v.node=next;
+    const passing=i<steps-1;
+    const r=await onVillainTile(v, next, passing);
+    if(r==='dead'||r==='stop') return;
+  }
+}
+async function walkVillains(){
+  if(!S||!(S.villains||[]).length) return;
+  const list=(S.villains||[]).slice();
+  for(const v of list){
+    if(!S||S.over) return;
+    if(!(S.villains||[]).some(x=>x.id===v.id)) continue;
+    await walkVillainSteps(v, 1+rnd(6));
+  }
+}
+
+
 function applySleepOthers(user){ for(const p of alive()){ if(p.id===user.id) continue; if(p.hospital||p.jail) continue; p.sleep=3; } log(`${user.name} 讓其他人集體午睡 3 天！`); }
 function snapPos(p){ const n=WORLD.nodes[p.node]; p._gx=n.x; p._gy=n.y; p._walk=false; fitCamToPlayer(p,false); }
 
@@ -2491,7 +2768,7 @@ async function walkSteps(p, steps){
       p.prev=p.node; p.node=next; nxt.mine=0;
       if(WORLD.nodes[next].kind==='start') passStart(p);
       log(`${p.name} 踩到地裂地雷！`); sfx('boom');
-      if(p.ride){ p.ride=0; p.diceMax=1; log(`${p.name} 的代步工具被炸壞了`); }
+      wreckVehicle(p,'被地雷炸爛了');
       mustPay(p,800,{fine:true}); sendHospital(p,3,{}); p._stopped=true; return;
     }
     if(nxt.block){
@@ -2632,7 +2909,7 @@ function aiPickDir(p,opts,straight){
 
 function explodeBomb(p){
   log(`倒數爆彈在 ${p.name} 身上炸開了！`); sfx('boom');
-  p.bomb=0; if(p.ride){ p.ride=0; p.diceMax=1; log(`${p.name} 的代步工具被炸壞了`); }
+  p.bomb=0; wreckVehicle(p,'被倒數爆彈炸爛了');
   mustPay(p,1200,{fine:true});
   const n=WORLD.nodes[p.node];
   for(const pl of S.plots){
@@ -2660,12 +2937,9 @@ async function resolveLand(p){
   if(n.kind==='start'){ S.phase='after'; paintHUD(); return endAfterIfAI(p); }
   if(n.kind==='hospital' || n.kind==='jail'){
     const trapped=alive().filter(o=>o.id!==p.id && (n.kind==='hospital'?o.hospital>0:o.jail>0));
-    if(trapped.length && p.pts>=30){
-      S.pending={type:'bail',pid:p.id,kind:n.kind,targets:trapped.map(o=>o.id)};
-      paintHUD(); maybeAI(); sync(); return;
-    }
-    await popup({title:n.name, body:n.kind==='hospital'?'醫院很安靜，沒有需要辦理出院的人。你探視一圈就離開了。':'加班室裡暫時沒有人需要保釋。你走了一圈就離開了。', pid:p.id});
-    S.phase='after'; paintHUD(); return endAfterIfAI(p);
+    const hires=hireableTypes(n.kind);
+    S.pending={type:'facility',pid:p.id,kind:n.kind,targets:trapped.map(o=>o.id),hires:hires.map(d=>d.id)};
+    paintHUD(); maybeAI(); sync(); return;
   }
   if(n.kind==='bank'){ S.pending={type:'bank',pid:p.id,fromTile:true}; paintHUD(); maybeAI(); sync(); return; }
   if(n.kind==='shop'){
@@ -2859,11 +3133,14 @@ function endAfterIfAI(p){
   S.phase='after'; paintHUD(); sync();
   if(isAuto(p)) timerAI(()=>aiAfter(p));
 }
-function endTurn(){
+async function endTurn(){
   if(!S||S.over||S.busy) return;
   S.pending=null; S.phase='end'; clearForks();
-  const p=cur(); if(p){p.expr='normal';p.anim='';p.diceMax=1}
-  nextTurn();
+  const p=cur(); if(p){p.expr='normal';p.anim='';p.diceMax=p.ride||1}
+  S.busy=true;
+  try{ await walkVillains(); }catch(e){ console.error(e); if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.stack||e)); }
+  if(S) S.busy=false;
+  if(S&&!S.over) nextTurn();
 }
 
 /* items (adapted to nodes/plots) */
@@ -2879,7 +3156,7 @@ function beginItem(p,it){
   if(u==='now'){ takeItem(p,it.id); applyNow(p,it); paintHUD(); sync(); return true; }
   if(u==='here'){ takeItem(p,it.id); applyHere(p,it); paintHUD(); sync(); return true; }
   if(u==='dice'){ S.pending={type:'pickdice',pid:p.id,item:it.id}; paintHUD(); maybeAI(); return true; }
-  if(u==='multidice'){ takeItem(p,it.id); p.ride=it.id==='dice3'?3:2; S.pending={type:'ndice',pid:p.id,max:p.ride}; paintHUD(); maybeAI(); return true; }
+  if(u==='multidice'){ takeItem(p,it.id); S.pending={type:'ndice',pid:p.id,max:it.id==='dice3'?3:2}; paintHUD(); maybeAI(); return true; }
   if(u==='player'||u==='playerSelf'){ S.pending={type:'pickplayer',pid:p.id,item:it.id,allowSelf:u==='playerSelf'}; paintHUD(); maybeAI(); return true; }
   if(u==='group'){ S.pending={type:'pickgroup',pid:p.id,item:it.id}; paintHUD(); maybeAI(); return true; }
   if(u==='stock'){ S.pending={type:'pickstock',pid:p.id,item:it.id}; paintHUD(); maybeAI(); return true; }
@@ -3014,7 +3291,17 @@ function applyTileItem(p,it,tid){
   paintHUD();
 }
 function sameTier(a,b){ if(!a||!b) return false; return Math.floor(a.price/1500)===Math.floor(b.price/1500) || a.group===b.group; }
-function buyShop(p,id){ const it=ITEMS[id]; if(!it) return; if(p.pts<it.pts||p.items.length>=8) return; p.pts-=it.pts; giveItem(p,id); sfx('coin'); }
+function buyShop(p,id){
+  const it=ITEMS[id]; if(!it) return;
+  if(it.use==='vehicle'){
+    if(p.pts<it.pts) return;
+    p.pts-=it.pts;
+    p.vehicle=id; p.ride=id==='car'?3:2; p.diceMax=p.ride;
+    log(`${p.name} 買下「${it.name}」，以後最多擲 ${p.ride} 顆骰子`);
+    sfx('coin'); return;
+  }
+  if(p.pts<it.pts||p.items.length>=8) return; p.pts-=it.pts; giveItem(p,id); sfx('coin');
+}
 function bankAct(p,kind,amt){
   amt=Math.max(0,Math.round(+amt||0));
   if(kind==='dep'){ amt=Math.min(amt,p.money); p.money-=amt; p.dep+=amt; }
@@ -3126,8 +3413,17 @@ function handleAct(pid,a){
       S.pending=null; S.phase='after'; paintHUD(); endAfterIfAI(p); sync(); return;
     }
   }
+  if(a.t==='hire'){
+    if(pend&&pend.type==='facility'){
+      const typ=a.typ;
+      const hunt=a.hunt||(alive().filter(o=>o.id!==p.id).sort((x,y)=>netWorth(y)-netWorth(x))[0]||{}).id;
+      const v=hireVillain(p, typ, hunt);
+      if(!v) log('請不到人（點數不足，或這位已經在外頭）');
+      S.pending=null; S.phase='after'; paintHUD(); endAfterIfAI(p); sync(); return;
+    }
+  }
   if(a.t==='bail'){
-    if(pend&&pend.type==='bail'){
+    if(pend&&(pend.type==='bail'||pend.type==='facility')){
       const t=pById(a.id);
       if(t && p.pts>=30){
         p.pts-=30;
@@ -3214,6 +3510,14 @@ function maybeAI(){
 }
 function timerAI(fn){ setTimeout(()=>{ try{ if(S&&!S.over) fn(); }catch(e){ console.error(e); if(window.__TEST_ERRS) window.__TEST_ERRS.push(String(e.stack||e)); } }, FAST?0:(speedy?80:280)); }
 
+function aiWantVillain(p,pend){
+  if(!pend||p.pts<300) return null;
+  const avail=pend.hires||[];
+  if(!avail.length) return null;
+  const pref={money:'bandit',stock:'spy',pride:'thug',cheer:'thief',unlucky:'thief',airy:pick(avail)}[p.pers]||'bandit';
+  if(avail.includes(pref)) return pref;
+  return avail[0];
+}
 function shouldBuy(p,plot){
   const price=buyPrice(p,plot);
   if(p.money<price) return false;
@@ -3256,7 +3560,11 @@ function aiPending(p,pend){
   if(pend.type==='buy') handleAct(p.id,{t:shouldBuy(p,S.plots[pend.plot])?'buy':'skipbuy'});
   else if(pend.type==='upgrade') handleAct(p.id,{t:(p.money>upgradeCost(S.plots[pend.plot])+1500 && p.pers!=='unlucky')?'up':'skipup'});
   else if(pend.type==='shop'){
-    const aff=SHOP_ORDER.find(id=>ITEMS[id].pts<=p.pts && p.items.length<8 && !AUTO_ITEMS.has(id) && ITEMS[id].pts<=80);
+    if(!p.ride && p.pts>=100){
+      const vid=p.pts>=150 && (p.pers==='money'||p.pers==='pride'||p.pers==='stock') ? 'car' : (p.pts>=100?'bike':null);
+      if(vid) handleAct(p.id,{t:'shopbuy',id:vid});
+    }
+    const aff=SHOP_ORDER.find(id=>ITEMS[id]&&ITEMS[id].use!=='vehicle'&&ITEMS[id].pts<=p.pts && p.items.length<8 && !AUTO_ITEMS.has(id) && ITEMS[id].pts<=80);
     if(aff) handleAct(p.id,{t:'shopbuy',id:aff});
     handleAct(p.id,{t:'shopdone'});
   }else if(pend.type==='hospital') handleAct(p.id,{t:'hospital',pay:p.money>6000});
@@ -3302,7 +3610,11 @@ function aiPending(p,pend){
     handleAct(p.id,{t:'magic',fx});
   }
   else if(pend.type==='biz') handleAct(p.id,{t:'biz',biz: pick(['mall','hotel','mall','hotel','gas','lab'])});
-  else if(pend.type==='bail') handleAct(p.id,{t:'baildone'});
+  else if(pend.type==='bail'||pend.type==='facility'){
+    const typ=aiWantVillain(p, pend);
+    if(typ) handleAct(p.id,{t:'hire',typ});
+    else handleAct(p.id,{t:'baildone'});
+  }
   else if(pend.type==='coshares'){
     const st=S.stocks.find(s=>s.id===pend.stock);
     const price=Math.round(((st&&st.price)||100)*0.8);
@@ -3366,7 +3678,7 @@ function paintHUD(){
   $('players').innerHTML=S.players.map(p=>{
     preloadImg(p);
     const on=cur()&&cur().id===p.id;
-    const st=[p.god&&GODS[p.god]?GODS[p.god].icon:'', p.hospital?'🏥':'', p.jail?'📋':'', p.sleep?'😴':'', p.dream?'🌙':'', p.dropped?'📡':''].filter(Boolean).join(' ');
+    const st=[p.vehicle==='car'||p.ride===3?'🚗':(p.vehicle==='bike'||p.ride===2?'🛵':''), p.god&&GODS[p.god]?GODS[p.god].icon:'', p.hospital?'🏥':'', p.jail?'📋':'', p.sleep?'😴':'', p.dream?'🌙':'', p.dropped?'📡':''].filter(Boolean).join(' ');
     return `<div class="pbox ${on?'turn':''} ${p.bankrupt?'out':''}">${portraitHTML(p,p.expr,28)}
       <div class="meta"><div class="nm">${esc(p.name)}${p.isAI?'':' '}</div>
       <div class="cash">${fmt(p.money)}</div>
@@ -3408,8 +3720,8 @@ function paintModal(){
     html+=`要把「${esc(t.name)}」加蓋成「${LVNAME[(t.lv||0)+1]}」嗎？費用 ${fmt(upgradeCost(t))}</div>
       <div class="dacts"><button class="btn ghost" data-act="skipup">不用</button><button class="btn" data-act="up">加蓋</button></div>`;
   }else if(pend.type==='shop'){
-    html+=`卡牌點：<b>${actor.pts}</b>。選一個道具，或直接離開。</div>`+SHOP_ORDER.map(id=>{
-      const it=ITEMS[id]; const dis=actor.pts<it.pts||actor.items.length>=8;
+    html+=`卡牌點：<b>${actor.pts}</b>。選一個道具或座駕，或直接離開。${actor.ride?(' 目前座駕：'+vehicleName(actor)) : ' 目前步行（1 顆骰子）。'}</div>`+SHOP_ORDER.map(id=>{
+      const it=ITEMS[id]; const dis=actor.pts<it.pts||(it.use!=='vehicle'&&actor.items.length>=8);
       return `<button class="listbtn" style="display:block;width:100%;text-align:left;padding:8px;margin:4px 0;border:0;border-radius:8px;background:#fff;box-shadow:0 2px 0 #e8d5b0;font:inherit;font-weight:700" data-shop="${id}" ${dis?'disabled':''}>${it.icon} ${it.name}　${it.pts}點<br><span class="muted">${esc(it.desc)}</span></button>`;
     }).join('')+`<div class="dacts"><button class="btn" data-act="shopdone">離開道具舖</button></div>`;
   }else if(pend.type==='hospital'){
@@ -3468,11 +3780,23 @@ function paintModal(){
     const t=S.plots[pend.plot];
     html+=`「${esc(t.name)}」是一塊可規劃的商業地。要蓋成什麼？空地時不收過路費。</div>`+
       Object.values(BIZ).map(b=>`<button class="btn ghost" style="width:100%" data-biz="${b.id}">${b.icon} ${b.name}${b.max===1?'（不能加蓋）':'（最高 5 級）'}</button>`).join('');
-  }else if(pend.type==='bail'){
+  }else if(pend.type==='bail'||pend.type==='facility'){
     const word=pend.kind==='hospital'?'辦理出院':'提前離開加班室';
-    html+=`可以花 30 點卡牌點，幫一個人${word}。你現有 ${actor.pts} 點。</div>`+
-      pend.targets.map(id=>{ const o=pById(id); return o?`<button class="btn ghost" style="width:100%" data-bail="${o.id}">${esc(o.name)}　剩 ${pend.kind==='hospital'?o.hospital:o.jail} 天</button>`:''}).join('')+
-      `<div class="dacts"><button class="btn" data-act="baildone">不用了</button></div>`;
+    const place=pend.kind==='hospital'?'陽光醫院':'加班總署';
+    html+=`這裡是${place}。你現有 <b>${actor.pts}</b> 點。</div>`;
+    if(pend.targets&&pend.targets.length){
+      html+=`<div class="muted" style="margin:6px 0">花 30 點，幫一個人${word}：</div>`+
+        pend.targets.map(id=>{ const o=pById(id); return o?`<button class="btn ghost" style="width:100%" data-bail="${o.id}">${esc(o.name)}　剩 ${pend.kind==='hospital'?o.hospital:o.jail} 天</button>`:''}).join('');
+    }
+    const hs=(pend.hires||[]).map(id=>VILLAINS[id]).filter(Boolean);
+    if(hs.length){
+      html+=`<div class="muted" style="margin:8px 0 4px">花 300 點請一位街頭麻煩人物出門辦事：</div>`+
+        hs.map(d=>`<button class="btn ghost" style="width:100%;text-align:left" data-hire="${d.id}" ${actor.pts<d.pts?'disabled':''}>${d.icon} ${d.name}　${d.pts}點<br><span class="muted">${esc(d.desc)}</span></button>`).join('');
+    }
+    if(!(pend.targets&&pend.targets.length) && !hs.length){
+      html+=`<div>這時候沒有人需要幫忙，也沒有能請的人。</div>`;
+    }
+    html+=`<div class="dacts"><button class="btn" data-act="baildone">離開</button></div>`;
   }else if(pend.type==='coshares'){
     const st=S.stocks.find(s=>s.id===pend.stock)||{};
     const price=Math.round((st.price||100)*0.8);
@@ -3524,7 +3848,7 @@ function sendAct(a){
 }
 
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-act],[data-item],[data-shop],[data-dice],[data-ndice],[data-pid],[data-g],[data-sid],[data-tid],[data-bank],[data-sbu],[data-ssl],[data-lotto],[data-magic],[data-biz],[data-bail],[data-buildco]');
+  const t=e.target.closest('[data-act],[data-item],[data-shop],[data-dice],[data-ndice],[data-pid],[data-g],[data-sid],[data-tid],[data-bank],[data-sbu],[data-ssl],[data-lotto],[data-magic],[data-biz],[data-bail],[data-buildco],[data-hire]');
   if(!t) return;
   if(t.dataset.item){
     const id=t.dataset.item; if(AUTO_ITEMS.has(id)) return;
@@ -3560,6 +3884,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.magic) sendAct({t:'magic',fx:t.dataset.magic});
   if(t.dataset.biz) sendAct({t:'biz',biz:t.dataset.biz});
   if(t.dataset.bail) sendAct({t:'bail',id:t.dataset.bail});
+  if(t.dataset.hire) sendAct({t:'hire',typ:t.dataset.hire});
   if(t.dataset.buildco) sendAct({t:'buildco',tid:+t.dataset.buildco});
   if(act==='cobuy') sendAct({t:'coshares',n:+(($('co-amt')&&$('co-amt').value)||0)});
 });
@@ -3624,7 +3949,9 @@ $('setup-go').onclick=async()=>{
   }
 };
 
-function startLocal(payload,n,win,maxRound){
+function readStartPts(){ const el=$('startPts'); return el? +el.value : 0; }
+function startLocal(payload,n,win,maxRound,startPts){
+  if(startPts==null) startPts=readStartPts();
   if(!WORLD) WORLD=buildWorld();
   mode='ai'; me.host=true; me.id='me';
   const players=[mkPlayer({...payload,id:'me',isAI:FAST,human:!FAST})];
@@ -3635,7 +3962,7 @@ function startLocal(payload,n,win,maxRound){
     players.push(mkPlayer({id:'AI'+i,name:c.name,charId:c.id,pers:c.pers,color:c.color,lines:LINES[c.pers],isAI:true,human:false}));
   }
   // spread start slightly: all start at plaza, prev different so first step fans out? same start is fine
-  S=freshState(players,{win,maxRound,code:''}); window.S=S; window.WORLD=WORLD;
+  S=freshState(players,{win,maxRound,code:'',startPts}); window.S=S; window.WORLD=WORLD;
   players.forEach(snapPos);
   show('game'); resizeGame(); dirtyG=true; dirtyB=true;
   zoom=1; camFree=false;
@@ -3660,7 +3987,7 @@ async function startHost(payload){
   mode='host'; me.host=true; me.id='H';
   const p0=mkPlayer({...payload,id:'H',isAI:false,human:true});
   portraits[p0.id]=p0.img||'';
-  S=freshState([p0],{code,win:$('winMode').value,maxRound:+$('roundN').value||16}); window.S=S; window.WORLD=WORLD;
+  S=freshState([p0],{code,win:$('winMode').value,maxRound:+$('roundN').value||16,startPts:readStartPts()}); window.S=S; window.WORLD=WORLD;
   S.phase='lobby';
   peer=new Peer('fuweng-'+code,PEER_CFG);
   peer.on('error',e=>$('setup-msg').textContent='連線錯誤：'+e.type);
@@ -3717,7 +4044,7 @@ $('btn-start').onclick=()=>{
     i++;
   }
   if(S.players.length<2){ $('setup-msg').textContent='至少要兩人才能開始'; return; }
-  S.win=$('winMode').value; S.maxRound=+$('roundN').value||16;
+  S.win=$('winMode').value; S.maxRound=+$('roundN').value||16; S.startPts=readStartPts(); applyStartPts(S.players, S.startPts);
   S.players.forEach(snapPos);
   show('game'); resizeGame(); dirtyG=true; dirtyB=true; zoom=1; camFree=false;
   fitCamToPlayer(S.players[0],true); ensureLoop(); startTurn(); bcast();
@@ -3865,12 +4192,14 @@ function boot(){
   window.__showForks=showForks; window.__opts=optionsAt; window.__openDlg=openDlg; window.__clearForks=clearForks;
   window.__cam=(o)=>{ if(o.zoom!=null) zoom=o.zoom; if(o.free!=null) camFree=o.free; if(o.x!=null){camX=camTx=o.x;camY=camTy=o.y;} dirtyG=true; dirtyB=true; };
   window.__cacheInfo=()=>({dpr, cache:cacheG&&{w:cacheG.width,h:cacheG.height,cw:cacheG._cw,ch:cacheG._ch,cd:cacheG._cd}, cacheW:cacheW&&{w:cacheW.width,h:cacheW.height,cw:cacheW._cw,ch:cacheW._ch,cd:cacheW._cd}, cacheB:cacheB&&{w:cacheB.width,h:cacheB.height,cd:cacheB._cd}, view:{viewW,viewH,zoom,cw:CAN&&CAN.width,ch:CAN&&CAN.height}});
+  window.__hire=hireVillain; window.__walkVillains=walkVillains; window.__VILLAINS=VILLAINS;
   const q=new URLSearchParams(location.search);
   if(q.get('fast')==='1') speedy=true;
   if(q.get('autotest')==='1'){
     FAST=true; muted=true; speedy=true; window.__TEST_ERRS=[];
     const n=+(q.get('n')||4), win=q.get('win')||'rounds', maxRound=+(q.get('rounds')||8);
-    startLocal({name:'測試員',charId:'uncle',pers:'money',color:'#2a9d8f',lines:LINES.money}, n, win, maxRound);
+    const startPts=q.get('pts')!=null?+q.get('pts'):400;
+    startLocal({name:'測試員',charId:'uncle',pers:'money',color:'#2a9d8f',lines:LINES.money}, n, win, maxRound, startPts);
     const t0=Date.now();
     const iv=setInterval(()=>{
       if(!S) return;
